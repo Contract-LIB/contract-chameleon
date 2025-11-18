@@ -1,6 +1,6 @@
 [submodule "libs/jmltoolkit"]
 	path = libs/jmlparser
-	url = https://github.com/jmltoolkit/jmlparser.git
+	url = https://github.com/Contract-LIB/jmlparser.git
 [submodule "libs/key"]
 	path = libs/key
 	url = https://github.com/KeYProject/key.git
