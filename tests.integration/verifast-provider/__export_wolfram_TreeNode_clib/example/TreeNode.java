@@ -1,0 +1,21 @@
+package example;
+
+public abstract class TreeNode {
+
+    //@ predicate pred(list<int> absVal);
+
+    public static void init(int v)
+    //@ requires true;
+    //@ ensures (METHOD_APPL) == (METHOD_APPL);
+    {
+        //TODO: Implement method 'example.TreeNode.init'.
+    }
+
+    public abstract void add(int v);
+    //@ requires this.pred(?this_absVal_old) &*& true;
+    //@ ensures this.pred(?this_absVal) &*& helper_predicate(v, this_absVal_old, v, this_absVal, ?helper_predicate_res) &*& (helper_predicate_res) && (METHOD_APPL);
+
+    public abstract boolean contains(int v);
+    //@ requires this.pred(?this_absVal_old) &*& true;
+    //@ ensures this.pred(?this_absVal) &*& (result) == (METHOD_APPL);
+}

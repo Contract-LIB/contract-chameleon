@@ -42,6 +42,14 @@ runIntegrationTest("vf-provider-map", ["verifast-provider", "./export/theories/F
 runIntegrationTest("vf-applicant-adt", ["verifast-applicant", "./export/theories/AlgebraicDataTypes.clib"])
 runIntegrationTest("vf-provider-adt", ["verifast-provider", "./export/theories/AlgebraicDataTypes.clib"])
 
+runIntegrationTest("vf-applicant-wolfram-int-tree", ["verifast-applicant", "./export/wolfram/IntTreeSet.clib"])
+runIntegrationTest("vf-provider-wolfram-int-tree", ["verifast-provider", "./export/wolfram/IntTreeSet.clib"])
+
+runIntegrationTest("vf-applicant-wolfram-linked-cell-list", ["verifast-applicant", "./export/wolfram/LinkedCellList.clib"])
+runIntegrationTest("vf-provider-wolfram-linked-cell-list", ["verifast-provider", "./export/wolfram/LinkedCellList.clib"])
+
+runIntegrationTest("vf-applicant-wolfram-tree-node", ["verifast-applicant", "./export/wolfram/TreeNode.clib"])
+runIntegrationTest("vf-provider-wolfram-tree-node", ["verifast-provider", "./export/wolfram/TreeNode.clib"])
 
 // KeY export
 
@@ -66,6 +74,14 @@ runIntegrationTest("key-provider-map", ["key-provider", "./export/theories/Finit
 runIntegrationTest("key-applicant-adt", ["key-applicant", "./export/theories/AlgebraicDataTypes.clib"])
 runIntegrationTest("key-provider-adt", ["key-provider", "./export/theories/AlgebraicDataTypes.clib"])
 
+runIntegrationTest("key-applicant-wolfram-int-tree", ["key-applicant", "./export/wolfram/IntTreeSet.clib"])
+runIntegrationTest("key-provider-wolfram-int-tree", ["key-provider", "./export/wolfram/IntTreeSet.clib"])
+
+runIntegrationTest("key-applicant-wolfram-linked-cell-list", ["key-applicant", "./export/wolfram/LinkedCellList.clib"])
+runIntegrationTest("key-provider-wolfram-linked-cell-list", ["key-provider", "./export/wolfram/LinkedCellList.clib"])
+
+runIntegrationTest("key-applicant-wolfram-tree-node", ["key-applicant", "./export/wolfram/TreeNode.clib"])
+runIntegrationTest("key-provider-wolfram-tree-node", ["key-provider", "./export/wolfram/TreeNode.clib"])
 
 // KeY Import
 
@@ -94,6 +110,26 @@ runIntegrationTest("key-import-examples-stack", ["key-import", "./import-from-ke
 runIntegrationTest("key-import-features", ["key-import", "./import-from-key/features/"])
 runIntegrationTest("key-import-theories", ["key-import", "./import-from-key/theories/"])
 
+// - Tests for Wolfram
+
+tasks.register('run-integration-wolfram') {
+    group = "application"
+    description = "Run all tests for wolfram"
+    dependsOn(
+      "key-applicant-wolfram-int-tree",
+      "key-provider-wolfram-int-tree",
+      "key-applicant-wolfram-linked-cell-list",
+      "key-provider-wolfram-linked-cell-list",
+      "key-applicant-wolfram-tree-node",
+      "key-provider-wolfram-tree-node",
+      "vf-applicant-wolfram-int-tree",
+      "vf-provider-wolfram-int-tree",
+      "vf-applicant-wolfram-linked-cell-list",
+      "vf-provider-wolfram-linked-cell-list",
+      "vf-applicant-wolfram-tree-node",
+      "vf-provider-wolfram-tree-node"
+      )
+}
 
 
 // - Job for all integration tests joined
