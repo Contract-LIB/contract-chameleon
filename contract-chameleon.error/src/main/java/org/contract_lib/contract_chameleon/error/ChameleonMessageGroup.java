@@ -1,25 +1,25 @@
 package org.contract_lib.contract_chameleon.error;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public final class ChameleonMessageGroup extends Exception {
 
-  List<ChameleonReportable> messages;
+  public final List<ChameleonReportable> messages;
 
-  ChameleonMessageGroup(List<ChameleonReportable> messages) {
-    this.messages = messages;
+  public ChameleonMessageGroup(List<ChameleonReportable> messages) {
+    this.messages = new ArrayList(messages);
   }
 
   public String getMessage() {
-    //TODO: sort messages before printing
-    return messages.stream()
+    return this.messages.stream().sorted()
       .map(this::messageDescription)
       .collect(Collectors.joining(System.lineSeparator()));
   } 
 
   public List<ChameleonReportable> getMessages() {
-    return messages;
+    return new ArrayList(this.messages);
   }
 
   private String messageDescription(ChameleonReportable message) {

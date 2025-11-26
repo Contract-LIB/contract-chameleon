@@ -1,9 +1,12 @@
 package org.contract_lib.lang.contract_lib.error;
 
-import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
-import org.contract_lib.contract_chameleon.error.ChameleonError;
+import java.util.Optional;
 
-public final class SyntaxError extends ChameleonError {
+import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
+import org.contract_lib.contract_chameleon.error.ChameleonReportable;
+import org.contract_lib.contract_chameleon.error.ChameleonMessageType;
+
+public final class SyntaxError implements ChameleonReportable {
 
   public String file;
   public int line;
@@ -32,5 +35,13 @@ public final class SyntaxError extends ChameleonError {
   }
   public String getMessage() {
     return this.message;
+  }
+  public ChameleonMessageType messageType() {
+    return ChameleonMessageType.ERROR; 
+  }
+
+
+  public Optional<String> getDetailedMessage() {
+    return Optional.empty();
   }
 }
