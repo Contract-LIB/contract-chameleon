@@ -14,22 +14,20 @@ final class ContractLibAstErrorListener extends BaseErrorListener {
   private final String locationId;
 
   ContractLibAstErrorListener(
-    String locationId,
-    ChameleonMessageManager manager
-  ) {
+      String locationId,
+      ChameleonMessageManager manager) {
     this.locationId = locationId;
     this.manager = manager;
   }
 
   @Override
   public void syntaxError(
-    Recognizer<?,?> recognizer,
-    Object offendingSymbol,
-    int line,
-    int charPositionInLine,
-    String msg,
-    RecognitionException e
-  ) {
-    manager.report(new SyntaxError(locationId, line, charPositionInLine, msg));
+      Recognizer<?, ?> recognizer,
+      Object offendingSymbol,
+      int line,
+      int charPositionInLine,
+      String msg,
+      RecognitionException e) {
+    manager.report(new SyntaxError(locationId, line, charPositionInLine, msg, ""));
   }
 }

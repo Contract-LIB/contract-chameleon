@@ -3,30 +3,18 @@ package org.contract_lib.lang.contract_lib.label;
 import java.util.Map;
 import java.util.HashMap;
 
-//import java.util.IdentityHashMap;
-
 import org.contract_lib.lang.contract_lib.ast.ContractLibAstElement;
 
-public class LabelWrapper<T> {
+/** 
+ * Adds a label to the elements of the contract lib ast. 
+ *
+ * @see ContractLibAstElement
+ */
+public final class LabelWrapper<T> {
 
-  //TODO: Write proper javadoc
-  
-  //TODO: Remove alternative constructor
-  /* This initializer might only be necessary,
-   *  when the equals method of the key is changed.
-   */
-  /*
-  public static <T> LabelWrapper<T> withIdentityMap() {
-    return new LabelWrapper(new IdentityHashMap());
-  }
-  */
-  
+  /// Create a new label wrapper.
   public LabelWrapper() {
-    this(new HashMap());
-  }
-
-  private LabelWrapper(Map<ContractLibAstElement, T> map) {
-    this.elementToLabelMap = map;
+    this.elementToLabelMap = new HashMap<>();
   }
 
   private Map<ContractLibAstElement, T> elementToLabelMap;

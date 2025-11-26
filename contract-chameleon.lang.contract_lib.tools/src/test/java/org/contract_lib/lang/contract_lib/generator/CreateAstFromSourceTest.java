@@ -13,10 +13,6 @@ import java.util.stream.Stream;
 
 import java.io.InputStream;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 
@@ -24,26 +20,23 @@ import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
 import org.contract_lib.contract_chameleon.error.ChameleonMessageGroup;
 
 import org.contract_lib.lang.contract_lib.ast.ContractLibAst;
-import org.contract_lib.lang.contract_lib.generator.ContractLibGenerator;
 
 class CreateAstFromSourceTest {
 
   static Stream<Arguments> positiveDefinitions() {
     return Stream.of(
-      Arguments.of("ast/DeclareAbstraction.clib", 3, 0, 0),
-      Arguments.of("ast/DeclareDatatype.clib", 0, 3, 0),
-      Arguments.of("ast/DeclareSort.clib", 0, 0, 4)
-    );
+        Arguments.of("ast/DeclareAbstraction.clib", 3, 0, 0),
+        Arguments.of("ast/DeclareDatatype.clib", 0, 3, 0),
+        Arguments.of("ast/DeclareSort.clib", 0, 0, 4));
   }
 
   @ParameterizedTest
   @MethodSource("positiveDefinitions")
   void testDeclarations(
-    String filePath,
-    int nAbstractions,
-    int nDatatypes,
-    int nSorts
-  ) throws Exception {
+      String filePath,
+      int nAbstractions,
+      int nDatatypes,
+      int nSorts) throws Exception {
     InputStream in = getClass().getClassLoader().getResourceAsStream(filePath);
     assertNotNull(in, "Input stream not created from resource.");
 
@@ -64,18 +57,16 @@ class CreateAstFromSourceTest {
 
   static Stream<Arguments> definitionErrors() {
     return Stream.of(
-      Arguments.of("ast/InvalidTopLevel.clib", 2, 2, 3)
-    );
+        Arguments.of("ast/InvalidTopLevel.clib", 2, 2, 3));
   }
 
   @ParameterizedTest
   @MethodSource("definitionErrors")
   void testInvalidDeclarations(
-    String filePath,
-    int nAbstractions,
-    int nDatatypes,
-    int nSorts
-  ) throws Exception {
+      String filePath,
+      int nAbstractions,
+      int nDatatypes,
+      int nSorts) throws Exception {
     InputStream in = getClass().getClassLoader().getResourceAsStream(filePath);
     assertNotNull(in, "Input stream not created from resource.");
 
@@ -88,11 +79,10 @@ class CreateAstFromSourceTest {
     System.err.println(ast);
     messageManager.writeStdErr();
 
-    ChameleonMessageGroup exceptions = assertThrows(
-      ChameleonMessageGroup.class,
-      messageManager::check,
-      "An error is expected."
-    );
+    assertThrows(
+        ChameleonMessageGroup.class,
+        messageManager::check,
+        "An error is expected.");
 
     //TODO: Check number of exceptions
     //TODO: Report error when bracket is missing
@@ -102,6 +92,5 @@ class CreateAstFromSourceTest {
     assertEquals(nAbstractions, ast.abstractions().size(), "Wrong numner of abstractions found.");
     assertEquals(nDatatypes, ast.datatypes().size(), "Wrong numner of abstractions found.");
     assertEquals(nSorts, ast.sorts().size(), "Wrong numner of sorts found.");
-
   }
 }

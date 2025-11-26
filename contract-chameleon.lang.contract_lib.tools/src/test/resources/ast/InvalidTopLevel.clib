@@ -50,7 +50,7 @@
 (declare-datatypes
   (
    (TestDatatypeA 0)
-   (TestDatatypeB 0)
+   (TestDatatypeA 0)
   )
   (
     (
