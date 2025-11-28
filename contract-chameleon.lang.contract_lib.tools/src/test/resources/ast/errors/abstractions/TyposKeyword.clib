@@ -1,0 +1,19 @@
+;typo in keyword
+(declare-abstractios
+  (
+    (TestSortA 0)
+  )
+  (
+    ((testConsA))
+  )
+)
+
+;valid abstraction
+(declare-abstractions
+  (
+    (TestSortA 0)
+  )
+  (
+    ((testConsA))
+  )
+)

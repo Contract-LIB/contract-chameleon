@@ -69,7 +69,7 @@ public class ContractLibGenerator {
 
     ContractLIBParser.Start_Context parseTree = parser.start_();
 
-    ContractLibAstTranslator translator = new ContractLibAstTranslator(this.extensions);
+    ContractLibAstTranslator translator = new ContractLibAstTranslator(this.extensions, this.manager);
 
     ContractLibAst ast = translator.translateStart(parseTree);
 

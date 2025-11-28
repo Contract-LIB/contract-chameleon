@@ -12,6 +12,7 @@
   )
 )
 
+; Two abstractions in one declaration
 (declare-abstractions
   (
    (TestAbstractionB 0)

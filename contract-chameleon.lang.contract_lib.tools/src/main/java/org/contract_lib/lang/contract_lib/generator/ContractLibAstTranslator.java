@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
 import org.contract_lib.lang.contract_lib.antlr4parser.ContractLIBParser;
 
 import org.contract_lib.lang.contract_lib.ast.ContractLibAst;
@@ -33,21 +34,27 @@ import org.contract_lib.lang.contract_lib.ast.Formal;
 import org.contract_lib.lang.contract_lib.ast.PrePostPair;
 import org.contract_lib.lang.contract_lib.ast.ArgumentMode;
 import org.contract_lib.lang.contract_lib.ast.VarBinding;
-
+import org.contract_lib.lang.contract_lib.error.DimensionError;
 import org.contract_lib.lang.contract_lib.label.AstTranslatorExtension;
 
 class ContractLibAstTranslator {
 
-  private List<AstTranslatorExtension> extensions;
+  private final List<AstTranslatorExtension> extensions;
+  private final ChameleonMessageManager messageManager;
 
   private static final Numeral DEFAULT_RANK_DATATYPE_DECLARATION = new Numeral("0");
 
-  ContractLibAstTranslator(List<AstTranslatorExtension> extensions) {
+  ContractLibAstTranslator(
+      List<AstTranslatorExtension> extensions,
+      ChameleonMessageManager messageManager) {
+
+    this.messageManager = messageManager;
     this.extensions = new ArrayList<>(extensions);
   }
 
-  ContractLibAstTranslator() {
+  ContractLibAstTranslator(ChameleonMessageManager messageManager) {
     this.extensions = new ArrayList<>();
+    this.messageManager = messageManager;
   }
 
   ContractLibAst translateStart(ContractLIBParser.Start_Context ctx) {
@@ -128,18 +135,28 @@ class ContractLibAstTranslator {
         .map(this::translateSortDec)
         .collect(Collectors.toList());
 
-    List<DatatypeDec> helpers = ctx.datatype_dec().stream()
+    List<DatatypeDec> delarations = ctx.datatype_dec().stream()
         .map(this::translateDatatypeDec)
         .collect(Collectors.toList());
 
-    if (sortDec.size() != helpers.size()) {
-      //TODO: Handle error
+    int numberAbstractions = Integer.min(sortDec.size(), delarations.size());
+
+    if (sortDec.size() != delarations.size()) {
+
+      messageManager.report(new DimensionError(
+          "", //TODO get file orgin
+          ctx.start.getLine(),
+          ctx.start.getCharPositionInLine(),
+          String.format(
+              "The dimensions do not match, given %d sort declarations and %d constructor definitions.",
+              sortDec.size(),
+              delarations.size())));
     }
 
-    List<Abstraction> abstractions = IntStream.range(0, sortDec.size())
+    List<Abstraction> abstractions = IntStream.range(0, numberAbstractions)
         .mapToObj(i -> new Abstraction(
             sortDec.get(i),
-            helpers.get(i)))
+            delarations.get(i)))
         .toList();
 
     callExtensions(abstractions, ctx, AstTranslatorExtension::extensionDeclareAbstractions);
