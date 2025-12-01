@@ -1,0 +1,19 @@
+(define-contract booleanTestTrue
+  (
+    (input (in Bool))
+    (result (out Bool))
+  )
+  (
+    (true true)
+  )
+)
+
+(define-contract booleanTestFalse
+  (
+    (input (in Bool))
+    (result (out Bool))
+  )
+  (
+    (false false)
+  )
+)

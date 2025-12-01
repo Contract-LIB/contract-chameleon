@@ -1,3 +1,4 @@
+/*
 package org.contract_lib.lang.contract_lib.modifier;
 
 import org.contract_lib.lang.contract_lib.ast.Term;
@@ -18,3 +19,4 @@ public class LabelSubstitution {
   }
 
 }
+*/

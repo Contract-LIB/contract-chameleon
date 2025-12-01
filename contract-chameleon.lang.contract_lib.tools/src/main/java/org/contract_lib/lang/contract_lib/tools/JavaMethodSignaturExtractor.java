@@ -18,9 +18,9 @@ import org.contract_lib.lang.contract_lib.ast.Argument;
 
 public final class JavaMethodSignaturExtractor {
 
-  private static final String DEFAULT_RETURN_IDENTIFIER = "result"; 
-  private static final String DEFAULT_THIS_IDENTIFIER = "this"; 
-  private static final String DOT = "."; 
+  private static final String DEFAULT_RETURN_IDENTIFIER = "result";
+  private static final String DEFAULT_THIS_IDENTIFIER = "this";
+  private static final String DOT = ".";
   private static final String TODO_MESSAGE = "//TODO: Implement method '%s'.";
   private static final String RETURN_COMMAND = "return %s;";
 
@@ -30,8 +30,8 @@ public final class JavaMethodSignaturExtractor {
   private Optional<Sort> ownerSort;
   private boolean isStatic;
   private boolean readOnlyThis;
-  private final List<Argument> arguments; 
-  private final List<Argument> inoutArguments; 
+  private final List<Argument> arguments;
+  private final List<Argument> inoutArguments;
   private final List<Argument> inArguments;
   private Optional<Sort> returnType;
 
@@ -39,21 +39,20 @@ public final class JavaMethodSignaturExtractor {
   private final Set<String> fieldIdentifier;
 
   public JavaMethodSignaturExtractor(
-    Contract contract,
-    ChameleonMessageManager messageManager
-  ) {
+      Contract contract,
+      ChameleonMessageManager messageManager) {
     this.isStatic = true;
-    this.fieldIdentifier = new HashSet();
-    this.arguments = new ArrayList();
-    this.inoutArguments = new ArrayList();
-    this.inArguments = new ArrayList();
+    this.fieldIdentifier = new HashSet<>();
+    this.arguments = new ArrayList<>();
+    this.inoutArguments = new ArrayList<>();
+    this.inArguments = new ArrayList<>();
     this.returnType = Optional.empty();
     this.contractIdentifier = contract.identifier().identifier();
 
     Optional<String> className = extractName(contractIdentifier);
     contract.formals().stream().forEachOrdered(this::handleFormal);
 
-    className.ifPresent((cn)->{
+    className.ifPresent((cn) -> {
       ownerClassIdentifier = cn;
     });
 
@@ -64,17 +63,14 @@ public final class JavaMethodSignaturExtractor {
 
   public List<String> getDefaultMethodBody(Function<Sort, String> defaultValueProvider) {
     Optional<String> translation = returnType
-      .map(defaultValueProvider);
-
+        .map(defaultValueProvider);
 
     List<String> returnValue = translation
-      .map((s) -> List.of(
-        String.format(TODO_MESSAGE, contractIdentifier),
-        String.format(RETURN_COMMAND, s))
-      )
-      .orElseGet(() -> List.of(
-        String.format(TODO_MESSAGE, contractIdentifier)
-      ));
+        .map((s) -> List.of(
+            String.format(TODO_MESSAGE, contractIdentifier),
+            String.format(RETURN_COMMAND, s)))
+        .orElseGet(() -> List.of(
+            String.format(TODO_MESSAGE, contractIdentifier)));
 
     return returnValue;
   }
@@ -96,15 +92,15 @@ public final class JavaMethodSignaturExtractor {
   }
 
   public List<Argument> getArguments() {
-    return new ArrayList(this.arguments);
+    return new ArrayList<>(this.arguments);
   }
 
   public List<Argument> inoutArguments() {
-    return new ArrayList(this.inoutArguments);
+    return new ArrayList<>(this.inoutArguments);
   }
 
   public List<Argument> inArguments() {
-    return new ArrayList(this.inArguments);
+    return new ArrayList<>(this.inArguments);
   }
 
   public Optional<Argument> thisReadOnlyArgument() {
@@ -112,15 +108,16 @@ public final class JavaMethodSignaturExtractor {
       return Optional.empty();
     } else {
       return this.ownerSort
-        .map((s) -> new Argument(s, DEFAULT_THIS_IDENTIFIER));
+          .map((s) -> new Argument(s, DEFAULT_THIS_IDENTIFIER));
     }
   }
+
   public Optional<Argument> thisMutatableArgument() {
     if (isStatic || this.readOnlyThis) {
       return Optional.empty();
     } else {
       return this.ownerSort
-        .map((s) -> new Argument(s, DEFAULT_THIS_IDENTIFIER));
+          .map((s) -> new Argument(s, DEFAULT_THIS_IDENTIFIER));
     }
   }
 
@@ -145,6 +142,7 @@ public final class JavaMethodSignaturExtractor {
       System.err.println("ERROR: There must only be one out parameter named `result`");
     }
   }
+
   private void addParameter(Formal f, List<Argument> toList) {
     String name = f.identifier().identifier();
     if (name.equals(DEFAULT_RETURN_IDENTIFIER)) {
@@ -155,6 +153,7 @@ public final class JavaMethodSignaturExtractor {
       toList.add(new Argument(f.sort(), name));
     }
   }
+
   private void handlThisParameter(Formal formal) {
     if (this.isStatic) {
       //TODO: Add conversion from type to class identifier
@@ -173,6 +172,7 @@ public final class JavaMethodSignaturExtractor {
       System.err.println("ERROR: Parameter with name `this` is used multiple times.");
     }
   }
+
   private void handleInoutParameter(Formal formal) {
     if (formal.identifier().identifier().equals(DEFAULT_THIS_IDENTIFIER)) {
       handlThisParameter(formal);
@@ -180,6 +180,7 @@ public final class JavaMethodSignaturExtractor {
       addParameter(formal, this.inoutArguments);
     }
   }
+
   private void handleInParameter(Formal formal) {
     if (formal.identifier().identifier().equals(DEFAULT_THIS_IDENTIFIER)) {
       handlThisParameter(formal);

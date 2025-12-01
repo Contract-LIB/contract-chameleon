@@ -7,11 +7,7 @@ import java.util.ArrayList;
 
 import java.nio.file.Path;
 
-import java.util.stream.Collectors;
-
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 
@@ -21,28 +17,31 @@ import org.contract_lib.lang.contract_lib.antlr4parser.ContractLIBLexer;
 import org.contract_lib.lang.contract_lib.antlr4parser.ContractLIBParser;
 
 import org.contract_lib.lang.contract_lib.ast.ContractLibAst;
+import org.contract_lib.lang.contract_lib.ast.ContractLibAstElement;
+import org.contract_lib.lang.contract_lib.label.AstElementOrigin;
 import org.contract_lib.lang.contract_lib.label.AstTranslatorExtension;
 
+/// The default class to create the `AST` from a '.clib' file.
 public class ContractLibGenerator {
 
   private List<AstTranslatorExtension> extensions;
   private ChameleonMessageManager manager;
 
+  private AstElementOrigin fileOrigin = new AstElementOrigin();
+
   public ContractLibGenerator(
-    ChameleonMessageManager manager
-  ) {
+      ChameleonMessageManager manager) {
     this(
-      manager,
-      new ArrayList()
-    );
+        manager,
+        new ArrayList<>());
   }
-  
+
   public ContractLibGenerator(
-    ChameleonMessageManager manager,
-    List<AstTranslatorExtension> extensions
-  ) {
+      ChameleonMessageManager manager,
+      List<AstTranslatorExtension> extensions) {
     this.manager = manager;
     this.extensions = extensions;
+    this.extensions.add(fileOrigin);
   }
 
   public ContractLibAst generateFromPath(Path filepath) throws IOException {
@@ -56,26 +55,32 @@ public class ContractLibGenerator {
   }
 
   public ContractLibAst generate(
-    String locationId,
-    CharStream charStream
-  ) {
+      String locationId,
+      CharStream charStream) {
     ContractLIBLexer lexer = new ContractLIBLexer(charStream);
     CommonTokenStream tokenStream = new CommonTokenStream(lexer);
     ContractLIBParser parser = new ContractLIBParser(tokenStream);
-    
+
     ContractLibAstErrorListener errorHandler = new ContractLibAstErrorListener(
-      locationId,
-      manager
-    );
+        locationId,
+        manager);
 
     parser.addErrorListener(errorHandler);
-  
+
     ContractLIBParser.Start_Context parseTree = parser.start_();
 
-    ContractLibAstTranslator translator = new ContractLibAstTranslator();
+    ContractLibAstTranslator translator = new ContractLibAstTranslator(this.extensions, this.manager);
 
     ContractLibAst ast = translator.translateStart(parseTree);
 
     return ast;
+  }
+
+  public int getLine(ContractLibAstElement element) {
+    return fileOrigin.getLine(element);
+  }
+
+  public int getLinePosition(ContractLibAstElement element) {
+    return fileOrigin.getLinePosition(element);
   }
 }

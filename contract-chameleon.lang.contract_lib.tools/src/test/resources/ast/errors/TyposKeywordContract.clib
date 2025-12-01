@@ -1,0 +1,17 @@
+;typo in keyword
+(declare-contract contractA
+  (
+    (input (in Bool))
+    (result (out Bool))
+  )
+  ((true true))
+)
+
+;valid contract
+(define-contract contractA
+  (
+    (input (in Bool))
+    (result (out Bool))
+  )
+  ((true true))
+)

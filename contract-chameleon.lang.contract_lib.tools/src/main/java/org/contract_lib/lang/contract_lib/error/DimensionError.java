@@ -5,20 +5,19 @@ import java.util.Optional;
 import org.contract_lib.contract_chameleon.error.ChameleonReportable;
 import org.contract_lib.contract_chameleon.error.ChameleonMessageType;
 
-/// Syntax error in the grammar which is  detected by `antlr4parser`.
-public final class SyntaxError implements ChameleonReportable {
+/// Dimension errors, where lists are expected to have the same length but do not.
+public final class DimensionError implements ChameleonReportable {
 
   private String file;
   private int line;
   private int charIndex;
   private String message;
 
-  public SyntaxError(
+  public DimensionError(
       String file,
       int line,
       int charIndex,
-      String message,
-      String detailedMessage) {
+      String message) {
     this.file = file;
     this.line = line;
     this.charIndex = charIndex;

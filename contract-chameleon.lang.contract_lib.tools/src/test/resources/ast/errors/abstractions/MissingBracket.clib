@@ -1,0 +1,67 @@
+;missing ending brackets 
+(declare-abstractions
+  (
+    (TestSortA 0)
+  )
+  (
+    ((testConsA))
+  )
+
+;valid abstraction
+(declare-abstractions
+  (
+    (TestSortA 0)
+  )
+  (
+    ((testConsA))
+  )
+)
+
+;missing ending brackets two
+(declare-abstractions
+  (
+    (TestSortA 0)
+  )
+  (
+    ((testConsA))
+
+
+;valid abstraction
+(declare-abstractions
+  (
+    (TestSortA 0)
+  )
+  (
+    ((testConsA))
+  )
+)
+
+;missing brackets sort dec
+(declare-abstractions
+  (
+    (TestSortA 0)
+  
+  (
+    ((testConsA))
+  )
+)
+
+;valid abstraction
+(declare-abstractions
+  (
+    (TestSortA 0)
+  )
+  (
+    ((testConsA))
+  )
+)
+
+;missing brackets sort dec two
+(declare-abstractions
+  (
+    (TestSortA 0
+  
+  (
+    ((testConsA))
+  )
+)

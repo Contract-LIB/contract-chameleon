@@ -1,0 +1,18 @@
+; missing command
+  (
+   (TestAbstractionA 0)
+  )
+  (
+   (
+    (TestConstructorA)
+    (TestConstructorB (testSelectorB_0 Int))
+    (TestConstructorC (testSelectorB_0 Int))
+   )
+  )
+)
+
+;missing numeral
+(declare-sort TestSortE
+
+;missing closing bracket
+(declare-sort TestSortA 0

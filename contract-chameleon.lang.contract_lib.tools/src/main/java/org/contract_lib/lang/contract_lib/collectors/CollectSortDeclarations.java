@@ -12,7 +12,7 @@ import org.contract_lib.lang.contract_lib.ast.Abstraction;
 
 final class CollectSortDeclarations {
 
-  Map<String, List<SortDec>> sortDeclarations = new HashMap();
+  Map<String, List<SortDec>> sortDeclarations = new HashMap<>();
 
   void collectFrom(ContractLibAst ast) {
     ast.sorts().stream().forEach(this::collectSort);
@@ -22,7 +22,7 @@ final class CollectSortDeclarations {
 
   void collectSort(SortDec.Def sort) {
     String identifier = sort.name().identifier();
-    List<SortDec> list = sortDeclarations.getOrDefault(identifier, new ArrayList());
+    List<SortDec> list = sortDeclarations.getOrDefault(identifier, new ArrayList<>());
     list.add(sort);
     sortDeclarations.put(identifier, list);
   }
