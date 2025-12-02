@@ -12,24 +12,13 @@ public final class ChameleonMessageGroup extends Exception {
   }
 
   public String getMessage() {
-    //TODO: sort messages before printing
     return messages.stream()
-      .map(this::messageDescription)
-      .collect(Collectors.joining(System.lineSeparator()));
-  } 
+        .map(ChameleonReportable::getMessage)
+        .collect(Collectors.joining(System.lineSeparator()));
+  }
 
   public List<ChameleonReportable> getMessages() {
     return messages;
   }
 
-  private String messageDescription(ChameleonReportable message) {
-    return String.format(
-      "%s in %s: %d|%d -> %s",
-      message.messageType(),
-      message.getLocationIdentifier(), 
-      message.getLine(),
-      message.getCharIndex(),
-      message.getMessage()
-    );
-  }
 }

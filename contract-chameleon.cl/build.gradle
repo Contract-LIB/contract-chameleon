@@ -27,6 +27,7 @@ repositories {
 
 dependencies {
     implementation project(":contract-chameleon.core")
+    implementation project(":contract-chameleon.error")
 
     // Add adapters to the final jar, might be still extended through classpath in `java -cp adapters/* org.contractlib.contract_chameleon.ContractChameleon`
     runtimeOnly project(":contract-chameleon.adapter.key.export")
