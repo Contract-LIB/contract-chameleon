@@ -13,6 +13,7 @@ import java.util.ServiceLoader;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.printer.DefaultPrettyPrinter;
 
 import com.github.javaparser.ast.CompilationUnit;
@@ -29,16 +30,6 @@ import com.github.javaparser.ast.stmt.Behavior;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.EmptyStmt;
 import com.github.javaparser.ast.stmt.Statement;
-
-import com.github.javaparser.ast.expr.SimpleName;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.BooleanLiteralExpr;
-import com.github.javaparser.ast.expr.FieldAccessExpr;
-import com.github.javaparser.ast.expr.ThisExpr;
-import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.DoubleLiteralExpr;
 
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.VoidType;
@@ -903,6 +894,16 @@ public class SimpleKeyProviderTranslator {
     objectCreated(contract.formals(), variableScope).ifPresent(clauses::add);
     clauses.addAll(accessibleClause);
     clauses.addAll(assignableClause);
+
+    if (methodSignaturExtractor.isStatic()) {
+      JmlSimpleExprClause invClause = new JmlSimpleExprClause()
+        .setExpression(new MethodCallExpr(
+          null, // scope
+          new SimpleName("\\invariant_for"),
+          NodeList.nodeList(new NameExpr("\\result"))))
+        .setKind(ENSURES);
+      clauses.add(invClause);
+  }
 
     JmlContract jmlContract = new JmlContract()
         .setBehavior(Behavior.NORMAL)

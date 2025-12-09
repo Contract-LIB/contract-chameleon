@@ -34,7 +34,7 @@ public record SetFuncTranslations() implements FuncProvider {
     return List.of(
         new FuncTranslation.MethodCall(
             "set.empty",
-            "\\dl_finiteSetEmpty",
+            "\\dl_sEmpty",
             List.of(),
             List.of(),
             JML_SET_TYPE,
@@ -42,7 +42,7 @@ public record SetFuncTranslations() implements FuncProvider {
 
         new FuncTranslation.MethodCall(
             "set.singleton",
-            "\\dl_finiteSetSingleton",
+            "\\dl_sSingleton",
             List.of(CLIB_GENERIC_TYPE),
             List.of(JML_GENERIC_TYPE),
             JML_SET_TYPE,
@@ -50,7 +50,7 @@ public record SetFuncTranslations() implements FuncProvider {
 
         new FuncTranslation.MethodCall(
             "set.union",
-            "\\dl_finiteSetUnion",
+            "\\dl_sUnion",
             List.of(CLIB_SET_TYPE, CLIB_SET_TYPE),
             List.of(JML_SET_TYPE, JML_SET_TYPE),
             JML_SET_TYPE,
@@ -58,7 +58,7 @@ public record SetFuncTranslations() implements FuncProvider {
 
         new FuncTranslation.MethodCall(
             "set.inter",
-            "\\dl_finiteSetInter",
+            "\\dl_sIntersect",
             List.of(CLIB_SET_TYPE, CLIB_SET_TYPE),
             List.of(JML_SET_TYPE, JML_SET_TYPE),
             JML_SET_TYPE,
@@ -66,7 +66,7 @@ public record SetFuncTranslations() implements FuncProvider {
 
         new FuncTranslation.MethodCall(
             "set.minus",
-            "\\dl_finiteSetMinus",
+            "\\dl_sSetMinus",
             List.of(CLIB_SET_TYPE, CLIB_SET_TYPE),
             List.of(JML_SET_TYPE, JML_SET_TYPE),
             JML_SET_TYPE,
@@ -74,21 +74,21 @@ public record SetFuncTranslations() implements FuncProvider {
 
         new FuncTranslation.MethodCall(
             "set.member",
-            "\\dl_finiteSetMember",
+            "\\dl_sElementOf",
             List.of(CLIB_SET_TYPE, CLIB_GENERIC_TYPE),
             List.of(JML_SET_TYPE, JML_GENERIC_TYPE),
             JML_BOOL_TYPE,
             CLIB_BOOL_TYPE),
         new FuncTranslation.MethodCall(
             "set.subset",
-            "\\dl_finiteSetSubset",
+            "\\dl_sSubset",
             List.of(CLIB_SET_TYPE, CLIB_SET_TYPE),
             List.of(JML_SET_TYPE, JML_SET_TYPE),
             JML_BOOL_TYPE,
             CLIB_BOOL_TYPE),
         new FuncTranslation.MethodCall(
             "set.disjunct",
-            "\\dl_finiteSetDisjunct",
+            "\\dl_sDisjoint",
             List.of(CLIB_SET_TYPE, CLIB_SET_TYPE),
             List.of(JML_SET_TYPE, JML_SET_TYPE),
             JML_BOOL_TYPE,
@@ -96,7 +96,7 @@ public record SetFuncTranslations() implements FuncProvider {
 
         new FuncTranslation.MethodCall(
             "set.card",
-            "\\dl_finiteSetCard",
+            "\\dl_sCard",
             List.of(CLIB_SET_TYPE),
             List.of(JML_SET_TYPE),
             JML_INT_TYPE,

@@ -40,7 +40,7 @@ public class SetTranslation implements TypeTranslation {
   public Type getJmlType(Sort sort) {
     return new ClassOrInterfaceType(
         null,
-        new SimpleName("\\dl_set"),
+        new SimpleName("\\dl_Set"),
         null);
   }
 
