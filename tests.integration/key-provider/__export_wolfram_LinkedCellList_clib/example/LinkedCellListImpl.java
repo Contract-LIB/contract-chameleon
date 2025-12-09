@@ -7,7 +7,7 @@ public class LinkedCellListImpl extends LinkedCellList {
         ;
     }
 
-    public void addLast(Cell v) {
+    public void add(Cell v) {
         //TODO: To implement by the user.
         return;
     }

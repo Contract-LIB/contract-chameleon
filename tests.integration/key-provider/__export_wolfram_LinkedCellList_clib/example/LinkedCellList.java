@@ -21,6 +21,7 @@ public abstract class LinkedCellList {
         requires (false | true);
         ensures (true & (true ==> \result.absVal == \seq_empty));
         ensures \fresh(\result.footprint);
+        ensures \invariant_for(\result);
         */
     public static LinkedCellList init() {
         return new LinkedCellListImpl();
@@ -32,7 +33,7 @@ public abstract class LinkedCellList {
         accessible this.footprint;
         assignable this.footprint;
         */
-    public abstract void addLast(Cell v);
+    public abstract void add(Cell v);
 
     /*@  normal_behavior
         requires (false | !this.absVal == \seq_empty);

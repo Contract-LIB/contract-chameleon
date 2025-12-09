@@ -4,9 +4,9 @@ public abstract class Cell {
 
     //@ predicate pred(int absVal);
 
-    public static Cell init(int id, int v)
+    public static Cell init()
     //@ requires true;
-    //@ ensures result.pred(?result_absVal) &*& (result_absVal) == (v);
+    //@ ensures result.pred(?result_absVal) &*& (result_absVal) == (0);
     {
         //TODO: Implement method 'example.Cell.init'.
         return null;
@@ -15,4 +15,8 @@ public abstract class Cell {
     public abstract int value();
     //@ requires this.pred(?this_absVal_old) &*& true;
     //@ ensures this.pred(?this_absVal) &*& (result) == (this_absVal);
+
+    public abstract void set(int v);
+    //@ requires this.pred(?this_absVal_old) &*& true;
+    //@ ensures this.pred(?this_absVal) &*& (this_absVal) == (v);
 }

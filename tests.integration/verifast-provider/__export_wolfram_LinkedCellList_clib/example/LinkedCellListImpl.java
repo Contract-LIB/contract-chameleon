@@ -4,11 +4,11 @@ public class LinkedCellListImpl extends LinkedCellList {
 
     //@ predicate pred(list<Cell> absVal);
 
-    public void addLast(Cell v)
+    public void add(Cell v)
     //@ requires this.pred(?this_absVal_old) &*& true;
     //@ ensures this.pred(?this_absVal) &*& (this_absVal) == (append(this_absVal_old, cons(v, nil)));
     {
-        //TODO: Implement method 'example.LinkedCellList.addLast'.
+        //TODO: Implement method 'example.LinkedCellList.add'.
     }
 
     public Cell getLast()

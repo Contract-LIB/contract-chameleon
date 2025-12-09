@@ -12,7 +12,7 @@ public abstract class LinkedCellList {
         return null;
     }
 
-    public abstract void addLast(Cell v);
+    public abstract void add(Cell v);
     //@ requires this.pred(?this_absVal_old) &*& true;
     //@ ensures this.pred(?this_absVal) &*& (this_absVal) == (append(this_absVal_old, cons(v, nil)));
 

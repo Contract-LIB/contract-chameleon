@@ -1,27 +1,30 @@
 (declare-abstractions
     ((example.Cell 0))
-    (((Cell (absVal Int)))))  ; "example.Cell" here?
+    (((Cell (absVal Int)))))
 
 (declare-abstractions
-    ( 
-      (example.LinkedCellList 0))
+    ((example.LinkedCellList 0))
     (((LinkedCellList (absVal (Seq (Ref Cell)))))))
 
 ; - Contracts for Cell
 
 
 (define-contract example.Cell.init
-    ((result (out Cell))
-     (id (in Int))
-     (v (in Int)))
+    ((result (out Cell)))
     ((true
-     (= (absVal result) v))))
+     (= (absVal result) 0))))
 
 (define-contract example.Cell.value
     ((this (inout Cell))
      (result (out Int)))
     ((true
      (= result (absVal this)))))
+
+(define-contract example.Cell.set
+    ((this (inout Cell))
+     (v (in Int)))
+    ((true
+     (= (absVal this) v))))
 
 ; - Contracts for List
 
@@ -30,7 +33,7 @@
     ((true
      (= (absVal result) seq.empty))))                            ; in Z3: "(as seq.empty (Seq CellRef))"
 
-(define-contract example.LinkedCellList.addLast
+(define-contract example.LinkedCellList.add
     ((this (inout LinkedCellList))
      (v (in (Ref Cell))))
     ((true

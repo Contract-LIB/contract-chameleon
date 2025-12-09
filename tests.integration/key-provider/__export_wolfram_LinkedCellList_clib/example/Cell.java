@@ -16,11 +16,12 @@ public abstract class Cell {
 
     /*@  normal_behavior
         requires (false | true);
-        ensures (true & (true ==> \result.absVal == v));
+        ensures (true & (true ==> \result.absVal == 0));
         ensures \fresh(\result.footprint);
+        ensures \invariant_for(\result);
         */
-    public static Cell init(int id, int v) {
-        return new CellImpl(id, v);
+    public static Cell init() {
+        return new CellImpl();
     }
 
     /*@  normal_behavior
@@ -30,4 +31,12 @@ public abstract class Cell {
         assignable this.footprint;
         */
     public abstract int value();
+
+    /*@  normal_behavior
+        requires (false | true);
+        ensures (true & (true ==> this.absVal == v));
+        accessible this.footprint;
+        assignable this.footprint;
+        */
+    public abstract void set(int v);
 }

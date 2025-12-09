@@ -4,7 +4,7 @@ public abstract class IntTreeSet {
 
     //@ predicate pred(list<int> absVal);
 
-    public abstract static IntTreeSet init(int v);
+    public abstract static IntTreeSet init();
     //@ requires true;
     //@ ensures result.pred(?result_absVal) &*& (result_absVal) == (true);
 

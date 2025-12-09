@@ -11,21 +11,22 @@ public abstract class IntTreeSet {
     //@ public instance accessible \inv : footprint;
 
 
-    //@ public instance ghost \dl_set absVal;
+    //@ public instance ghost \dl_Set absVal;
 
 
     /*@  normal_behavior
         requires (false | true);
-        ensures (true & (true ==> \result.absVal == \dl_finiteSetEmpty()));
+        ensures (true & (true ==> \result.absVal == \dl_sEmpty()));
         ensures \fresh(\result.footprint);
+        ensures \invariant_for(\result);
         */
-    public static IntTreeSet init(int v) {
-        return new IntTreeSetImpl(v);
+    public static IntTreeSet init() {
+        return new IntTreeSetImpl();
     }
 
     /*@  normal_behavior
         requires (false | true);
-        ensures (true & (true ==> (\forall int x;\dl_finiteSetMember(x, \old(this.absVal)) || x == v) && \dl_finiteSetMember(v, this.absVal)));
+        ensures (true & (true ==> (\forall int x;\dl_sElementOf(x, \old(this.absVal)) || x == v) && \dl_sElementOf(v, this.absVal)));
         accessible this.footprint;
         assignable this.footprint;
         */
@@ -33,7 +34,7 @@ public abstract class IntTreeSet {
 
     /*@  normal_behavior
         requires (false | true);
-        ensures (true & (true ==> \result == \dl_finiteSetMember(v, this.absVal)));
+        ensures (true & (true ==> \result == \dl_sElementOf(v, this.absVal)));
         accessible this.footprint;
         assignable this.footprint;
         */

@@ -2,7 +2,7 @@ package example;
 
 public class IntTreeSetImpl extends IntTreeSet {
 
-    IntTreeSetImpl(int v) {
+    IntTreeSetImpl() {
         //TODO: To implement by the user.
         ;
     }
