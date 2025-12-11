@@ -13,6 +13,7 @@ import org.contract_lib.contract_chameleon.AdapterArgument;
 import org.contract_lib.contract_chameleon.AdapterArgumentProvider;
 import org.contract_lib.contract_chameleon.AdapterMap;
 import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
+import org.contract_lib.contract_chameleon.error.SimpleErrorMessage;
 
 public final class ArgumentParser implements AdapterArgumentProvider {
 
@@ -55,21 +56,18 @@ public final class ArgumentParser implements AdapterArgumentProvider {
     List<String> argList = new ArrayList<>(List.of(args));
 
     if (argList.isEmpty()) {
-      //TODO: Report proper error
-      System.err.println("ERROR: No adapter selected!");
+      messageManager.report(new SimpleErrorMessage("No adapter selected."));
       return;
     }
     String adapterIdentifier = argList.removeFirst();
     providedAdapter = Optional.ofNullable(adapterMap.get(adapterIdentifier));
 
+    //TODO: Fix for adapters that take no input path (help, list)
     if (argList.isEmpty()) {
-      //TODO: Report proper error
-      System.err.println("ERROR: No input file or path provided");
+      messageManager.report(new SimpleErrorMessage("No input file or path provided."));
       return;
     }
     inputPath = Optional.of(argList.removeFirst());
-
-    System.err.println(parseMap);
 
     Optional<ArgumentPair> activeArgument = Optional.empty();
     List<String> values = new ArrayList<>();
@@ -81,14 +79,12 @@ public final class ArgumentParser implements AdapterArgumentProvider {
         if (activeArgument.isPresent()) {
           values.add(s);
         } else {
-          /// TODO: throw error: argument already defined
-          System.err.println("ERROR: Value provided but argument expected.");
+          messageManager.report(new SimpleErrorMessage(String.format("Value provided but argument expected: %s", s)));
         }
       } else {
         // Close argumnet list, parse values for the argument, and set new argument
         if (parsedArguments.containsKey(matchedArgument.getClass())) {
-          /// TODO: throw error: argument already defined
-          System.err.println("ERROR: Argument was already defined before.");
+          messageManager.report(new SimpleErrorMessage("Argument was already defined before."));
           continue;
         }
         activeArgument.ifPresent(arg -> {
@@ -102,7 +98,6 @@ public final class ArgumentParser implements AdapterArgumentProvider {
       arg.arg().parseArguments(arg.label(), messageManager, values);
       parsedArguments.put((Class<AdapterArgument>) arg.arg().getClass(), arg.arg());
     });
-    System.err.println(parsedArguments);
   }
 
   void addToMap(AdapterArgument argument) {

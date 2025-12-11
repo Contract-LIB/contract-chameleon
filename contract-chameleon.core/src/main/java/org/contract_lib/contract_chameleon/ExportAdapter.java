@@ -12,6 +12,8 @@ import java.nio.file.Paths;
 
 import org.contract_lib.contract_chameleon.arguments.OutputPath;
 import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
+import org.contract_lib.contract_chameleon.error.ChameleonMessageType;
+import org.contract_lib.contract_chameleon.error.SimpleErrorMessage;
 
 public abstract class ExportAdapter extends Adapter {
 
@@ -19,22 +21,27 @@ public abstract class ExportAdapter extends Adapter {
       List<Path> sourceFiles,
       ChameleonMessageManager messageManager) throws IOException;
 
-  //public abstract String adapterTitle();
-  public abstract String defaultOutputDir();
+  public abstract String adapterTitle();
 
-  private ChameleonMessageManager messageManager = new ChameleonMessageManager();
+  public abstract String defaultOutputDir();
 
   @Override
   public final void perform(
+      ChameleonMessageManager messageManager,
       AdapterArgumentProvider adapterProvider,
       String[] args) {
 
-    System.err.println("============================== ");
-    System.err.println("==== Perform Key Provider ==== "); //TODO: proper title provider
-    System.err.println("============================== ");
+    String adapterTitle = String.format("===== %s =====", adapterTitle());
+    String frame = "=".repeat(adapterTitle.length());
 
+    //TODO: Print as info message
+    System.err.println(frame);
+    System.err.println(adapterTitle);
+    System.err.println(frame);
+
+    //TODO: move to proper parameter
     if (args.length <= 1) {
-      System.err.println("Expected path to files in command"); //TODO: proper error handling
+      System.err.println("Expected path to files in command.");
       return;
     }
     String inputFileName = args[1];
@@ -53,7 +60,10 @@ public abstract class ExportAdapter extends Adapter {
       Path directoryPath = Paths.get(".", outputDir, fileDir);
 
       if (Files.isDirectory(directoryPath)) {
-        System.err.println(String.format("INFO: Directory at %s does already exist.", directoryPath));
+        messageManager.report(new SimpleErrorMessage(
+            String.format("Directory at %s does already exist.", directoryPath),
+            ChameleonMessageType.INFO,
+            null));
       } else {
         Files.createDirectories(directoryPath);
       }
@@ -67,13 +77,19 @@ public abstract class ExportAdapter extends Adapter {
         Path classPath = Paths.get(".", outputDir, fileDir, directoryName, fileName + fileEnding);
 
         if (Files.isDirectory(packagePath)) {
-          System.err.println(String.format("INFO: Directory at %s does already exist.", packagePath));
+          messageManager.report(new SimpleErrorMessage(
+              String.format("Directory at %s does already exist.", packagePath),
+              ChameleonMessageType.INFO,
+              null));
         } else {
           Files.createDirectories(packagePath);
         }
 
         if (Files.exists(classPath)) {
-          System.err.println(String.format("WARNING: File at %s does already exist, will be overridden!", classPath));
+          messageManager.report(new SimpleErrorMessage(
+              String.format("WARNING: File at %s does already exist, will be overridden!", classPath),
+              ChameleonMessageType.INFO,
+              null));
         }
 
         //TODO: Use better syntax, ensure closed stream
@@ -83,8 +99,7 @@ public abstract class ExportAdapter extends Adapter {
       }
 
     } catch (IOException e) {
-      //TODO: Proper error handling, permission checks, …
-      System.err.println(e);
+      messageManager.report(new SimpleErrorMessage(e.toString()));
     }
   }
 

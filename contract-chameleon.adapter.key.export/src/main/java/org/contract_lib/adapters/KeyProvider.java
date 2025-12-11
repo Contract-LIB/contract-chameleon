@@ -17,14 +17,17 @@ public final class KeyProvider extends ExportAdapter {
     return "key-provider";
   }
 
+  public String adapterTitle() {
+    return "KeY Provider Adapter";
+  }
+
   public String getAdapterName() {
     return "key-provider";
   }
 
   public List<TranslationResult> perform(
       List<Path> sourceFiles,
-      ChameleonMessageManager messageManager
-    ) throws IOException {
+      ChameleonMessageManager messageManager) throws IOException {
 
     //TODO: Support mulitple files
     System.err.println("This provider supports only one class at the moment.");
@@ -35,7 +38,7 @@ public final class KeyProvider extends ExportAdapter {
     ContractLibAst ast = generator.generateFromPath(fileName);
     SimpleKeyProviderTranslator trans = new SimpleKeyProviderTranslator(messageManager);
     List<TranslationResult> results = trans.translateContractLibAstProvider(ast);
-      
+
     return results;
   }
 }

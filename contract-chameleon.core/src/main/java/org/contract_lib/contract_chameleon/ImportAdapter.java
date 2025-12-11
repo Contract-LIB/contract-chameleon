@@ -2,17 +2,13 @@
 package org.contract_lib.contract_chameleon;
 
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.io.File;
 import java.io.BufferedWriter;
 import java.io.Writer;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import org.contract_lib.contract_chameleon.Adapter;
 
 import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
 
@@ -22,19 +18,22 @@ public abstract class ImportAdapter extends Adapter {
       List<Path> sourceFiles,
       ChameleonMessageManager messageManager) throws IOException;
 
-  //public abstract String adapterTitle();
-  public abstract String defaultOutputDir();
+  public abstract String adapterTitle();
 
-  private ChameleonMessageManager messageManager = new ChameleonMessageManager();
+  public abstract String defaultOutputDir();
 
   @Override
   public final void perform(
+      ChameleonMessageManager messageManager,
       AdapterArgumentProvider adapterProvider,
       String[] args) {
 
-    System.err.println("============================== ");
-    System.err.println("==== Perform Key Provider ==== "); //TODO: proper title provider
-    System.err.println("============================== ");
+    String adapterTitle = String.format("===== %s =====", adapterTitle());
+    String frame = "=".repeat(adapterTitle.length());
+
+    System.err.println(frame);
+    System.err.println(adapterTitle);
+    System.err.println(frame);
 
     if (args.length <= 1) {
       System.err.println("Expected path to files in command"); //TODO: proper error handling

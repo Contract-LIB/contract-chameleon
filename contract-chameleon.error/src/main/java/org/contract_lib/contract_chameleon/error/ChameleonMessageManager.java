@@ -23,7 +23,7 @@ public final class ChameleonMessageManager {
   /// Write all reported messages to std error.
   public void writeStdErr() {
     messages.stream()
-        .map(c -> c.messageType() + c.getMessage())
+        .map(c -> String.format("%s: %s", c.messageType(), c.getMessage()))
         .forEachOrdered(System.err::println);
   }
 

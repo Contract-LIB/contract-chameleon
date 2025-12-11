@@ -16,6 +16,10 @@ public final class VerifastApplicant extends ExportAdapter {
     return "verifast-applicant";
   }
 
+  public String adapterTitle() {
+    return "Verifast Applicant Adapter";
+  }
+
   public String getAdapterName() {
     return "verifast-applicant";
   }

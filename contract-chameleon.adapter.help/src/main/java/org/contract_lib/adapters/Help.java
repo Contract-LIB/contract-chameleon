@@ -3,6 +3,7 @@ package org.contract_lib.adapters;
 import org.contract_lib.contract_chameleon.Adapter;
 import org.contract_lib.contract_chameleon.AdapterArgumentProvider;
 import org.contract_lib.contract_chameleon.AdapterMap;
+import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
 
 public final class Help extends Adapter implements HelpMessage {
 
@@ -22,6 +23,10 @@ public final class Help extends Adapter implements HelpMessage {
       Adapter for providing help
       """;
 
+  public String adapterTitle() {
+    return "Contract Chameleon Help";
+  }
+
   @Override
   public String getAdapterName() {
     return ADAPTER_NAME;
@@ -29,6 +34,7 @@ public final class Help extends Adapter implements HelpMessage {
 
   @Override
   public void perform(
+      ChameleonMessageManager messageManager,
       AdapterArgumentProvider argumentProvider,
       String[] args) {
 

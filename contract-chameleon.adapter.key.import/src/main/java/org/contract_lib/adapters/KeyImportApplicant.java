@@ -15,6 +15,10 @@ public final class KeyImportApplicant extends ImportAdapter {
     return "key-import";
   }
 
+  public String adapterTitle() {
+    return "KeY Import Adapter";
+  }
+
   public String getAdapterName() {
     return "key-import";
   }

@@ -52,13 +52,11 @@ public final class JavaMethodSignaturExtractor {
     Optional<String> className = extractName(contractIdentifier);
     contract.formals().stream().forEachOrdered(this::handleFormal);
 
-    className.ifPresent((cn) -> {
+    className.ifPresentOrElse((cn) -> {
       ownerClassIdentifier = cn;
-    });
-
-    if (!className.isPresent()) {
+    }, () -> {
       System.err.println("ERROR: each contract needs to be associated with an abstraction.");
-    }
+    });
   }
 
   public List<String> getDefaultMethodBody(Function<Sort, String> defaultValueProvider) {
