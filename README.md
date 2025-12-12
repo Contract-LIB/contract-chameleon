@@ -63,9 +63,21 @@ gradle run-integration-tests #Simple way to check if the adapter do what they sh
 
 For each module the `JavaDoc` can be found in `<module>/build/docs/javadoc/org/contract_lib/contract_chameleon/package-summary.html`.
 
+### JavaDoc of Dependencies
+
+#### jmlparser
+
+```sh
+# build Javadoc
+./mvnw javadoc:javadoc
+```
+
+The `JavaDoc` can be found in for the different packages: `<jmlparser-module>/javaparser-core/target/reports/apidocs/index.html`
+
 ## Run integration tests with tools
 
 ### KeY
+
 ```sh
 # check if proofs can be found in key (see folder `tests.integration`)
 gradle key_ci-check-all --continue

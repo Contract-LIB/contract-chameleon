@@ -30,6 +30,7 @@ import com.github.javaparser.ast.stmt.Statement;
 
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.ThisExpr;
@@ -37,7 +38,7 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.DoubleLiteralExpr;
-
+import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.VoidType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
@@ -55,8 +56,6 @@ import com.github.javaparser.ast.jml.expr.JmlQuantifiedExpr;
 
 import static com.github.javaparser.ast.jml.clauses.JmlClauseKind.REQUIRES;
 import static com.github.javaparser.ast.jml.clauses.JmlClauseKind.ENSURES;
-
-import com.github.javaparser.ast.jml.expr.JmlBinaryInfixExpr;
 
 import com.github.javaparser.printer.configuration.DefaultPrinterConfiguration;
 import com.github.javaparser.printer.configuration.PrinterConfiguration;
@@ -98,10 +97,6 @@ import static org.contract_lib.adapters.translations.VariableScope.VariableTrans
 public class SimpleKeyProviderTranslator {
 
   private static final String IMPLEMENTATION_SUFFIX = "Impl";
-
-  private static final SimpleName IMLIES = new SimpleName("==>");
-  private static final SimpleName AND = new SimpleName("&");
-  private static final SimpleName OR = new SimpleName("|");
 
   private ChameleonMessageManager messageManager;
   private KeyTranslations keyTranslator;
@@ -665,20 +660,20 @@ public class SimpleKeyProviderTranslator {
     return mergeExpression(
         pair.pre(),
         pair.post(),
-        IMLIES);
+        BinaryExpr.Operator.IMPLICATION);
   }
 
-  private Expression mergeExpression(Expression left, Expression right, SimpleName op) {
-    return new JmlBinaryInfixExpr(left, right, op);
+  private Expression mergeExpression(Expression left, Expression right, BinaryExpr.Operator op) {
+    return new BinaryExpr(new EnclosedExpr(left), new EnclosedExpr(right), op);
   }
 
   private Expression mergeOr(Expression left, Expression right) {
-    return mergeExpression(left, right, OR);
+    return mergeExpression(left, right, BinaryExpr.Operator.OR);
   }
 
   //TODO: Merge as separate clauses
   private Expression mergeAnd(Expression left, Expression right) {
-    return mergeExpression(left, right, AND);
+    return mergeExpression(left, right, BinaryExpr.Operator.OR);
   }
 
   //TODO: Compute those in one Function, with checks 
