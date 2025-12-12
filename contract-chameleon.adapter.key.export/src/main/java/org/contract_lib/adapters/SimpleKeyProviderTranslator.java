@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.ServiceLoader;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import com.github.javaparser.printer.DefaultPrettyPrinter;
@@ -19,7 +18,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
@@ -117,7 +115,6 @@ public class SimpleKeyProviderTranslator {
         sortTranslator,
         KeyTranslations.ToDatatypeTranslation::new
     //KeyTranslations.ToSortTranslation::new
-
     );
 
     ServiceLoader<TypeTranslation> typeLoader = ServiceLoader.load(
