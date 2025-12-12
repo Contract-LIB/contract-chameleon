@@ -57,6 +57,9 @@ import org.contract_lib.adapters.translation.quantifier.AllIntQuantorTranslation
 /// what are suitable abstractions and interfaces used in a translation.
 public class SimpleVerifastTranslator {
 
+  private static final String RESULT_NAME = "result";
+  private static final String NULL = "null";
+
   private ChameleonMessageManager messageManager;
 
   private final TypeTranslator typeTranslator;
@@ -326,10 +329,15 @@ public class SimpleVerifastTranslator {
 
     //If the return value is an abstraction, create the predicate for return 
     extractor.getReturnType()
-        .map((p) -> new Argument(p, "result"))
+        .map((p) -> new Argument(p, RESULT_NAME))
         .flatMap(p -> predicateTranslator.createPredicate(p, termTranslator, true, false))
         .ifPresent(ensuresPredicates::add);
-    //TODO: Add result != null
+
+    extractor.getReturnType()
+        .map((p) -> new VeriFastExpression.BinaryOperation("!=",
+            new VeriFastExpression.Variable(RESULT_NAME),
+            new VeriFastExpression.Variable(NULL)))
+        .ifPresent(ensuresPredicates::add);
 
     //resultPredicate.ifPresent(ensuresExprList::add);
     //TODO: add not null predicate for result constructor
