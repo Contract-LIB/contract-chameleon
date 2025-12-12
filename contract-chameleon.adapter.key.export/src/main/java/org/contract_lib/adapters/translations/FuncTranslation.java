@@ -6,6 +6,7 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.BinaryExpr;
+import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.UnaryExpr;
 
 import com.github.javaparser.ast.type.Type;
@@ -30,7 +31,6 @@ public interface FuncTranslation {
   public interface FuncTranslator {
     FuncTranslation translate(Term.Identifier.IdentifierValue identifier);
   }
-
 
   @FunctionalInterface
   public interface MethodExprInterface {
@@ -182,7 +182,7 @@ public interface FuncTranslation {
       }
       Expression expr = parameters.get(0);
       return new UnaryExpr(
-          expr,
+          new EnclosedExpr(expr),
           this.unaryJmlOperator);
     }
 
@@ -225,8 +225,8 @@ public interface FuncTranslation {
       Expression left = parameters.get(0);
       Expression right = parameters.get(1);
       return new BinaryExpr(
-          left,
-          right,
+          new EnclosedExpr(left),
+          new EnclosedExpr(right),
           this.binaryJmlOperator);
     }
 

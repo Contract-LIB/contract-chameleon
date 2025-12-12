@@ -1,27 +1,18 @@
 
 package org.contract_lib.adapters.translations.functions;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.expr.ArrayAccessExpr;
 import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
-import com.github.javaparser.ast.type.PrimitiveType;
 
 import org.contract_lib.adapters.translations.FuncTranslation;
 import org.contract_lib.lang.contract_lib.ast.Sort;
 import org.contract_lib.lang.contract_lib.ast.Symbol;
 import org.contract_lib.lang.contract_lib.ast.Term;
-import org.contract_lib.lang.key.ast.KeyArgument;
-import org.contract_lib.lang.key.ast.KeyDatatype;
-import org.contract_lib.lang.key.ast.KeyDatatypeConstructor;
 import org.contract_lib.lang.key.ast.KeySort;
 
 public record LogicTypeFuncTranslation(
