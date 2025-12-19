@@ -17,9 +17,10 @@ import org.contract_lib.adapters.result.HelperFile;
 public final class HelperTranslator {
 
   private static final String HELPER_FILE = "_chameleon_help";
-  private static final VeriFastType BOOLEAN_TYPE = new VeriFastType("boolean");
-  private static final VeriFastType GEN_LIST = new VeriFastType("list<t>");
-  private static final VeriFastType GEN_EL = new VeriFastType("t");
+  private static final VeriFastType BOOLEAN_TYPE = new VeriFastType.VeriFastBoolean();
+  private static final VeriFastType GEN_LIST = new VeriFastType.VeriFastInduction("list",
+      List.of(new VeriFastType.VeriFastClass("t", List.of())));
+  private static final VeriFastType GEN_EL = new VeriFastType.VeriFastClass("t", List.of());
 
   public static final List<VeriFastHelper> DEFAULT_HELPER = List.of(
       new VeriFastFixpoint(
@@ -116,5 +117,4 @@ public final class HelperTranslator {
         HELPER_FILE,
         new VeriFastHelperSpecification(this.helper));
   }
-
 }

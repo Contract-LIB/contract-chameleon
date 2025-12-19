@@ -22,7 +22,7 @@ public final class SetTranslation implements TypeTranslation {
     if (inner.size() != 1) {
       System.err.println("one parameter for Ref expected");
     }
-    return new VeriFastType(String.format("list<%s>", translator.translate(inner.get(0)).name()));
+    return new VeriFastType.VeriFastInduction("list", List.of(translator.translate(inner.get(0))));
   }
 
   public List<VeriFastExpression> getHelper() {

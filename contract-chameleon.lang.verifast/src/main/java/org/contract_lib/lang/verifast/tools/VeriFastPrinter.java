@@ -21,7 +21,6 @@ import org.contract_lib.lang.verifast.ast.VeriFastInduction;
 import org.contract_lib.lang.verifast.ast.VeriFastInductionConstructor;
 import org.contract_lib.lang.verifast.ast.VeriFastFixpoint;
 
-
 public class VeriFastPrinter {
 
   private static final int INDENTATION_STEPS = 4;
@@ -102,7 +101,7 @@ public class VeriFastPrinter {
     print(SPACE);
     printBlock(() -> {
       printNewLine();
-      printList(vfClass.predicates(),() -> printNewLine(), this::printVeriFastPredicate);
+      printList(vfClass.predicates(), () -> printNewLine(), this::printVeriFastPredicate);
       printNewLine();
       printList(vfClass.methods(), () -> printNewLine(), this::printVeriFastMethod);
     });
@@ -123,7 +122,7 @@ public class VeriFastPrinter {
   }
 
   public void printVeriFastType(VeriFastType type) {
-    print(type.name());
+    print(type.getName());
   }
 
   public void printVeriFastMethod(VeriFastMethod method) {
@@ -152,7 +151,7 @@ public class VeriFastPrinter {
       printVeriFastContract(method.contract());
       printIndentation();
       printBlock(() -> {
-        for(String s : method.body().get()) {
+        for (String s : method.body().get()) {
           printIndentation();
           print(s);
           printNewLine();
@@ -192,27 +191,25 @@ public class VeriFastPrinter {
 
   public void printVeriFastExpression(VeriFastExpression expr) {
     expr.<Void>perform(
-      this::printVeriFastExpressionChain,
-      this::printVeriFastExpressionBoolValue,
-      this::printVeriFastExpressionIntegerValue,
-      this::printVeriFastExpressionPredicate,
-      this::printVeriFastExpressionVariable,
-      this::printVeriFastExpressionVariableAssignment,
-      this::printVeriFastExpressionBinaryOperation,
-      this::printVeriFastFixpoint
-    );
+        this::printVeriFastExpressionChain,
+        this::printVeriFastExpressionBoolValue,
+        this::printVeriFastExpressionIntegerValue,
+        this::printVeriFastExpressionPredicate,
+        this::printVeriFastExpressionVariable,
+        this::printVeriFastExpressionVariableAssignment,
+        this::printVeriFastExpressionBinaryOperation,
+        this::printVeriFastFixpoint);
   }
 
   public Void printVeriFastExpressionChain(VeriFastExpression.Chain expr) {
     printList(
-      expr.expressions(),
-      () -> {
-        print(SPACE);
-        print(EXPRESSION_CHAIN_JOIN);
-        print(SPACE);
-      },
-      this::printVeriFastExpression
-    );
+        expr.expressions(),
+        () -> {
+          print(SPACE);
+          print(EXPRESSION_CHAIN_JOIN);
+          print(SPACE);
+        },
+        this::printVeriFastExpression);
     return null;
   }
 
@@ -261,6 +258,7 @@ public class VeriFastPrinter {
     print(BRACKET_CLOSE);
     return null;
   }
+
   public Void printVeriFastFixpoint(VeriFastExpression.Fixpoint expr) {
     print(expr.operation());
     print(BRACKET_OPEN);
@@ -270,7 +268,6 @@ public class VeriFastPrinter {
   }
 
   // - Helper Definition
-  
 
   public void printVeriFastHelperSpecification(VeriFastHelperSpecification spec) {
     print(VERIFAST_OPEN_BLOCK);
@@ -278,10 +275,9 @@ public class VeriFastPrinter {
     printNewLine();
 
     printList(
-      spec.definitions(),
-      () -> printNewLine(),
-      this::printVeriFastHelperDefinition
-    );
+        spec.definitions(),
+        () -> printNewLine(),
+        this::printVeriFastHelperDefinition);
 
     printNewLine();
     print(VERIFAST_CLOSE_BLOCK);
@@ -291,10 +287,9 @@ public class VeriFastPrinter {
 
   public Void printVeriFastHelperDefinition(VeriFastHelper definition) {
     return definition.perform(
-      this::printVeriFastInduction,
-      this::printVeriFastPredicateDefinition,
-      this::printVeriFastFixpoint
-    );
+        this::printVeriFastInduction,
+        this::printVeriFastPredicateDefinition,
+        this::printVeriFastFixpoint);
   }
 
   public Void printVeriFastPredicateDefinition(VeriFastPredicate definition) {
@@ -351,10 +346,13 @@ public class VeriFastPrinter {
     print(DEFINITION_OPERATOR);
     print(SPACE);
     printList(
-      definition.constructors(),
-      () -> {print(SPACE);print(CONSTRUCTOR_OPERATOR); print(SPACE); },
-      this::printVeriFastInductionConstructor
-    );
+        definition.constructors(),
+        () -> {
+          print(SPACE);
+          print(CONSTRUCTOR_OPERATOR);
+          print(SPACE);
+        },
+        this::printVeriFastInductionConstructor);
     print(SEMICOLON);
     return null;
   }
@@ -373,6 +371,7 @@ public class VeriFastPrinter {
   private interface Block {
     void content();
   }
+
   @FunctionalInterface
   private interface Separator {
     void print();
@@ -415,7 +414,7 @@ public class VeriFastPrinter {
     }
     T t = i.next();
     consumer.accept(t);
-    
+
     while (i.hasNext()) {
       t = i.next();
       separator.print();

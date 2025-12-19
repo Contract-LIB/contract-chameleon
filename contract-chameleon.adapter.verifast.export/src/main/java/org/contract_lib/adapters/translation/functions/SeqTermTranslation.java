@@ -24,10 +24,11 @@ public final record SeqTermTranslation() implements TermTranslationProvider {
   public final static Sort.Type CLIB_INT = new Sort.Type("Int");
   public final static Sort.Type CLIB_SEQ = new Sort.Type("Seq");
   public final static Sort.Type CLIB_GEN = new Sort.Type("A");
-  public final static VeriFastType VERIFAST_BOOLEAN = new VeriFastType("boolean");
-  public final static VeriFastType VERIFAST_INT = new VeriFastType("int");
-  public final static VeriFastType VERIFAST_SEQ = new VeriFastType("list<A>");
-  public final static VeriFastType VERIFAST_GEN = new VeriFastType("A");
+  public final static VeriFastType VERIFAST_BOOLEAN = new VeriFastType.VeriFastBoolean();
+  public final static VeriFastType VERIFAST_INT = new VeriFastType.VeriFastInteger();
+  public final static VeriFastType VERIFAST_SEQ = new VeriFastType.VeriFastInduction("list",
+      List.of(new VeriFastType.VeriFastClass("A", List.of())));
+  public final static VeriFastType VERIFAST_GEN = new VeriFastType.VeriFastClass("A", List.of());
 
   public List<TermTranslation> getAll() {
     return List.of(

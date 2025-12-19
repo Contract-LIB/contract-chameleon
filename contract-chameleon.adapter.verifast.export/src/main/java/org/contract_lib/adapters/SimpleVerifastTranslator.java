@@ -166,7 +166,7 @@ public class SimpleVerifastTranslator {
   private void addAbstractionType(String name) {
     this.typeTranslator.addTranslation(new AbstractionTranslation(
         new Sort.Type(name),
-        new VeriFastType(name)));
+        new VeriFastType.VeriFastClass(name, List.of())));
   }
 
   private void translateAbstractionJavaFile(Abstraction abstraction) {
@@ -307,10 +307,8 @@ public class SimpleVerifastTranslator {
     extractor.thisMutatableArgument()
         .ifPresent(inoutArguments::add);
 
-    //TODO: Add helper for types!!
+    //TODO: Add helper for user types!!
 
-    //TODO: split predicate translation in precond. and postconds as they have diff. available arguments
-    // - the 
     predicateTranslator.clearAvailableArguments();
 
     TermTranslator termTranslator = new TermTranslator(
@@ -334,6 +332,8 @@ public class SimpleVerifastTranslator {
         .ifPresent(ensuresPredicates::add);
 
     extractor.getReturnType()
+        .map(this.typeTranslator::translate)
+        .filter(t -> !t.isLogicType())
         .map((p) -> new VeriFastExpression.BinaryOperation("!=",
             new VeriFastExpression.Variable(RESULT_NAME),
             new VeriFastExpression.Variable(NULL)))

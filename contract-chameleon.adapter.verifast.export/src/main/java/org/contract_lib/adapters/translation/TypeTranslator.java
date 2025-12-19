@@ -13,7 +13,7 @@ public final class TypeTranslator {
   private final Map<String, TypeTranslation> translations;
 
   public TypeTranslator(List<TypeTranslation> translations) {
-    this.translations = new HashMap();
+    this.translations = new HashMap<>();
     for (TypeTranslation t : translations) {
       this.translations.put(t.getClibSort().getName(), t);
     }
@@ -33,7 +33,7 @@ public final class TypeTranslator {
     if (t == null) {
       System.err.println(String.format("ERROR: Translation not found for sort: %s", sort.getName()));
       //TODO: print proper error
-      return new VeriFastType("ErrorType");
+      return new VeriFastType.VeriFastClass("ErrorType", List.of());
     } else {
       return t.getVerifastType(this, sort);
     }

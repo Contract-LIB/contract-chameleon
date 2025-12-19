@@ -26,8 +26,8 @@ public final record AllIntQuantorTranslation() implements QuantorTranslation {
 
   private static final String FORALL_INT_QUANTOR_PREDICATE_NAME = "forall_int";
   private static final String RES_SUFFIX = "_res";
-  private static final VeriFastType BOOLEAN_TYPE = new VeriFastType("boolean");
-  private static final VeriFastType INT_TYPE = new VeriFastType("int");
+  private static final VeriFastType BOOLEAN_TYPE = new VeriFastType.VeriFastBoolean();
+  private static final VeriFastType INT_TYPE = new VeriFastType.VeriFastInteger();
 
   @Override
   public Optional<VeriFastExpression> translate(

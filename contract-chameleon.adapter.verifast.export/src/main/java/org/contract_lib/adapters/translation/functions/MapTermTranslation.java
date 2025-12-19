@@ -18,7 +18,7 @@ import static org.contract_lib.adapters.translation.TermTranslation.FixpointOper
 public final record MapTermTranslation() implements TermTranslationProvider {
 
   public final static Sort.Type CLIB_BOOLEAN = new Sort.Type("Bool");
-  public final static VeriFastType VERIFAST_BOOLEAN = new VeriFastType("boolean");
+  public final static VeriFastType VERIFAST_BOOLEAN = new VeriFastType.VeriFastBoolean();
 
   public List<TermTranslation> getAll() {
     return List.of();

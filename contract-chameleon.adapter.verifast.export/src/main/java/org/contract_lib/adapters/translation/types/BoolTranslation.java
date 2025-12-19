@@ -18,7 +18,7 @@ public final class BoolTranslation implements TypeTranslation {
   public VeriFastType getVerifastType(
       TypeTranslator translator,
       Sort sort) {
-    return new VeriFastType("boolean");
+    return new VeriFastType.VeriFastBoolean();
   }
 
   public List<VeriFastExpression> getHelper() {
