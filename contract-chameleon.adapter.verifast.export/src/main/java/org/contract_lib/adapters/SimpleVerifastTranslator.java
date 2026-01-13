@@ -375,9 +375,7 @@ public class SimpleVerifastTranslator {
     VeriFastJavaExpression defaultBody = new VeriFastJavaExpression.SimpleStatement(
         extractor.getDefaultMethodBody());
 
-    List<VeriFastJavaExpression> consBody = new ArrayList<>();
-    consBody.add(defaultBody);
-    consBody.add(new VeriFastJavaExpression.SimpleStatement("//@assume false;"));
+    List<VeriFastJavaExpression> consBody = new ArrayList<>(List.of(defaultBody));
 
     List<VeriFastJavaExpression> methodBody = new ArrayList<>(List.of(defaultBody));
 
