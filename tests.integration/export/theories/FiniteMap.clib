@@ -27,13 +27,15 @@
 (define-contract example_test_map.MapWrapper.initValue
   (
    (result (out MapWrapper))
+   (v (in Int))
+   (w (in Int))
    )
   ((
     true
     (and 
-      (= (a result) (map.singleton 0 0))
-      (= (b result) (map.singleton 0 0))
-      (= (c result) (map.singleton 0 0))
+      (= (a result) (map.singleton v w))
+      (= (b result) (map.singleton v w))
+      (= (c result) (map.singleton v w))
     )
   ))
 )

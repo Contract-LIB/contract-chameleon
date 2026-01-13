@@ -14,11 +14,14 @@ import org.contract_lib.lang.verifast.ast.VeriFastClass;
 import org.contract_lib.lang.verifast.ast.VeriFastContract;
 import org.contract_lib.lang.verifast.ast.VeriFastExpression;
 import org.contract_lib.lang.verifast.ast.VeriFastMethod;
+import org.contract_lib.lang.verifast.ast.VeriFastConstructor;
 
 import org.contract_lib.lang.verifast.ast.VeriFastHelperSpecification;
 import org.contract_lib.lang.verifast.ast.VeriFastHelper;
 import org.contract_lib.lang.verifast.ast.VeriFastInduction;
 import org.contract_lib.lang.verifast.ast.VeriFastInductionConstructor;
+import org.contract_lib.lang.verifast.ast.VeriFastJavaExpression;
+import org.contract_lib.lang.verifast.ast.VeriFastJavaStatement;
 import org.contract_lib.lang.verifast.ast.VeriFastFixpoint;
 
 public class VeriFastPrinter {
@@ -63,6 +66,9 @@ public class VeriFastPrinter {
   private static final String CURLY_BRACKET_OPEN = "{";
   private static final String CURLY_BRACKET_CLOSE = "}";
 
+  /// The name of the class, which content is printed at the moment.
+  private String className;
+
   public VeriFastPrinter(Writer writer) {
     this.writer = writer;
     this.indentation = 0;
@@ -100,8 +106,11 @@ public class VeriFastPrinter {
     });
     print(SPACE);
     printBlock(() -> {
+      this.className = vfClass.name();
       printNewLine();
       printList(vfClass.predicates(), () -> printNewLine(), this::printVeriFastPredicate);
+      printNewLine();
+      printList(vfClass.constructors(), () -> printNewLine(), this::printVeriFastConstructor);
       printNewLine();
       printList(vfClass.methods(), () -> printNewLine(), this::printVeriFastMethod);
     });
@@ -119,6 +128,24 @@ public class VeriFastPrinter {
     print(BRACKET_CLOSE);
     print(SEMICOLON);
     printNewLine();
+  }
+
+  public void printVeriFastConstructor(VeriFastConstructor cons) {
+    printIndentation();
+    print(this.className);
+    print(BRACKET_OPEN);
+    printColonList(cons.arguments(), this::printVeriFastArgument);
+    print(BRACKET_CLOSE);
+    printNewLine();
+    printVeriFastContract(cons.contract());
+    printIndentation();
+    printBlock(() -> {
+      for (VeriFastJavaExpression vfExpr : cons.body()) {
+        printIndentation();
+        printJavaExpr(vfExpr);
+        printNewLine();
+      }
+    });
   }
 
   public void printVeriFastType(VeriFastType type) {
@@ -151,9 +178,9 @@ public class VeriFastPrinter {
       printVeriFastContract(method.contract());
       printIndentation();
       printBlock(() -> {
-        for (String s : method.body().get()) {
+        for (VeriFastJavaExpression expr : method.body().get()) {
           printIndentation();
-          print(s);
+          printJavaExpr(expr);
           printNewLine();
         }
       });
@@ -183,9 +210,67 @@ public class VeriFastPrinter {
     printNewLine();
   }
 
+  // MARK: - Java Expressions
+
+  public void printJavaExpr(VeriFastJavaExpression expression) {
+    expression.<Void>perform(
+        this::printJavaExpressionStandard,
+        this::printJavaExpressionReturn,
+        this::printJavaExpressionSimpleStatement
+    );
+  }
+
+  public Void printJavaExpressionStandard(VeriFastJavaExpression.Standard simpleStatement) {
+    printJavaStatement(simpleStatement.statement());
+    print(SEMICOLON);
+    return null;
+  }
+
+  public Void printJavaExpressionReturn(VeriFastJavaExpression.Return returnExpression) {
+    print(RETURN);
+    print(SPACE);
+    printJavaStatement(returnExpression.statement());
+    print(SEMICOLON);
+    return null;
+  }
+
+  public Void printJavaExpressionSimpleStatement(VeriFastJavaExpression.SimpleStatement simpleStatement) {
+    print(simpleStatement.statement());
+    return null;
+  }
+
+  // MARK: - Java Statements
+
+  public void printJavaStatement(VeriFastJavaStatement statement) {
+    statement.<Void>perform(
+      this::printConstructorCall,
+      this::printDefaultStatment
+    );
+  }
+
+  public Void printConstructorCall(VeriFastJavaStatement.ConstructorCall consCall) {
+    printVeriFastType(consCall.classType());
+    print(BRACKET_OPEN);
+    printColonList(consCall.arguments(), this::printVeriFastArgumentCall);
+    print(BRACKET_CLOSE);
+    return null;
+  }
+
+  public Void printDefaultStatment(VeriFastJavaStatement.DefaultValue defaultValue) {
+    print("defaultValue.type");
+    System.err.println("ERROR: Default value for type printer not supported yet.");
+    return null;
+  }
+
+  // MARK: - Helper
+
   public void printVeriFastArgument(VeriFastArgument argument) {
     printVeriFastType(argument.type());
     print(SPACE);
+    print(argument.name());
+  }
+
+  public void printVeriFastArgumentCall(VeriFastArgument argument) {
     print(argument.name());
   }
 
