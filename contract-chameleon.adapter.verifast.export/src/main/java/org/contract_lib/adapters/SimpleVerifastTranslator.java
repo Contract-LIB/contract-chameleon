@@ -27,8 +27,11 @@ import org.contract_lib.lang.verifast.ast.VeriFastMethod;
 import org.contract_lib.lang.verifast.ast.VeriFastPredicate;
 import org.contract_lib.lang.verifast.ast.VeriFastSpec;
 import org.contract_lib.lang.verifast.ast.VeriFastClass;
+import org.contract_lib.lang.verifast.ast.VeriFastConstructor;
 import org.contract_lib.lang.verifast.ast.VeriFastType;
 import org.contract_lib.lang.verifast.ast.VeriFastExpression;
+import org.contract_lib.lang.verifast.ast.VeriFastJavaExpression;
+import org.contract_lib.lang.verifast.ast.VeriFastJavaStatement;
 import org.contract_lib.lang.verifast.ast.VeriFastArgument;
 import org.contract_lib.lang.verifast.ast.VeriFastContract;
 
@@ -57,6 +60,9 @@ import org.contract_lib.adapters.translation.quantifier.AllIntQuantorTranslation
 /// what are suitable abstractions and interfaces used in a translation.
 public class SimpleVerifastTranslator {
 
+  private static final String RESULT_NAME = "result";
+  private static final String NULL = "null";
+
   private ChameleonMessageManager messageManager;
 
   private final TypeTranslator typeTranslator;
@@ -67,9 +73,20 @@ public class SimpleVerifastTranslator {
   private final List<String> javaSpecFiles;
   private final List<String> javaFiles;
 
+  /// Access the name of the implementation class given an class identifer.
+  private final Map<String, String> getImplementationClassName;
+
+  /// Available methods of the abstract class.
   private final Map<String, List<VeriFastMethod>> getAbstractJavaClassMethods;
+
+  /// Available methods of the implementation class.
   private final Map<String, List<VeriFastMethod>> getImplClassMethods;
+
+  /// Available methods of the java specification.
   private final Map<String, List<VeriFastMethod>> getSpecClassMethods;
+
+  /// Available constructors of the implementation class.
+  private final Map<String, List<VeriFastConstructor>> getImplClassConstructors;
 
   private final List<TermTranslation> termTranslations;
   private final List<QuantorTranslation> quantorTranslations;
@@ -81,9 +98,11 @@ public class SimpleVerifastTranslator {
     this.javaSpecFiles = new ArrayList<>();
     this.javaFiles = new ArrayList<>();
 
+    this.getImplementationClassName = new HashMap<>();
     this.getAbstractJavaClassMethods = new HashMap<>();
     this.getImplClassMethods = new HashMap<>();
     this.getSpecClassMethods = new HashMap<>();
+    this.getImplClassConstructors = new HashMap<>();
 
     this.helperTranslator = new HelperTranslator(
         this.messageManager,
@@ -163,7 +182,7 @@ public class SimpleVerifastTranslator {
   private void addAbstractionType(String name) {
     this.typeTranslator.addTranslation(new AbstractionTranslation(
         new Sort.Type(name),
-        new VeriFastType(name)));
+        new VeriFastType.VeriFastClass(name, List.of())));
   }
 
   private void translateAbstractionJavaFile(Abstraction abstraction) {
@@ -177,11 +196,13 @@ public class SimpleVerifastTranslator {
     List<VeriFastPredicate> predicates = predicateTranslator.translatePredicateDef(
         name,
         abstraction.datatypeDec().constructors().get(0));
+
     List<VeriFastMethod> methods = new ArrayList<>();
 
     VeriFastClass vfc = new VeriFastClass(
         name,
         predicates,
+        new ArrayList<>(),
         methods,
         true,
         Optional.empty());
@@ -218,6 +239,7 @@ public class SimpleVerifastTranslator {
     VeriFastClass vfc = new VeriFastClass(
         name,
         predicates,
+        new ArrayList<>(),
         methods,
         true,
         Optional.empty());
@@ -236,7 +258,7 @@ public class SimpleVerifastTranslator {
     addAbstractionType(name);
     javaSpecFiles.add(directoryName + "/" + name + ".javaspec");
     results.add(file);
-    getSpecClassMethods.put(identifier, methods);
+    this.getSpecClassMethods.put(identifier, methods);
   }
 
   private void translateAbstractionImplementation(Abstraction abstraction) {
@@ -253,10 +275,12 @@ public class SimpleVerifastTranslator {
         abstraction.datatypeDec().constructors().get(0));
 
     List<VeriFastMethod> methods = new ArrayList<>();
+    List<VeriFastConstructor> constructors = new ArrayList<>();
 
     VeriFastClass vfc = new VeriFastClass(
         implName,
         predicates,
+        constructors,
         methods,
         false,
         Optional.of(name));
@@ -273,9 +297,13 @@ public class SimpleVerifastTranslator {
     System.err.println("Abstraction for: " + identifier);
 
     addAbstractionType(name);
+
     javaFiles.add(directoryName + "/" + implName + ".java");
     results.add(file);
-    getImplClassMethods.put(identifier, methods);
+
+    this.getImplementationClassName.put(identifier, implName);
+    this.getImplClassMethods.put(identifier, methods);
+    this.getImplClassConstructors.put(identifier, constructors);
   }
 
   public void translateContract(Contract contract) {
@@ -304,10 +332,8 @@ public class SimpleVerifastTranslator {
     extractor.thisMutatableArgument()
         .ifPresent(inoutArguments::add);
 
-    //TODO: Add helper for types!!
+    //TODO: Add helper for user types!!
 
-    //TODO: split predicate translation in precond. and postconds as they have diff. available arguments
-    // - the 
     predicateTranslator.clearAvailableArguments();
 
     TermTranslator termTranslator = new TermTranslator(
@@ -326,33 +352,49 @@ public class SimpleVerifastTranslator {
 
     //If the return value is an abstraction, create the predicate for return 
     extractor.getReturnType()
-        .map((p) -> new Argument(p, "result"))
+        .map((p) -> new Argument(p, RESULT_NAME))
         .flatMap(p -> predicateTranslator.createPredicate(p, termTranslator, true, false))
         .ifPresent(ensuresPredicates::add);
-    //TODO: Add result != null
 
-    //resultPredicate.ifPresent(ensuresExprList::add);
-    //TODO: add not null predicate for result constructor
+    extractor.getReturnType()
+        .map(this.typeTranslator::translate)
+        .filter(t -> !t.isLogicType())
+        .map((p) -> new VeriFastExpression.BinaryOperation("!=",
+            new VeriFastExpression.Variable(RESULT_NAME),
+            new VeriFastExpression.Variable(NULL)))
+        .ifPresent(ensuresPredicates::add);
 
     TermTranslator.VeriFastPrePostExpression expressions = termTranslator.translateContractPairs(
         requiresPredicates,
         ensuresPredicates,
         contract.pairs());
 
-    //TODO: add (expr == true) - cast from fixpoint to predicate
     requiresPredicates.add(expressions.pre());
     ensuresPredicates.add(expressions.post());
 
-    List<String> methodBody = extractor.getDefaultMethodBody(typeTranslator::getDefaultMethodBody);
+    VeriFastJavaExpression defaultBody = new VeriFastJavaExpression.SimpleStatement(
+        extractor.getDefaultMethodBody());
+
+    List<VeriFastJavaExpression> consBody = new ArrayList<>(List.of(defaultBody));
+
+    List<VeriFastJavaExpression> methodBody = new ArrayList<>(List.of(defaultBody));
+
+    String implementationClass = this.getImplementationClassName.get(extractor.ownerClassIdentifier());
 
     List<VeriFastArgument> arguments = translateArguments(extractor.getArguments());
+
+    List<VeriFastJavaExpression> constructorCaller = List.of(
+        new VeriFastJavaExpression.Return(
+            new VeriFastJavaStatement.ConstructorCall(
+                new VeriFastType.VeriFastClass(implementationClass, List.of()),
+                arguments)));
 
     VeriFastContract vfContract = new VeriFastContract(
         new VeriFastExpression.Chain(requiresPredicates),
         new VeriFastExpression.Chain(ensuresPredicates));
 
+    List<VeriFastMethod> listImpl = this.getImplClassMethods.get(owner);
     if (!isStatic) {
-      List<VeriFastMethod> listImpl = this.getImplClassMethods.get(owner);
       if (listImpl != null) {
         listImpl.add(new VeriFastMethod(
             vfContract,
@@ -364,6 +406,16 @@ public class SimpleVerifastTranslator {
       }
     }
 
+    List<VeriFastConstructor> listCons = this.getImplClassConstructors.get(owner);
+    if (isStatic) {
+      if (listCons != null) {
+        listCons.add(new VeriFastConstructor(
+            vfContract,
+            arguments,
+            consBody));
+      }
+    }
+
     List<VeriFastMethod> listAbst = this.getAbstractJavaClassMethods.get(owner);
     if (listAbst != null) {
       listAbst.add(new VeriFastMethod(
@@ -372,7 +424,7 @@ public class SimpleVerifastTranslator {
           resultType,
           arguments,
           isStatic,
-          isStatic ? Optional.of(methodBody) : Optional.empty()));
+          isStatic ? Optional.of(constructorCaller) : Optional.empty()));
     }
 
     List<VeriFastMethod> listSpec = this.getSpecClassMethods.get(owner);

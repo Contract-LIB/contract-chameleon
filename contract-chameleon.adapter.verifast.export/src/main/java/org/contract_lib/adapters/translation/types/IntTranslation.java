@@ -18,7 +18,7 @@ public final class IntTranslation implements TypeTranslation {
   public VeriFastType getVerifastType(
       TypeTranslator translator,
       Sort sort) {
-    return new VeriFastType("int");
+    return new VeriFastType.VeriFastInteger();
   }
 
   public List<VeriFastExpression> getHelper() {

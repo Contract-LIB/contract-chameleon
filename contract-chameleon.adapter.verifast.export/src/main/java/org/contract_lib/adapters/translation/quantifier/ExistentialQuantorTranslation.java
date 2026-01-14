@@ -26,7 +26,7 @@ public final record ExistentialQuantorTranslation() implements QuantorTranslatio
 
   private static final String EXISTS_QUANTOR_PREDICATE_NAME = "exists";
   private static final String RES_SUFFIX = "_res";
-  private static final VeriFastType BOOLEAN_TYPE = new VeriFastType("boolean");
+  private static final VeriFastType BOOLEAN_TYPE = new VeriFastType.VeriFastBoolean();
 
   @Override
   public Optional<VeriFastExpression> translate(

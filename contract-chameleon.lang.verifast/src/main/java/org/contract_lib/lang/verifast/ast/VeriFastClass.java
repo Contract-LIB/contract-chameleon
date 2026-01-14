@@ -6,8 +6,8 @@ import java.util.Optional;
 public record VeriFastClass(
     String name,
     List<VeriFastPredicate> predicates,
+    List<VeriFastConstructor> constructors,
     List<VeriFastMethod> methods,
     boolean isAbstract,
-    Optional<String> implFrom
-) {
+    Optional<String> implFrom) {
 }

@@ -21,7 +21,7 @@ java -cp '*' org.contract_lib.ContractChameleon # load all available classpaths 
 The additional `JAR` must have a file with the name `org.contract_lib.contract_chameleon.Adapter`
  in `src/main/ressources/META-INF/services`
 containing the full class name (including package) of the additional adapter.
-Compare the following [example](./contract-chameleon.adapter.key-provider/).
+Compare the following [example](./contract-chameleon.adapter.key.import/).
 
 ## Developing the tool
 

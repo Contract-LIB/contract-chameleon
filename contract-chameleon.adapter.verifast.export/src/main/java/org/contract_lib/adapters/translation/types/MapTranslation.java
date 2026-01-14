@@ -23,9 +23,10 @@ public final class MapTranslation implements TypeTranslation {
     if (inner.size() != 2) {
       System.err.println("two parameter for map expected");
     }
-    return new VeriFastType(
-        String.format("map<pair<%s, %s>>", translator.translate(inner.get(0)).name(),
-            translator.translate(inner.get(1)).name()));
+    return new VeriFastType.VeriFastInduction("list", List.of(
+        new VeriFastType.VeriFastInduction("pair", List.of(
+            translator.translate(inner.get(0)),
+            translator.translate(inner.get(1))))));
   }
 
   public List<VeriFastExpression> getHelper() {

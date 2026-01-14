@@ -16,7 +16,7 @@ import static org.contract_lib.adapters.translation.TermTranslation.BinaryOperat
 public final record IntTermTranslation() implements TermTranslationProvider {
 
   public final static Sort.Type CLIB_INT = new Sort.Type("Int");
-  public final static VeriFastType VERIFAST_INT = new VeriFastType("int");
+  public final static VeriFastType VERIFAST_INT = new VeriFastType.VeriFastInteger();
 
   public List<TermTranslation> getAll() {
     return List.of(

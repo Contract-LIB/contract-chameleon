@@ -9,7 +9,7 @@ public record VeriFastMethod(
     Optional<VeriFastType> resultType,
     List<VeriFastArgument> arguments,
     boolean isStatic,
-    Optional<List<String>> body //if no body method is abstract
+    Optional<List<VeriFastJavaExpression>> body //if no body method is abstract
 ) {
 
 }
