@@ -1,0 +1,71 @@
+plugins {
+    // Used to create a singel jar
+    id("com.gradleup.shadow") version "9.0.0-rc1"
+
+    id 'application'
+    id 'maven-publish'
+}
+
+group = 'org.contract_lib'
+version = '1.0.0-SNAPSHOT' // <--- 2. MUST end in '-SNAPSHOT' for Maven to treat it as such
+
+publishing {
+    publications {
+        standard(MavenPublication) {
+            from components.shadow
+        }
+    }
+}
+
+shadowJar {
+    archiveClassifier.set("exe")
+    mergeServiceFiles()
+}
+
+distZip {
+    archiveBaseName.set("contract-chameleon")
+}
+
+repositories {
+    // Use Maven Central for resolving dependencies.
+    mavenLocal()
+    mavenCentral()
+
+    maven {
+        url = uri('https://s01.oss.sonatype.org/content/repositories/snapshots')
+    }
+}
+
+dependencies {
+    runtimeOnly project(":contract-chameleon.cl")
+
+    // Add adapters to the final jar, might be still extended through classpath in `java -cp adapters/* org.contractlib.contract_chameleon.ContractChameleon`
+    runtimeOnly project(":contract-chameleon.adapter.key.export")
+    runtimeOnly project(":contract-chameleon.adapter.verifast.export")
+    runtimeOnly project(":contract-chameleon.adapter.key.import")
+    runtimeOnly project(":contract-chameleon.adapter.help")
+}
+
+// Apply a specific Java toolchain to ease working on different environments.
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+application {
+    // Define the main class for the application.
+    mainClass = 'org.contract_lib.ContractChameleon'
+}
+
+jar {
+  manifest {
+    attributes 'Main-Class': application.mainClass
+  }
+}
+
