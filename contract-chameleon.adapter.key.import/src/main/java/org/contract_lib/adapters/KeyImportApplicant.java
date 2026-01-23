@@ -6,9 +6,13 @@ import java.util.List;
 
 import java.nio.file.Path;
 
+import org.contract_lib.contract_chameleon.Adapter;
 import org.contract_lib.contract_chameleon.ImportAdapter;
 import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
 
+import com.google.auto.service.AutoService;
+
+@AutoService(Adapter.class)
 public final class KeyImportApplicant extends ImportAdapter {
 
   public String defaultOutputDir() {

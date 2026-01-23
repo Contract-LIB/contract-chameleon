@@ -1,6 +1,6 @@
+
 plugins {
-    // Used to create a singel jar
-    id("com.gradleup.shadow") version "9.0.0-rc1"
+    id 'com.gradleup.shadow' version "9.3.1"
 
     id 'application'
     id 'maven-publish'
@@ -9,25 +9,14 @@ plugins {
 group = 'org.contract_lib'
 version = '1.0.0-SNAPSHOT' // <--- 2. MUST end in '-SNAPSHOT' for Maven to treat it as such
 
-publishing {
-    publications {
-        standard(MavenPublication) {
-            from components.shadow
-        }
-    }
-}
-
-shadowJar {
-    archiveClassifier.set("exe")
-    mergeServiceFiles()
-}
-
-distZip {
-    archiveBaseName.set("contract-chameleon")
-}
+def adapterProjects = [
+    ":contract-chameleon.adapter.help",
+    ":contract-chameleon.adapter.key.export",
+    ":contract-chameleon.adapter.verifast.export",
+    ":contract-chameleon.adapter.key.import",
+]
 
 repositories {
-    // Use Maven Central for resolving dependencies.
     mavenLocal()
     mavenCentral()
 
@@ -36,14 +25,21 @@ repositories {
     }
 }
 
+shadowJar {
+  mergeServiceFiles()
+}
+
+distZip {
+    archiveBaseName.set("contract-chameleon")
+}
+
 dependencies {
     runtimeOnly project(":contract-chameleon.cl")
 
     // Add adapters to the final jar, might be still extended through classpath in `java -cp adapters/* org.contractlib.contract_chameleon.ContractChameleon`
-    runtimeOnly project(":contract-chameleon.adapter.key.export")
-    runtimeOnly project(":contract-chameleon.adapter.verifast.export")
-    runtimeOnly project(":contract-chameleon.adapter.key.import")
-    runtimeOnly project(":contract-chameleon.adapter.help")
+    adapterProjects.each { 
+      runtimeOnly project(it)
+    }
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -51,15 +47,12 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
-}
 
-java {
     withJavadocJar()
     withSourcesJar()
 }
 
 application {
-    // Define the main class for the application.
     mainClass = 'org.contract_lib.ContractChameleon'
 }
 
@@ -67,5 +60,34 @@ jar {
   manifest {
     attributes 'Main-Class': application.mainClass
   }
+}
+
+task pureShadowJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+
+    archiveClassifier.set("pure")
+    mergeServiceFiles()
+    configurations = project.configurations.named('runtimeClasspath').map { [it] }
+
+    manifest.from tasks.jar.manifest
+
+    // Removes all dependencies of the base distribution
+    dependencies {
+      adapterProjects.each { 
+          exclude(dependency(it))
+      }
+    }
+}
+
+tasks.assemble.dependsOn pureShadowJar
+tasks.assemble.dependsOn shadowJar
+
+publishing {
+    publications {
+        shadow(MavenPublication) {
+            from components.shadow
+
+            artifact(pureShadowJar)
+        }
+    }
 }
 

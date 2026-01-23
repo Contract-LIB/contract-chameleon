@@ -1,5 +1,0 @@
-org.contract_lib.adapters.translation.functions.BooleanTermTranslation
-org.contract_lib.adapters.translation.functions.IntTermTranslation
-org.contract_lib.adapters.translation.functions.SeqTermTranslation
-org.contract_lib.adapters.translation.functions.SetTermTranslation
-org.contract_lib.adapters.translation.functions.MapTermTranslation

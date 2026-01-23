@@ -4,10 +4,14 @@ plugins {
 
 repositories {
     // Use Maven Central for resolving dependencies.
+    mavenLocal()
     mavenCentral()
 }
 
 dependencies {
+    compileOnly 'com.google.auto.service:auto-service:1.1.1'
+    annotationProcessor 'com.google.auto.service:auto-service:1.1.1'
+
     implementation project(":contract-chameleon.core")
     implementation project(":contract-chameleon.error")
 
