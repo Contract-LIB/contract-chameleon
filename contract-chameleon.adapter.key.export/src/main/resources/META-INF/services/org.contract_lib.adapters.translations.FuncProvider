@@ -1,6 +1,0 @@
-org.contract_lib.adapters.translations.functions.BoolFuncTranslations
-org.contract_lib.adapters.translations.functions.IntFuncTranslations
-org.contract_lib.adapters.translations.functions.MapFuncTranslations
-org.contract_lib.adapters.translations.functions.SetFuncTranslations
-org.contract_lib.adapters.translations.functions.SeqFuncTranslations
-

@@ -14,6 +14,10 @@ repositories {
 }
 
 dependencies {
+
+    compileOnly 'com.google.auto.service:auto-service:1.1.1'
+    annotationProcessor 'com.google.auto.service:auto-service:1.1.1'
+
     implementation project(":contract-chameleon.core")
     implementation project(":contract-chameleon.error")
     implementation project(":contract-chameleon.lang.contract_lib")

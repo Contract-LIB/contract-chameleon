@@ -3,6 +3,9 @@ package org.contract_lib.adapters;
 import org.contract_lib.contract_chameleon.Adapter;
 import org.contract_lib.contract_chameleon.AdapterMap;
 
+import com.google.auto.service.AutoService;
+
+@AutoService(Adapter.class)
 public final class Help extends Adapter implements HelpMessage {
 
   private static String ADAPTER_NAME = "help";

@@ -1,0 +1,102 @@
+plugins {
+    id 'application'
+    id 'maven-publish'
+    id 'com.gradleup.shadow' version "9.3.1"
+}
+
+group = 'org.contract_lib'
+version = '1.0.0-SNAPSHOT' // <--- 2. MUST end in '-SNAPSHOT' for Maven to treat it as such
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+
+    maven {
+        url = uri('https://s01.oss.sonatype.org/content/repositories/snapshots')
+    }
+}
+
+distZip {
+    archiveBaseName.set("contract-chameleon")
+}
+
+dependencies {
+  runtimeOnly project(":contract-chameleon.cl")
+
+  // How to add adapters from different repositories to the build
+  //runtimeOnly 'org.tool:adapter-extension:1.0.0-SNAPSHOT'
+  //runtimeOnly 'org.tool.b:adapter-extension-b:1.0.0-SNAPSHOT'
+  
+  // adapters from this repository
+  runtimeOnly project(":contract-chameleon.adapter.help")
+  runtimeOnly project(":contract-chameleon.adapter.key.export")
+  runtimeOnly project(":contract-chameleon.adapter.verifast.export")
+  runtimeOnly project(":contract-chameleon.adapter.key.import")
+}
+
+// Apply a specific Java toolchain to ease working on different environments.
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+
+    withJavadocJar()
+    withSourcesJar()
+}
+
+application {
+    mainClass = 'org.contract_lib.ContractChameleon'
+}
+
+jar {
+  manifest {
+    attributes 'Main-Class': application.mainClass
+  }
+}
+
+
+shadowJar {
+  
+  description ="Create a combined JAR of project and runtime dependencies with the adapters"
+  // Procedure to merge the service files
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE // Or FAIL.
+  mergeServiceFiles()
+  filesMatching('META-INF/services/**') {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE // Or WARN.
+  }
+}
+
+task lightShadowJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+
+  description = "Create a combined JAR of project and runtime dependencies without the adapters"
+
+  // Procedure to merge the service files
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE // Or FAIL.
+  mergeServiceFiles()
+  filesMatching('META-INF/services/**') {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE // Or WARN.
+  }
+
+  archiveClassifier.set("light")
+  configurations = project.configurations.named('runtimeClasspath').map { [it] }
+
+  manifest.from tasks.jar.manifest
+  dependencies {
+    exclude(project(":contract-chameleon.adapter.key.export"))
+    exclude(project(":contract-chameleon.adapter.key.import"))
+    exclude(project(":contract-chameleon.adapter.verifast.export"))
+  }
+}
+
+assemble.dependsOn lightShadowJar 
+
+publishing {
+  publications {
+    shadow(MavenPublication) {
+      from components.shadow
+
+      artifact(lightShadowJar)
+    }
+  }
+}
+

@@ -1,18 +1,5 @@
 plugins {
-    id 'application'
-
-    // Used to create a singel jar
-    id("com.gradleup.shadow") version "9.0.0-rc1"
-}
-
-shadowJar {
-    archiveClassifier.set("exe")
-    archiveBaseName.set("contract-chameleon")
-    mergeServiceFiles()
-}
-
-distZip {
-    archiveBaseName.set("contract-chameleon")
+  id 'java-library'
 }
 
 repositories {
@@ -28,12 +15,6 @@ repositories {
 dependencies {
     implementation project(":contract-chameleon.core")
 
-    // Add adapters to the final jar, might be still extended through classpath in `java -cp adapters/* org.contractlib.contract_chameleon.ContractChameleon`
-    runtimeOnly project(":contract-chameleon.adapter.key.export")
-    runtimeOnly project(":contract-chameleon.adapter.verifast.export")
-    runtimeOnly project(":contract-chameleon.adapter.key.import")
-    runtimeOnly project(":contract-chameleon.adapter.help")
-    
     // Use JUnit Jupiter for testing.
     testImplementation libs.junit.jupiter
     //testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
@@ -45,20 +26,4 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
-}
-
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
-
-application {
-    // Define the main class for the application.
-    mainClass = 'org.contract_lib.ContractChameleon'
-}
-
-jar {
-  manifest {
-    attributes 'Main-Class': application.mainClass
-  }
 }

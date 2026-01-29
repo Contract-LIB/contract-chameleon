@@ -1,6 +1,0 @@
-org.contract_lib.adapters.translation.types.IntTranslation
-org.contract_lib.adapters.translation.types.BoolTranslation
-org.contract_lib.adapters.translation.types.SeqTranslation
-org.contract_lib.adapters.translation.types.SetTranslation
-org.contract_lib.adapters.translation.types.RefTranslation
-org.contract_lib.adapters.translation.types.MapTranslation
