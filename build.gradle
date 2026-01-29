@@ -1,20 +1,11 @@
-
 plugins {
-    id 'com.gradleup.shadow' version "9.3.1"
-
     id 'application'
     id 'maven-publish'
+    id 'com.gradleup.shadow' version "9.3.1"
 }
 
 group = 'org.contract_lib'
 version = '1.0.0-SNAPSHOT' // <--- 2. MUST end in '-SNAPSHOT' for Maven to treat it as such
-
-def adapterProjects = [
-    ":contract-chameleon.adapter.help",
-    ":contract-chameleon.adapter.key.export",
-    ":contract-chameleon.adapter.verifast.export",
-    ":contract-chameleon.adapter.key.import",
-]
 
 repositories {
     mavenLocal()
@@ -25,21 +16,22 @@ repositories {
     }
 }
 
-shadowJar {
-  mergeServiceFiles()
-}
-
 distZip {
     archiveBaseName.set("contract-chameleon")
 }
 
 dependencies {
-    runtimeOnly project(":contract-chameleon.cl")
+  runtimeOnly project(":contract-chameleon.cl")
 
-    // Add adapters to the final jar, might be still extended through classpath in `java -cp adapters/* org.contractlib.contract_chameleon.ContractChameleon`
-    adapterProjects.each { 
-      runtimeOnly project(it)
-    }
+  // How to add adapters from different repositories to the build
+  //runtimeOnly 'org.tool:adapter-extension:1.0.0-SNAPSHOT'
+  //runtimeOnly 'org.tool.b:adapter-extension-b:1.0.0-SNAPSHOT'
+  
+  // adapters from this repository
+  runtimeOnly project(":contract-chameleon.adapter.help")
+  runtimeOnly project(":contract-chameleon.adapter.key.export")
+  runtimeOnly project(":contract-chameleon.adapter.verifast.export")
+  runtimeOnly project(":contract-chameleon.adapter.key.import")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -62,32 +54,49 @@ jar {
   }
 }
 
-task pureShadowJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
 
-    archiveClassifier.set("pure")
-    mergeServiceFiles()
-    configurations = project.configurations.named('runtimeClasspath').map { [it] }
-
-    manifest.from tasks.jar.manifest
-
-    // Removes all dependencies of the base distribution
-    dependencies {
-      adapterProjects.each { 
-          exclude(dependency(it))
-      }
-    }
+shadowJar {
+  
+  description ="Create a combined JAR of project and runtime dependencies with the adapters"
+  // Procedure to merge the service files
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE // Or FAIL.
+  mergeServiceFiles()
+  filesMatching('META-INF/services/**') {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE // Or WARN.
+  }
 }
 
-tasks.assemble.dependsOn pureShadowJar
-tasks.assemble.dependsOn shadowJar
+task lightShadowJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar) {
+
+  description = "Create a combined JAR of project and runtime dependencies without the adapters"
+
+  // Procedure to merge the service files
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE // Or FAIL.
+  mergeServiceFiles()
+  filesMatching('META-INF/services/**') {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE // Or WARN.
+  }
+
+  archiveClassifier.set("light")
+  configurations = project.configurations.named('runtimeClasspath').map { [it] }
+
+  manifest.from tasks.jar.manifest
+  dependencies {
+    exclude(project(":contract-chameleon.adapter.key.export"))
+    exclude(project(":contract-chameleon.adapter.key.import"))
+    exclude(project(":contract-chameleon.adapter.verifast.export"))
+  }
+}
+
+assemble.dependsOn lightShadowJar 
 
 publishing {
-    publications {
-        shadow(MavenPublication) {
-            from components.shadow
+  publications {
+    shadow(MavenPublication) {
+      from components.shadow
 
-            artifact(pureShadowJar)
-        }
+      artifact(lightShadowJar)
     }
+  }
 }
 
