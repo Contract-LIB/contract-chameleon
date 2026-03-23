@@ -1,9 +1,7 @@
 
-package org.contract_lib.contract_chameleon;
+package org.contract_lib.contract_chameleon.adapters;
 
 import java.util.List;
-
-import java.io.File;
 import java.io.Writer;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -12,9 +10,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.contract_lib.contract_chameleon.Adapter;
-
+import org.contract_lib.contract_chameleon.error.ChameleonException;
 import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
 
+//TODO: Rename to `TranslationAdapter` and remove Export-/Import-Adapter
 public abstract class ExportAdapter extends Adapter {
 
   public abstract List<TranslationResult> perform(
@@ -26,21 +25,28 @@ public abstract class ExportAdapter extends Adapter {
 
   private ChameleonMessageManager messageManager = new ChameleonMessageManager();
 
+  /** The checker adapters that should run beforehand this adapter is called.
+   * <p>
+   * The adapters might run in arbitrary order,
+   * or might be skipped.
+   * <p>
+   * Defaults to a empty list of contexts.
+   */
+  public List<CheckerAdapter> requiredAdapters() {
+    return List.of();
+  }
+
   @Override
-  public final void perform(String[] args) {
-
-    System.err.println("============================== ");
-    System.err.println("==== Perform Key Provider ==== "); //TODO: proper title provider
-    System.err.println("============================== ");
-
-    if (args.length <= 1) {
-      System.err.println("Expected path to files in command"); //TODO: proper error handling
-      return;
-    }
-    String inputFileName = args[1];
-    if (args.length > 2) {
-      System.err.println("Only the first input file is handled at the moment.");
-    }
+  public final void perform() {
+    //if (args.length <= 1) {
+    //  System.err.println("Expected path to files in command"); //TODO: proper error handling
+    //  return;
+    //}
+    String inputFileName = ""; //= args[1];
+    //if (args.length > 2) {
+    //  System.err.println("Only the first input file is handled at the moment.");
+    //}
+    System.err.println("This is an old interface, please change to 'TranslationAdapter'.");
 
     try {
       List<TranslationResult> results = this.perform(List.of(Paths.get(inputFileName)), messageManager);
@@ -72,15 +78,12 @@ public abstract class ExportAdapter extends Adapter {
           System.err.println(String.format("WARNING: File at %s does already exist, will be overridden!", classPath));
         }
 
-        //TODO: Use better syntax, ensure closed stream
-        BufferedWriter writer = Files.newBufferedWriter(classPath);
-        res.write(writer);
-        writer.close();
+        try (BufferedWriter writer = Files.newBufferedWriter(classPath)) {
+          res.write(writer);
+        }
       }
-
     } catch (IOException e) {
-      //TODO: Proper error handling, permission checks, …
-      System.err.println(e);
+      messageManager.report(new ChameleonException(e));
     }
   }
 
@@ -90,12 +93,16 @@ public abstract class ExportAdapter extends Adapter {
   }
 
   public interface TranslationResult {
+    /// The name of the directory where the file should be stored.
     String directoryName();
 
+    /// The name under which the file should be stored. 
     String fileName();
 
+    /// The fileending of the file stored.
     String fileEnding();
 
+    /// Write handler how the content should be written to the file.
     void write(Writer writer) throws IOException;
   }
 }
