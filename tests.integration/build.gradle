@@ -1,8 +1,10 @@
 apply from: "functions.gradle" 
-apply from: "encapsulation.gradle" 
 apply from: "tools.gradle" 
 apply from: "key-ci.gradle" 
 apply from: "verifast.gradle" 
+
+apply from: "encapsulation.gradle" 
+
 
 def mode = "OVERWRITE"
 def log = "INFO"

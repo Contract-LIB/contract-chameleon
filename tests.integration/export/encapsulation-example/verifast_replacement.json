@@ -1,0 +1,8 @@
+{
+  "example.LinkedCellList.init": "head = null;",
+  "example.LinkedCellList.add": "if (head == null) {\n          head = new NonEmptyLinkedCellList(v);\n        } else {\n          head.add(v);\n        }",
+  "example.LinkedCellList.getLast": "Cell result; \n        if (head == null) { \n            result = null; \n        } else { \n            result = head.getLast(); \n        } \n        return result;",
+  "example.Cell.init": "//Test",
+  "example.Cell.value": "//Test",
+  "example.Cell.set": "//Test"
+}

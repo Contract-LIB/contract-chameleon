@@ -1,3 +1,4 @@
+import groovy.json.JsonSlurper
 
 // ===== Importing the generated files into the tools
 
@@ -84,4 +85,37 @@ tasks.register("help--all") {
   group = "Help"
   description = "Run the help command of all tools."
   dependsOn 'run-help-key', 'run-help-key-ci', 'run-help-verifast'
+}
+
+// Replace function
+
+ext.replaceWithImpl = {String taskName, String source, String destination, String replacementSource -> 
+  tasks.register(taskName, Copy) {
+
+    def jsonFile = file(replacementSource)
+
+    inputs.files(jsonFile)
+
+    from(source)
+    into(destination)
+
+    group = "Integration Tests Copy / Replace"
+    description = "Moves the created integration test source files and fills in the user implmentation."
+
+
+    def replacements = [:]
+    doFirst {
+        replacements = new JsonSlurper().parse(jsonFile)
+    }
+
+    filter { String line ->
+        replacements.each { key, value ->
+            def target = "//TODO: Implement method '${key}'."
+            if (line.contains(target)) {
+                line = line.replace(target, value)
+            }
+        }
+        return line
+    }
+  }
 }

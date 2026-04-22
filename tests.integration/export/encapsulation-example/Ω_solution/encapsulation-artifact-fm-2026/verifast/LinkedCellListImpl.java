@@ -16,7 +16,6 @@ public final class LinkedCellListImpl extends LinkedCellList {
         //@ ensures this.llist(nil);
     {
         head = null;
-        
     }
 
     public void add(Cell v)
