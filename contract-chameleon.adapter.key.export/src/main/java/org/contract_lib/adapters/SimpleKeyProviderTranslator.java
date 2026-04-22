@@ -8,8 +8,10 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.github.javaparser.printer.DefaultPrettyPrinter;
@@ -17,6 +19,7 @@ import com.github.javaparser.printer.DefaultPrettyPrinter;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -53,6 +56,7 @@ import com.github.javaparser.ast.jml.clauses.JmlContract;
 import com.github.javaparser.ast.jml.clauses.JmlClause;
 
 import com.github.javaparser.ast.jml.expr.JmlQuantifiedExpr;
+import com.github.javaparser.ast.nodeTypes.NodeWithModifiers;
 
 import static com.github.javaparser.ast.jml.clauses.JmlClauseKind.REQUIRES;
 import static com.github.javaparser.ast.jml.clauses.JmlClauseKind.ENSURES;
@@ -97,17 +101,29 @@ import static org.contract_lib.adapters.translations.VariableScope.VariableTrans
 public class SimpleKeyProviderTranslator {
 
   private static final String IMPLEMENTATION_SUFFIX = "Impl";
+  private static String FOOTPRINT_NAME = "fp";
+  private static String RESULT_LABEL = "\\result";
 
   private ChameleonMessageManager messageManager;
   private KeyTranslations keyTranslator;
 
+  private Set<DetailLevel> detailLevel = new HashSet<>();
+
   public SimpleKeyProviderTranslator(
       ChameleonMessageManager manager) {
+
     this.messageManager = manager;
+
+    //NOTE: This allows to explicitly introduce keywords, where they are assumed default in KeY
+    //this.detailLevel.add(DetailLevel.INSTANCE_ACCESSIBLE);
+    //this.detailLevel.add(DetailLevel.INSTANCE_GHOST);
+    //this.detailLevel.add(DetailLevel.INSTANCE_INVARIANT);
+    //this.detailLevel.add(DetailLevel.INSTANCE_FOOTPRINT);
 
     this.keyTranslator = new KeyTranslations(
         manager,
         sortTranslator,
+        //NOTE: This allows the change from datatype type translation to sort
         KeyTranslations.ToDatatypeTranslation::new
     //KeyTranslations.ToSortTranslation::new
     );
@@ -122,8 +138,6 @@ public class SimpleKeyProviderTranslator {
     ServiceLoader<FuncProvider> funcLoader = ServiceLoader.load(
         FuncProvider.class,
         ClassLoader.getSystemClassLoader());
-
-    System.err.println(funcLoader.stream().count());
 
     funcLoader.forEach(f -> funcTranslator.store(f.getAll()));
   }
@@ -220,7 +234,7 @@ public class SimpleKeyProviderTranslator {
       if (formal.identifier().identifier().equals("result")) {
         VariableScopeElement el = new VariableScopeElement(
             s,
-            new NameExpr("\\result"),
+            new NameExpr(RESULT_LABEL),
             formal.sort(),
             t.getJmlType(formal.sort()),
             t.hasFootprint());
@@ -393,8 +407,10 @@ public class SimpleKeyProviderTranslator {
         translation.getJmlType(selector.sort()),
         selector.symbol().identifier())
         .setPublic(true)
-        .addModifier(Modifier.DefaultKeyword.JML_INSTANCE)
+        //.addModifier(Modifier.DefaultKeyword.JML_INSTANCE)
         .addModifier(Modifier.DefaultKeyword.JML_GHOST);
+
+    addModifierIfRequired(DetailLevel.INSTANCE_GHOST, fieldDec);
 
     JmlFieldDeclaration jmlFieldDec = new JmlFieldDeclaration(
         NodeList.nodeList(),
@@ -418,14 +434,15 @@ public class SimpleKeyProviderTranslator {
         sortTranslator,
         fab)
         .stream()
-        .map(e -> new JmlClassExprDeclaration(
-            NodeList.nodeList(), //JML Tags
-            NodeList.nodeList(), //Modifier
-            new SimpleName("invariant"), // kind //TODO: this is also ignored, but invariant at least printed.
-            null, //new SimpleName("name"), //name //TODO: this is not supported yet in printing??
-            e)
-            .addModifier(Modifier.DefaultKeyword.PUBLIC)
-            .addModifier(Modifier.DefaultKeyword.JML_INSTANCE))
+        .map(e -> addModifierIfRequired(DetailLevel.INSTANCE_INVARIANT,
+            new JmlClassExprDeclaration(
+                NodeList.nodeList(), //JML Tags
+                NodeList.nodeList(), //Modifier
+                new SimpleName("invariant"), // kind //TODO: this is also ignored, but invariant at least printed.
+                null, //new SimpleName("name"), //name //TODO: this is not supported yet in printing??
+                e)
+                .addModifier(Modifier.DefaultKeyword.PUBLIC)))
+        //.addModifier(Modifier.DefaultKeyword.JML_INSTANCE))
         .forEach((i) -> dec.addMember(i));
 
     //Footprint invariants for ghost fields that are reference types.
@@ -437,14 +454,15 @@ public class SimpleKeyProviderTranslator {
         sortTranslator,
         footprintIndexfab).ifPresent(
             footprintInv -> dec.addMember(
-                new JmlClassExprDeclaration(
-                    NodeList.nodeList(), //JML Tags
-                    NodeList.nodeList(), //Modifier
-                    new SimpleName("invariant"), // kind //TODO: this is also ignored, but invariant at least printed.
-                    null, //new SimpleName("name"), //name //TODO: this is not supported yet in printing??
-                    footprintInv)
-                    .addModifier(Modifier.DefaultKeyword.PUBLIC)
-                    .addModifier(Modifier.DefaultKeyword.JML_INSTANCE)));
+                addModifierIfRequired(DetailLevel.INSTANCE_INVARIANT,
+                    new JmlClassExprDeclaration(
+                        NodeList.nodeList(), //JML Tags
+                        NodeList.nodeList(), //Modifier
+                        new SimpleName("invariant"), // kind //TODO: this is also ignored, but invariant at least printed.
+                        null, //new SimpleName("name"), //name //TODO: this is not supported yet in printing??
+                        footprintInv)
+                        .addModifier(Modifier.DefaultKeyword.PUBLIC))));
+    //.addModifier(Modifier.DefaultKeyword.JML_INSTANCE)));
   }
 
   private void addAbstractionFootprint(ClassOrInterfaceDeclaration dec) {
@@ -458,9 +476,10 @@ public class SimpleKeyProviderTranslator {
         //new JmlLogicType(JmlLogicType.Primitive.SET), 
         "footprint")
         .setPublic(true)
-        .addModifier(Modifier.DefaultKeyword.JML_INSTANCE)
+        //.addModifier(Modifier.DefaultKeyword.JML_INSTANCE)
         .addModifier(Modifier.DefaultKeyword.JML_GHOST);
-    //.addModifier(Modifier.DefaultKeyword.JML_MODEL);
+
+    addModifierIfRequired(DetailLevel.INSTANCE_FOOTPRINT, fieldDec);
 
     JmlFieldDeclaration jmlFieldDec = new JmlFieldDeclaration(
         NodeList.nodeList(),
@@ -479,31 +498,15 @@ public class SimpleKeyProviderTranslator {
             new SimpleName("\\subset"),
             NodeList.nodeList(
                 new FieldAccessExpr(new ThisExpr(), NodeList.nodeList(), new SimpleName("*")),
-                new FieldAccessExpr(new ThisExpr(), NodeList.nodeList(), new SimpleName("footprint")))))
-        .addModifier(Modifier.DefaultKeyword.PUBLIC)
-        .addModifier(Modifier.DefaultKeyword.JML_INSTANCE);
+                new FieldAccessExpr(new ThisExpr(), NodeList.nodeList(), new SimpleName(FOOTPRINT_NAME)))))
+        .addModifier(Modifier.DefaultKeyword.PUBLIC);
+
+    addModifierIfRequired(DetailLevel.INSTANCE_ACCESSIBLE, footprintInv);
 
     dec.addMember(footprintInv);
-
   }
 
   private void addAccessibleDef(ClassOrInterfaceDeclaration dec, List<SelectorDec> selector) {
-
-    /*
-    // The footprint invariant may only depend on itself
-    JmlClassAccessibleDeclaration accessFootprint = new JmlClassAccessibleDeclaration(
-        NodeList.nodeList(),
-        NodeList.nodeList(),
-        new NameExpr(new SimpleName("footprint")),
-        NodeList.nodeList(
-            new FieldAccessExpr(new ThisExpr(), NodeList.nodeList(), new SimpleName("footprint"))),
-        null //Measured by
-    )
-        .addModifier(Modifier.DefaultKeyword.PUBLIC)
-        .addModifier(Modifier.DefaultKeyword.JML_INSTANCE);
-    
-    dec.addMember(accessFootprint);
-    */
 
     // All invariants have to relay on footprint
     JmlClassAccessibleDeclaration accessInv = new JmlClassAccessibleDeclaration(
@@ -511,11 +514,12 @@ public class SimpleKeyProviderTranslator {
         NodeList.nodeList(),
         new NameExpr(new SimpleName("\\inv")),
         NodeList.nodeList(
-            new NameExpr(new SimpleName("footprint"))),
+            new NameExpr(new SimpleName(FOOTPRINT_NAME))),
         null //Measured by
     )
-        .addModifier(Modifier.DefaultKeyword.PUBLIC)
-        .addModifier(Modifier.DefaultKeyword.JML_INSTANCE);
+        .addModifier(Modifier.DefaultKeyword.PUBLIC);
+
+    addModifierIfRequired(DetailLevel.INSTANCE_ACCESSIBLE, accessInv);
 
     dec.addMember(accessInv);
   }
@@ -535,19 +539,6 @@ public class SimpleKeyProviderTranslator {
             .collect(Collectors.toList()));
 
     //TODO: Add footprints of components that are reference types, not value types.
-
-    /*
-    JmlRepresentsDeclaration represents = new JmlRepresentsDeclaration(
-        NodeList.nodeList(),
-        NodeList.nodeList(),
-        new Name("footprint"),
-        new MethodCallExpr(
-            null, // scope
-            new SimpleName("\\set_union"),
-            components))
-        .addModifier(Modifier.DefaultKeyword.PRIVATE);
-    dec.addMember(represents);
-    */
   }
 
   private void createAbstractClass(
@@ -643,6 +634,13 @@ public class SimpleKeyProviderTranslator {
   }
 
   private Expression joinPreContracts(List<ExpressionPair> contracts) {
+    if (contracts.size() == 0) {
+      return new BooleanLiteralExpr(true);
+    }
+    if (contracts.size() == 1) {
+      return contracts.getFirst().pre();
+    }
+
     return contracts
         .stream()
         .map(ExpressionPair::pre)
@@ -650,6 +648,14 @@ public class SimpleKeyProviderTranslator {
   }
 
   private Expression joinPostContracts(List<ExpressionPair> contracts) {
+
+    if (contracts.size() == 0) {
+      return new BooleanLiteralExpr(true);
+    }
+    if (contracts.size() == 1) {
+      return contracts.getFirst().post();
+    }
+
     return contracts
         .stream()
         .map(this::createPostCond)
@@ -671,7 +677,6 @@ public class SimpleKeyProviderTranslator {
     return mergeExpression(left, right, BinaryExpr.Operator.OR);
   }
 
-  //TODO: Merge as separate clauses
   private Expression mergeAnd(Expression left, Expression right) {
     return mergeExpression(left, right, BinaryExpr.Operator.OR);
   }
@@ -750,7 +755,7 @@ public class SimpleKeyProviderTranslator {
             expr,
             //new NameExpr(formal.identifier().identifier()),
             NodeList.nodeList(),
-            new SimpleName("footprint")));
+            new SimpleName(FOOTPRINT_NAME)));
   }
 
   private List<JmlClause> translateAccessible(
@@ -818,14 +823,51 @@ public class SimpleKeyProviderTranslator {
     return res;
   }
 
+  private Optional<JmlClause> newElementsFreshClause(
+      List<Formal> formals,
+      VariableTranslator variableScope) {
+
+    List<Expression> changeableFootprint = formals.stream()
+        .filter((f) -> isReference(f, variableScope))
+        .filter((f) -> isAssignable(f.argumentMode()))
+        .map(Formal::identifier)
+        .map(variableScope::translate)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .map(VariableScope::getJmlTerm)
+        .toList();
+
+    if (changeableFootprint.isEmpty()) {
+      return Optional.empty();
+    }
+
+    return Optional.of(new JmlSimpleExprClause(ENSURES,
+        null,
+        NodeList.nodeList(),
+        new MethodCallExpr(null, new SimpleName("\\new_elems_fresh"),
+            NodeList.nodeList(createUnionClause(changeableFootprint)))));
+  }
+
   private MethodCallExpr createDisjunctClause(Expression a, Expression b) {
     return new MethodCallExpr(null, new SimpleName("\\disjoint"),
         NodeList.nodeList(
-            new FieldAccessExpr(a, "footprint"),
-            new FieldAccessExpr(b, "footprint")));
+            new FieldAccessExpr(a, FOOTPRINT_NAME),
+            new FieldAccessExpr(b, FOOTPRINT_NAME)));
   }
 
-  private Optional<JmlClause> objectCreated(List<Formal> formals, VariableTranslator variableScope) {
+  //NOTE: requries at leas one element
+  private Expression createUnionClause(List<Expression> expressions) {
+    if (expressions.size() == 1) {
+      return new FieldAccessExpr(expressions.getFirst(), FOOTPRINT_NAME);
+    }
+    Expression first = expressions.removeFirst();
+    return new MethodCallExpr(null, new SimpleName("\\union"),
+        NodeList.nodeList(
+            new FieldAccessExpr(first, FOOTPRINT_NAME),
+            createUnionClause(expressions)));
+  }
+
+  private Optional<List<JmlClause>> objectCreated(List<Formal> formals, VariableTranslator variableScope) {
 
     return formals.stream()
         .filter((f) -> isReference(f, variableScope))
@@ -833,11 +875,17 @@ public class SimpleKeyProviderTranslator {
         .map(Formal::identifier)
         .map(variableScope::translate)
         .findAny()
-        .map((f) -> new JmlSimpleExprClause(ENSURES, null,
-            NodeList.nodeList(),
-            //new MethodCallExpr(null, new SimpleName("\\new_elems_fresh"),
-            new MethodCallExpr(null, new SimpleName("\\fresh"),
-                NodeList.nodeList(new FieldAccessExpr(new NameExpr("\\result"), "footprint")))));
+        .map((f) -> List.of(
+            // Create new object clause
+            new JmlSimpleExprClause(ENSURES, null,
+                NodeList.nodeList(),
+                new MethodCallExpr(null, new SimpleName("\\fresh"),
+                    NodeList.nodeList(new FieldAccessExpr(new NameExpr(RESULT_LABEL), FOOTPRINT_NAME)))),
+            // Ensure that invariants hold for created object
+            new JmlSimpleExprClause(ENSURES, null,
+                NodeList.nodeList(),
+                new MethodCallExpr(null, new SimpleName("\\invariant_for"),
+                    NodeList.nodeList(new NameExpr(RESULT_LABEL))))));
 
   }
 
@@ -892,9 +940,16 @@ public class SimpleKeyProviderTranslator {
     clauses.addAll(disPreClause);
     clauses.add(postClause);
     clauses.addAll(disPostClause);
-    objectCreated(contract.formals(), variableScope).ifPresent(clauses::add);
+    //add ensures clauses for new created object (invariant, fresh) 
+    objectCreated(contract.formals(), variableScope).ifPresent(clauses::addAll);
+    //allows all parameters that are `INOUT`, to have new objects created in their footprint
+    newElementsFreshClause(contract.formals(), variableScope).ifPresent(clauses::add);
     clauses.addAll(accessibleClause);
-    clauses.addAll(assignableClause);
+
+    // only add assignableClause when there is a return type
+    if (variableScope.returnType.isPresent()) {
+      clauses.addAll(assignableClause);
+    }
 
     JmlContract jmlContract = new JmlContract()
         .setBehavior(Behavior.NORMAL)
@@ -924,7 +979,7 @@ public class SimpleKeyProviderTranslator {
             .collect(Collectors.toList());
         EmptyStmt em = new EmptyStmt();
 
-        em.setLineComment("TODO: To implement by the user.");
+        em.setLineComment(methodSignaturExtractor.getDefaultMethodBody());
 
         NodeList<Statement> nl = NodeList.nodeList(em);
         BlockStmt body = new BlockStmt(nl);
@@ -963,7 +1018,7 @@ public class SimpleKeyProviderTranslator {
 
       //TODO: set default value when return type != void
       Statement returnStmt = new ReturnStmt();
-      returnStmt.setLineComment("TODO: To implement by the user.");
+      returnStmt.setLineComment(methodSignaturExtractor.getDefaultMethodBody());
 
       NodeList<Statement> nl = NodeList.nodeList(returnStmt);
 
@@ -1166,5 +1221,30 @@ public class SimpleKeyProviderTranslator {
   private record ExpressionPair(
       Expression pre,
       Expression post) {
+  }
+
+  <N extends Node & NodeWithModifiers<N>> N addModifierIfRequired(DetailLevel modifier, N declaration) {
+    if (this.detailLevel.contains(modifier)) {
+      declaration.addModifier(modifier.getKeyword());
+    }
+    return declaration;
+  }
+
+  /// Which keywords should added to the specification, even if they are the default
+  private enum DetailLevel {
+    INSTANCE_FOOTPRINT,
+    INSTANCE_GHOST,
+    INSTANCE_ACCESSIBLE,
+    INSTANCE_INVARIANT;
+
+    Modifier.DefaultKeyword getKeyword() {
+      return switch (this) {
+        case DetailLevel.INSTANCE_FOOTPRINT,
+            DetailLevel.INSTANCE_GHOST,
+            DetailLevel.INSTANCE_ACCESSIBLE,
+            DetailLevel.INSTANCE_INVARIANT ->
+          Modifier.DefaultKeyword.JML_INSTANCE;
+      };
+    }
   }
 }
