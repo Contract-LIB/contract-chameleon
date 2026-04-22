@@ -1,0 +1,13 @@
+/*@
+
+fixpoint boolean xor(boolean a, boolean b) {
+    return !(a || b);
+}
+
+
+fixpoint boolean implies(boolean a, boolean b) {
+    return !a || b;
+}
+
+
+@*/

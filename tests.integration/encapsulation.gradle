@@ -1,0 +1,15 @@
+// - Encapsulation example
+
+def mode = "OVERWRITE"
+def log = "INFO"
+
+runIntegrationTest("encapsulation-example-vf-applicant", ["verifast-applicant", "./export/encapsulation-example/LinkedCellList.clib", "-o", "./results/encapsulation-example/vf-applicant", "-m", "${mode}", "-l", "${log}"])
+runIntegrationTest("encapsulation-example-vf-provider", ["verifast-provider", "./export/encapsulation-example/LinkedCellList.clib", "-o", "./results/encapsulation-example/vf-provider", "-m", "${mode}", "-l", "${log}"])
+runIntegrationTest("encapsulation-example-key-applicant", ["key-applicant", "./export/encapsulation-example/LinkedCellList.clib","-o", "./results/encapsulation-example/key-applicant",  "-m", "${mode}", "-l", "${log}"])
+runIntegrationTest("encapsulation-example-key-provider", ["key-provider", "./export/encapsulation-example/LinkedCellList.clib", "-o", "./results/encapsulation-example/key-provider", "-m", "${mode}", "-l", "${log}"])
+
+tasks.register('run-encapsulation-example') {
+    group = "Integration Tests"
+    description = "Run all task of the encapsulaiton example"
+    dependsOn integrationTasks
+}
