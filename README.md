@@ -12,9 +12,7 @@ as an intermediate representation of the contracts.
 Contract-Chameleon itself does not proof any implementation,
 nor does it manage proofs.
 
-```
-TODO: diagram
-```
+![Role of Contract-LIB](./documentation/graphics/structure-cc.svg)
 
 ## Some basic terminology
 
