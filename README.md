@@ -12,6 +12,12 @@ as an intermediate representation of the contracts.
 Contract-Chameleon itself does not proof any implementation,
 nor does it manage proofs.
 
+The following diagram should give an idea,
+how `Contract-LIB` unfolds is potential as an intermediate language
+between multiple deductive verification tools.
+The tool `contract-chameleon` fills the gap to create the required connections,
+between the different tool-specific contract representations and `Contract-LIB`.
+
 ![Role of Contract-LIB](./documentation/graphics/structure-cc.svg)
 
 ## Some basic terminology
@@ -19,21 +25,27 @@ nor does it manage proofs.
 There is some basic terminology when it comes to `contract-chameleon`:
 Simply speaking, every adapter is named from the perspective of `contract-chameleon`.
 
-This means that `import` adapters take a specification
+This means that `import`-adapters take a specification
 in one of the tool specific languages (e.g., `JML (JavaDL)`)
 and translate it into a `Contract-LIB` specification.
 
-However, `export` adapters translate a `Contract-LIB` specification
+However, `export`-adapters translate a `Contract-LIB` specification
 to an application's specification.
-In contrast to the `import` adapters where only one use case exists,
+In contrast to the `import`-adapters where only one use case exists,
 there can be two ways to export a `Contract-LIB` specification.
-The `provider` perspective generates the interface the implementation
+The `provider`-perspective generates the interface the implementation
 needs to be proven against.
-The `applicant` (or `client`) perspective only generates the specification
+The `applicant`- (or `client`-) perspective only generates the specification
 for an interface of a contract
 that can be used in the client tool.
 
-The following diagram visualizes this relation.
+Additionally, the `checker`-adapter serves the purpose,
+to perform some more specific checks on the provided contracts,
+when there are further restrictions required for the translation.
+
+The following diagram visualizes the relation
+between the different types of adapters that exist is `contract-chameleon`.
+It also gives an overview over existing adapters at the moment.
 
 ![Diagram of Adapters in contract-chameleon](./documentation/graphics/adapters.svg)
 
@@ -45,14 +57,20 @@ The tool with all default adapters can be run with:
 java -jar contract-chameleon-exe.jar <adapter-name>
 ```
 
-### Help adapter
+### Help
 
-The help adapter provides information of the interface,
-and shows the available adapters.
+The command line interface provides a help argument,
+to list a help message.
 
 ```sh
-java -jar contract-chameleon-exe.jar help 
+java -jar contract-chameleon-exe.jar --help 
+```
 
+You can also pass this argument to all of the existing adapters,
+to get further information about the usage and the arguments of the specific adapters.
+
+```sh
+java -jar contract-chameleon-exe.jar key-provider --help 
 ```
 
 ### Executing additional adapters
