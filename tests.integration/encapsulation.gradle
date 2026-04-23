@@ -1,0 +1,51 @@
+// Encapsulation example
+// - Calls CC
+// - Copy to new directory and replace placeholders with actual code
+// - Try to verify the provided implementation
+
+// - Runtime arguments
+def mode = "OVERWRITE" // To force override in CC 
+def log = "INFO" // To set log level in CC
+
+// Call CC (generate to results)
+runIntegrationTest("encapsulation-example-vf-applicant", ["verifast-applicant", "./export/encapsulation-example/LinkedCellList.clib", "-o", "./results/encapsulation-example/vf-applicant", "-m", "${mode}", "-l", "${log}"])
+runIntegrationTest("encapsulation-example-vf-provider", ["verifast-provider", "./export/encapsulation-example/LinkedCellList.clib", "-o", "./results/encapsulation-example/vf-provider", "-m", "${mode}", "-l", "${log}"])
+runIntegrationTest("encapsulation-example-key-applicant", ["key-applicant", "./export/encapsulation-example/LinkedCellList.clib","-o", "./results/encapsulation-example/key-applicant",  "-m", "${mode}", "-l", "${log}"])
+runIntegrationTest("encapsulation-example-key-provider", ["key-provider", "./export/encapsulation-example/LinkedCellList.clib", "-o", "./results/encapsulation-example/key-provider", "-m", "${mode}", "-l", "${log}"])
+
+
+// Copy to to_proof
+
+replaceWithImpl(
+  "replace-vf-provider-encapsulation-example",
+  "./results/encapsulation-example/vf-provider",
+  "./replaced/encapsulation-example/vf-provider",
+  "./export/encapsulation-example/verifast_replacement.json")
+
+tasks.named('replace-vf-provider-encapsulation-example').configure {
+  dependsOn('encapsulation-example-vf-provider')
+}
+
+replaceWithImpl(
+  "replace-key-provider-encapsulation-example",
+  "./results/encapsulation-example/key-provider",
+  "./replaced/encapsulation-example/key-provider",
+  "./export/encapsulation-example/key_replacement.json")
+
+
+tasks.named('replace-key-provider-encapsulation-example').configure {
+  dependsOn('encapsulation-example-key-provider')
+}
+
+// Full run
+tasks.register('it-encapsulation-example') {
+    group = "Integration Tests"
+    description = "Run all task of the encapsulaiton example"
+
+    dependsOn "encapsulation-example-vf-applicant",
+      "encapsulation-example-vf-provider",
+      "encapsulation-example-key-applicant",
+      "encapsulation-example-key-provider",
+      "replace-vf-provider-encapsulation-example",
+      "replace-key-provider-encapsulation-example"
+}
