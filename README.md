@@ -35,9 +35,7 @@ that can be used in the client tool.
 
 The following diagram visualizes this relation.
 
-```
-TODO: diagram
-```
+![Diagram of Adapters in contract-chameleon](./documentation/graphics/adapters.svg)
 
 ## Running the tool
 
