@@ -11,6 +11,7 @@ import org.contract_lib.lang.verifast.ast.VeriFastPredicate;
 import org.contract_lib.lang.verifast.ast.VeriFastType;
 import org.contract_lib.lang.verifast.ast.VeriFastArgument;
 import org.contract_lib.lang.verifast.ast.VeriFastClass;
+import org.contract_lib.lang.verifast.ast.VeriFastComment;
 import org.contract_lib.lang.verifast.ast.VeriFastContract;
 import org.contract_lib.lang.verifast.ast.VeriFastExpression;
 import org.contract_lib.lang.verifast.ast.VeriFastMethod;
@@ -27,6 +28,10 @@ import org.contract_lib.lang.verifast.ast.VeriFastFixpoint;
 public class VeriFastPrinter {
 
   private static final int INDENTATION_STEPS = 4;
+
+  private static final String INLINE_COMMENT_OPEN = "//";
+  private static final String COMMENT_OPEN_BLOCK = "/*";
+  private static final String COMMENT_CLOSE_BLOCK = "*/";
 
   private static final String VERIFAST_OPEN = "//@";
   private static final String VERIFAST_OPEN_BLOCK = "/*@";
@@ -55,6 +60,7 @@ public class VeriFastPrinter {
 
   private static final String VOID = "void";
   private static final String RETURN = "return";
+  private static final String NEW = "new";
 
   private static final String SEMICOLON = ";";
   private static final String COLON = ",";
@@ -107,6 +113,8 @@ public class VeriFastPrinter {
     print(SPACE);
     printBlock(() -> {
       this.className = vfClass.name();
+      printNewLine();
+      printList(vfClass.classBodyComments(), () -> printNewLine(), this::printVeriFastComment);
       printNewLine();
       printList(vfClass.predicates(), () -> printNewLine(), this::printVeriFastPredicate);
       printNewLine();
@@ -216,8 +224,7 @@ public class VeriFastPrinter {
     expression.<Void>perform(
         this::printJavaExpressionStandard,
         this::printJavaExpressionReturn,
-        this::printJavaExpressionSimpleStatement
-    );
+        this::printJavaExpressionSimpleStatement);
   }
 
   public Void printJavaExpressionStandard(VeriFastJavaExpression.Standard simpleStatement) {
@@ -243,12 +250,13 @@ public class VeriFastPrinter {
 
   public void printJavaStatement(VeriFastJavaStatement statement) {
     statement.<Void>perform(
-      this::printConstructorCall,
-      this::printDefaultStatment
-    );
+        this::printConstructorCall,
+        this::printDefaultStatment);
   }
 
   public Void printConstructorCall(VeriFastJavaStatement.ConstructorCall consCall) {
+    print(NEW);
+    print(SPACE);
     printVeriFastType(consCall.classType());
     print(BRACKET_OPEN);
     printColonList(consCall.arguments(), this::printVeriFastArgumentCall);
@@ -447,6 +455,49 @@ public class VeriFastPrinter {
     print(BRACKET_OPEN);
     printColonList(definition.parameters(), this::printVeriFastType);
     print(BRACKET_CLOSE);
+    return null;
+  }
+
+  public Void printVeriFastComment(VeriFastComment comment) {
+    return comment.perform(
+        this::printVeriFastCommentNoEscaping,
+        this::printVeriFastCommentInline,
+        this::printVeriFastCommentMultiline,
+        this::printVeriFastCommentEndline);
+  }
+
+  public Void printVeriFastCommentNoEscaping(VeriFastComment.NoEscaping comment) {
+    printIndentation();
+    print(comment.commentBody());
+    printNewLine();
+    return null;
+  }
+
+  public Void printVeriFastCommentInline(VeriFastComment.Inline comment) {
+    printIndentation();
+    print(INLINE_COMMENT_OPEN);
+    print(SPACE);
+    print(comment.commentBody());
+    printNewLine();
+    return null;
+  }
+
+  public Void printVeriFastCommentMultiline(VeriFastComment.Multiline comment) {
+    printIndentation();
+    System.err.println("EndLine Comments not fully supported yet");
+    print(COMMENT_OPEN_BLOCK);
+    print(SPACE);
+    print(comment.commentBody());
+    print(COMMENT_CLOSE_BLOCK);
+    return null;
+  }
+
+  public Void printVeriFastCommentEndline(VeriFastComment.EndLine comment) {
+    System.err.println("EndLine Comments not fully supported yet");
+    print(INLINE_COMMENT_OPEN);
+    print(SPACE);
+    print(comment.commentBody());
+    printNewLine();
     return null;
   }
 

@@ -53,6 +53,22 @@ tasks.register("help-verifast", Exec) {
   dependsOn 'check-tools-files'
 }
 
+ext.runVerifast = { String taskName, List<String> argList ->
+
+  tasks.register(taskName, Exec) {
+    def verifast = project.findProperty("custom_verifast_exe") ?: contract_chameleon_verifast_exe
+    def verifast_file = new File(rootProject.rootDir, verifast)
+
+    group = "Integration Tests Verifast"
+    description = "Call the geneated code in verifast."
+
+    executable verifast_file.absolutePath
+    args(argList)
+
+    dependsOn 'check-tools-files'
+  }
+}
+
 tasks.register("help-key-ci", Exec) {
   def key = project.findProperty("custom_key_exe") ?: contract_chameleon_key_exe
   def ci_key = project.findProperty("custom_key_exe") ?: contract_chameleon_ci_key_exe
@@ -94,10 +110,12 @@ ext.replaceWithImpl = {String taskName, String source, String destination, Strin
 
     def jsonFile = file(replacementSource)
 
-    inputs.files(jsonFile)
+    inputs.file(jsonFile)
 
     from(source)
     into(destination)
+
+    outputs.dir(layout.buildDirectory.dir(destination)) 
 
     group = "Integration Tests Copy / Replace"
     description = "Moves the created integration test source files and fills in the user implmentation."
@@ -110,7 +128,7 @@ ext.replaceWithImpl = {String taskName, String source, String destination, Strin
 
     filter { String line ->
         replacements.each { key, value ->
-            def target = "//TODO: Implement method '${key}'."
+            def target = "//TODO: Implement '${key}'."
             if (line.contains(target)) {
                 line = line.replace(target, value)
             }

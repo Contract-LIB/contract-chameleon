@@ -11,9 +11,10 @@ import java.util.ServiceLoader;
 import java.util.ServiceLoader.Provider;
 import java.util.stream.Collectors;
 
+import org.contract_lib.contract_chameleon.contexts.MessageContext;
 import org.contract_lib.contract_chameleon.contexts.ResultDirectoryContext.TranslationResult;
 import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
-
+import org.contract_lib.contract_chameleon.error.ChameleonWarning;
 import org.contract_lib.lang.contract_lib.ast.ContractLibAst;
 import org.contract_lib.lang.contract_lib.ast.Abstraction;
 import org.contract_lib.lang.contract_lib.ast.Argument;
@@ -27,8 +28,10 @@ import org.contract_lib.lang.verifast.ast.VeriFastMethod;
 import org.contract_lib.lang.verifast.ast.VeriFastPredicate;
 import org.contract_lib.lang.verifast.ast.VeriFastSpec;
 import org.contract_lib.lang.verifast.ast.VeriFastClass;
+import org.contract_lib.lang.verifast.ast.VeriFastComment;
 import org.contract_lib.lang.verifast.ast.VeriFastConstructor;
 import org.contract_lib.lang.verifast.ast.VeriFastType;
+import org.contract_lib.lang.verifast.tools.substitution.VeriFastVaraibleSubstitution;
 import org.contract_lib.lang.verifast.ast.VeriFastExpression;
 import org.contract_lib.lang.verifast.ast.VeriFastJavaExpression;
 import org.contract_lib.lang.verifast.ast.VeriFastJavaStatement;
@@ -64,6 +67,7 @@ public class SimpleVerifastTranslator {
   private static final String NULL = "null";
 
   private ChameleonMessageManager messageManager;
+  private MessageContext messageContext;
 
   private final TypeTranslator typeTranslator;
   private final HelperTranslator helperTranslator;
@@ -91,8 +95,9 @@ public class SimpleVerifastTranslator {
   private final List<TermTranslation> termTranslations;
   private final List<QuantorTranslation> quantorTranslations;
 
-  public SimpleVerifastTranslator(Path path, ChameleonMessageManager messageManager) {
+  public SimpleVerifastTranslator(Path path, ChameleonMessageManager messageManager, MessageContext messageContext) {
     this.messageManager = messageManager;
+    this.messageContext = messageContext;
     this.results = new ArrayList<>();
 
     this.javaSpecFiles = new ArrayList<>();
@@ -205,7 +210,8 @@ public class SimpleVerifastTranslator {
         new ArrayList<>(),
         methods,
         true,
-        Optional.empty());
+        Optional.empty(),
+        new ArrayList<>());
 
     VeriFastSpec spec = new VeriFastSpec(
         packageName,
@@ -215,6 +221,8 @@ public class SimpleVerifastTranslator {
         directoryName,
         name,
         spec);
+
+    System.err.println(directoryName);
 
     System.err.println("Abstraction for: " + identifier);
     addAbstractionType(name);
@@ -242,7 +250,8 @@ public class SimpleVerifastTranslator {
         new ArrayList<>(),
         methods,
         true,
-        Optional.empty());
+        Optional.empty(),
+        new ArrayList<>());
 
     VeriFastSpec spec = new VeriFastSpec(
         packageName,
@@ -276,6 +285,9 @@ public class SimpleVerifastTranslator {
 
     List<VeriFastMethod> methods = new ArrayList<>();
     List<VeriFastConstructor> constructors = new ArrayList<>();
+    List<VeriFastComment> comments = new ArrayList<>();
+
+    comments.add(new VeriFastComment.NoEscaping(nameExtractor.getClassBodyPlaceholder()));
 
     VeriFastClass vfc = new VeriFastClass(
         implName,
@@ -283,7 +295,8 @@ public class SimpleVerifastTranslator {
         constructors,
         methods,
         false,
-        Optional.of(name));
+        Optional.of(name),
+        comments);
 
     VeriFastSpec spec = new VeriFastSpec(
         packageName,
@@ -410,7 +423,7 @@ public class SimpleVerifastTranslator {
     if (isStatic) {
       if (listCons != null) {
         listCons.add(new VeriFastConstructor(
-            vfContract,
+            this.changeResultToThis(vfContract),
             arguments,
             consBody));
       }
@@ -450,5 +463,16 @@ public class SimpleVerifastTranslator {
     return new VeriFastArgument(
         type,
         argument.identifier());
+  }
+
+  //
+  public VeriFastContract changeResultToThis(VeriFastContract contract) {
+    //TODO: See warning message
+    messageContext.logWarning("Substitution for constructors from `result` to `this` are not checked yet.");
+
+    VeriFastVaraibleSubstitution sub = new VeriFastVaraibleSubstitution(
+        (s) -> true,
+        (s) -> s.variable().equals("result") ? new VeriFastExpression.Variable("this") : s);
+    return sub.subVeriFastContract(contract);
   }
 }

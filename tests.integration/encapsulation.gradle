@@ -37,15 +37,39 @@ tasks.named('replace-key-provider-encapsulation-example').configure {
   dependsOn('encapsulation-example-key-provider')
 }
 
+//verifast -c -allow_dead_code -shared ./tests.integration/replaced/encapsulation-example/vf-provider/sources.jarsrc
+
+//TODO: Check arguments
+runVerifast("run-encapsulation-vf-provider", [
+"-c",
+"-allow_dead_code",
+"-shared",
+"./replaced/encapsulation-example/vf-provider/sources.jarsrc"])
+
+tasks.named('run-encapsulation-vf-provider').configure {
+  dependsOn('replace-key-provider-encapsulation-example')
+}
+
+runVerifast("run-encapsulation-vf-applicant", [
+"-c",
+"-allow_dead_code",
+"-shared",
+"./results/encapsulation-example/vf-applicant/sources.jarsrc"])
+
+
+tasks.named('run-encapsulation-vf-applicant').configure {
+  dependsOn('encapsulation-example-vf-applicant')
+}
+
 // Full run
 tasks.register('it-encapsulation-example') {
     group = "Integration Tests"
     description = "Run all task of the encapsulaiton example"
 
     dependsOn "encapsulation-example-vf-applicant",
-      "encapsulation-example-vf-provider",
+      "encapsulation-example-vf-applicant",
       "encapsulation-example-key-applicant",
       "encapsulation-example-key-provider",
-      "replace-vf-provider-encapsulation-example",
-      "replace-key-provider-encapsulation-example"
+      "replace-key-provider-encapsulation-example",
+      "run-encapsulation-vf"
 }

@@ -2,6 +2,7 @@ package example;
 
 public abstract class LinkedCellList {
 
+
     //@ predicate pred(list<Cell> absVal);
 
 

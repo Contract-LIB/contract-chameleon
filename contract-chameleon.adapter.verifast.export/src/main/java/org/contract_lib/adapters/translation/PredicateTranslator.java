@@ -99,6 +99,7 @@ public final class PredicateTranslator {
     return List.of(new VeriFastPredicate(
         PREDICATE_NAME,
         selectors,
+        Optional.empty(),
         Optional.empty()));
   }
 

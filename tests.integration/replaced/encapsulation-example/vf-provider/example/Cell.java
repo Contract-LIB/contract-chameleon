@@ -2,6 +2,7 @@ package example;
 
 public abstract class Cell {
 
+
     //@ predicate pred(int absVal);
 
 
@@ -9,7 +10,7 @@ public abstract class Cell {
     //@ requires true;
     //@ ensures result.pred(?result_absVal) &*& (result) != (null) &*& (result_absVal) == (0);
     {
-        return CellImpl();
+        return new CellImpl();
     }
 
     public abstract int value();
