@@ -8,18 +8,18 @@ def mode = "OVERWRITE" // To force override in CC
 def log = "INFO" // To set log level in CC
 
 // Call CC (generate to results)
-runIntegrationTest("encapsulation-example-vf-applicant", ["verifast-applicant", "./export/encapsulation-example/LinkedCellList.clib", "-o", "./results/encapsulation-example/vf-applicant", "-m", "${mode}", "-l", "${log}"])
-runIntegrationTest("encapsulation-example-vf-provider", ["verifast-provider", "./export/encapsulation-example/LinkedCellList.clib", "-o", "./results/encapsulation-example/vf-provider", "-m", "${mode}", "-l", "${log}"])
-runIntegrationTest("encapsulation-example-key-applicant", ["key-applicant", "./export/encapsulation-example/LinkedCellList.clib","-o", "./results/encapsulation-example/key-applicant",  "-m", "${mode}", "-l", "${log}"])
-runIntegrationTest("encapsulation-example-key-provider", ["key-provider", "./export/encapsulation-example/LinkedCellList.clib", "-o", "./results/encapsulation-example/key-provider", "-m", "${mode}", "-l", "${log}"])
+runIntegrationTest("encapsulation-example-vf-applicant", ["verifast-applicant", "./export/encapsulation-example/LinkedCellList.clib", "-o", "./build/results/encapsulation-example/vf-applicant", "-m", "${mode}", "-l", "${log}"])
+runIntegrationTest("encapsulation-example-vf-provider", ["verifast-provider", "./export/encapsulation-example/LinkedCellList.clib", "-o", "./build/results/encapsulation-example/vf-provider", "-m", "${mode}", "-l", "${log}"])
+runIntegrationTest("encapsulation-example-key-applicant", ["key-applicant", "./export/encapsulation-example/LinkedCellList.clib","-o", "./build/results/encapsulation-example/key-applicant",  "-m", "${mode}", "-l", "${log}"])
+runIntegrationTest("encapsulation-example-key-provider", ["key-provider", "./export/encapsulation-example/LinkedCellList.clib", "-o", "./build/results/encapsulation-example/key-provider", "-m", "${mode}", "-l", "${log}"])
 
 
 // Copy to to_proof
 
 replaceWithImpl(
   "replace-vf-provider-encapsulation-example",
-  "./results/encapsulation-example/vf-provider",
-  "./replaced/encapsulation-example/vf-provider",
+  "./build/results/encapsulation-example/vf-provider",
+  "./build/replaced/encapsulation-example/vf-provider",
   "./export/encapsulation-example/verifast_replacement.json")
 
 tasks.named('replace-vf-provider-encapsulation-example').configure {
@@ -28,8 +28,8 @@ tasks.named('replace-vf-provider-encapsulation-example').configure {
 
 replaceWithImpl(
   "replace-key-provider-encapsulation-example",
-  "./results/encapsulation-example/key-provider",
-  "./replaced/encapsulation-example/key-provider",
+  "./build/results/encapsulation-example/key-provider",
+  "./build/replaced/encapsulation-example/key-provider",
   "./export/encapsulation-example/key_replacement.json")
 
 
@@ -44,18 +44,24 @@ runVerifast("run-encapsulation-vf-provider", [
 "-c",
 "-allow_dead_code",
 "-shared",
-"./replaced/encapsulation-example/vf-provider/sources.jarsrc"])
+"./build/replaced/encapsulation-example/vf-provider/sources.jarsrc"])
 
 tasks.named('run-encapsulation-vf-provider').configure {
-  dependsOn('replace-key-provider-encapsulation-example')
+  dependsOn('replace-vf-provider-encapsulation-example')
 }
+
+// Test tasks to fix vf provider without
+runVerifast("run-encapsulation-vf-provider-test", [
+"-c",
+"-allow_dead_code",
+"-shared",
+"./build/replaced/encapsulation-example/vf-provider/sources.jarsrc"])
 
 runVerifast("run-encapsulation-vf-applicant", [
 "-c",
 "-allow_dead_code",
 "-shared",
-"./results/encapsulation-example/vf-applicant/sources.jarsrc"])
-
+"./build/results/encapsulation-example/vf-applicant/sources.jarsrc"])
 
 tasks.named('run-encapsulation-vf-applicant').configure {
   dependsOn('encapsulation-example-vf-applicant')
@@ -67,9 +73,14 @@ tasks.register('it-encapsulation-example') {
     description = "Run all task of the encapsulaiton example"
 
     dependsOn "encapsulation-example-vf-applicant",
-      "encapsulation-example-vf-applicant",
-      "encapsulation-example-key-applicant",
-      "encapsulation-example-key-provider",
+      "run-encapsulation-vf-applicant",
+      "encapsulation-example-vf-provider",//,
       "replace-key-provider-encapsulation-example",
-      "run-encapsulation-vf"
+      "run-encapsulation-vf-provider"
+      // "encapsulation-example-vf-applicant",
+      //"encapsulation-example-vf-provider"//,
+      //"encapsulation-example-key-applicant",
+      //"encapsulation-example-key-provider",
+      //"replace-key-provider-encapsulation-example",
+      //"run-encapsulation-vf"
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.contract_lib.lang.verifast.ast.VeriFastSpec;
@@ -134,6 +135,7 @@ public class VeriFastPrinter {
     print(BRACKET_OPEN);
     printColonList(pred.arguments(), this::printVeriFastArgument);
     print(BRACKET_CLOSE);
+    printOptional(pred.comment(), this::printVeriFastCommentInline);
     print(SEMICOLON);
     printNewLine();
   }
@@ -474,11 +476,12 @@ public class VeriFastPrinter {
   }
 
   public Void printVeriFastCommentInline(VeriFastComment.Inline comment) {
-    printIndentation();
-    print(INLINE_COMMENT_OPEN);
+    print(SPACE);
+    print(COMMENT_OPEN_BLOCK);
     print(SPACE);
     print(comment.commentBody());
-    printNewLine();
+    print(SPACE);
+    print(COMMENT_CLOSE_BLOCK);
     return null;
   }
 
@@ -541,6 +544,10 @@ public class VeriFastPrinter {
 
   private <T> void printListNewLine(List<T> print, Consumer<T> consumer) {
     printList(print, this::newLineSeparator, consumer);
+  }
+
+  private <T> void printOptional(Optional<T> print, Consumer<T> consumer) {
+    print.ifPresent(consumer::accept);
   }
 
   private <T> void printList(List<T> print, Separator separator, Consumer<T> consumer) {

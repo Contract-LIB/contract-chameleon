@@ -115,7 +115,7 @@ ext.replaceWithImpl = {String taskName, String source, String destination, Strin
     from(source)
     into(destination)
 
-    outputs.dir(layout.buildDirectory.dir(destination)) 
+    //outputs.dir(layout.buildDirectory.dir(destination)) 
 
     group = "Integration Tests Copy / Replace"
     description = "Moves the created integration test source files and fills in the user implmentation."
@@ -127,8 +127,17 @@ ext.replaceWithImpl = {String taskName, String source, String destination, Strin
     }
 
     filter { String line ->
+        //Singleline comment: // TODO: Implement 'example.Cell.init'.
         replacements.each { key, value ->
             def target = "//TODO: Implement '${key}'."
+            if (line.contains(target)) {
+                line = line.replace(target, value)
+            }
+        }
+        //Inline comment: /* TODO: Implement 'example.Cell.pred'. */
+        replacements.each { key, value ->
+        
+            def target = "/* TODO: Implement '${key}'. */"
             if (line.contains(target)) {
                 line = line.replace(target, value)
             }

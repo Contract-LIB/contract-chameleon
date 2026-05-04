@@ -23,6 +23,7 @@ public interface VeriFastComment {
     }
   }
 
+  /// Comment for {@code void /* Comment here */ myMethod() { … }}
   public record Inline(String commentBody) implements VeriFastComment {
 
     @Override
@@ -35,6 +36,7 @@ public interface VeriFastComment {
     }
   }
 
+  /// Comment for {@code /* \\n  * Comment here \\n */  \\n void  myMethod() { … }}
   public record Multiline(String commentBody) implements VeriFastComment {
     @Override
     public <R> R perform(
@@ -46,6 +48,7 @@ public interface VeriFastComment {
     }
   }
 
+  /// Comment for {@code \\n void  myMethod() { // Comment here \\n     … \\n}}.
   public record EndLine(String commentBody) implements VeriFastComment {
     @Override
     public <R> R perform(

@@ -31,6 +31,7 @@ import org.contract_lib.lang.verifast.ast.VeriFastClass;
 import org.contract_lib.lang.verifast.ast.VeriFastComment;
 import org.contract_lib.lang.verifast.ast.VeriFastConstructor;
 import org.contract_lib.lang.verifast.ast.VeriFastType;
+import org.contract_lib.lang.verifast.tools.substitution.VeriFastPredicateSubstitution;
 import org.contract_lib.lang.verifast.tools.substitution.VeriFastVaraibleSubstitution;
 import org.contract_lib.lang.verifast.ast.VeriFastExpression;
 import org.contract_lib.lang.verifast.ast.VeriFastJavaExpression;
@@ -200,7 +201,7 @@ public class SimpleVerifastTranslator {
 
     List<VeriFastPredicate> predicates = predicateTranslator.translatePredicateDef(
         name,
-        abstraction.datatypeDec().constructors().get(0));
+        abstraction.datatypeDec().constructors().get(0), Optional.empty());
 
     List<VeriFastMethod> methods = new ArrayList<>();
 
@@ -241,7 +242,8 @@ public class SimpleVerifastTranslator {
 
     List<VeriFastPredicate> predicates = predicateTranslator.translatePredicateDef(
         name,
-        abstraction.datatypeDec().constructors().get(0));
+        abstraction.datatypeDec().constructors().get(0),
+        Optional.empty());
     List<VeriFastMethod> methods = new ArrayList<>();
 
     VeriFastClass vfc = new VeriFastClass(
@@ -281,7 +283,10 @@ public class SimpleVerifastTranslator {
 
     List<VeriFastPredicate> predicates = predicateTranslator.translatePredicateDef(
         implName,
-        abstraction.datatypeDec().constructors().get(0));
+        abstraction.datatypeDec().constructors().get(0),
+        Optional.of(
+            new VeriFastComment.Inline(
+                "TODO: Implement '" + nameExtractor.getPackageName() + "." + nameExtractor.getClassName() + ".pred'.")));
 
     List<VeriFastMethod> methods = new ArrayList<>();
     List<VeriFastConstructor> constructors = new ArrayList<>();
@@ -338,7 +343,7 @@ public class SimpleVerifastTranslator {
     List<Argument> inArguments = extractor.inArguments();
     List<Argument> inoutArguments = extractor.inoutArguments();
 
-    //Add this parameter when necessary
+    //Add `this` parameter when necessary
     extractor.thisReadOnlyArgument()
         .ifPresent(inArguments::add);
 
@@ -423,7 +428,8 @@ public class SimpleVerifastTranslator {
     if (isStatic) {
       if (listCons != null) {
         listCons.add(new VeriFastConstructor(
-            this.changeResultToThis(vfContract),
+            this.removeThisPredcicateOwner(
+                this.changeResultToThis(vfContract)),
             arguments,
             consBody));
       }
@@ -465,14 +471,26 @@ public class SimpleVerifastTranslator {
         argument.identifier());
   }
 
-  //
+  // this changes all variables of result to variables of this. Needed in the translation of the initializer.
   public VeriFastContract changeResultToThis(VeriFastContract contract) {
     //TODO: See warning message
-    messageContext.logWarning("Substitution for constructors from `result` to `this` are not checked yet.");
+    messageContext.logWarning("Substitution for constructors from `result` to `this` are not tested yet.");
 
     VeriFastVaraibleSubstitution sub = new VeriFastVaraibleSubstitution(
+        (s) -> s.variable().equals("this"),
+        (s) -> s.variable().equals("result") ? new VeriFastExpression.Variable("this") : s,
+        this.messageContext);
+    return sub.subVeriFastContract(contract);
+  }
+
+  // this changes all variables of result to variables of this. Needed in the translation of the initializer.
+  public VeriFastContract removeThisPredcicateOwner(VeriFastContract contract) {
+    VeriFastPredicateSubstitution sub = new VeriFastPredicateSubstitution(
         (s) -> true,
-        (s) -> s.variable().equals("result") ? new VeriFastExpression.Variable("this") : s);
+        (p) -> p.owner().map((o) -> o.variable().equals("this")).orElse(false)
+            ? new VeriFastExpression.Predicate(Optional.empty(), p.predicateName(), p.arguments())
+            : p,
+        this.messageContext);
     return sub.subVeriFastContract(contract);
   }
 }
