@@ -19,7 +19,7 @@ public final class JavaMethodSignaturExtractor {
   private static final String DEFAULT_RETURN_IDENTIFIER = "result";
   private static final String DEFAULT_THIS_IDENTIFIER = "this";
   private static final String DOT = ".";
-  private static final String TODO_MESSAGE = "//TODO: Implement '%s'.";
+  private static final String TODO_MESSAGE = "// TODO: Implement '%s'.";
 
   private String contractIdentifier;
   private String methodName;

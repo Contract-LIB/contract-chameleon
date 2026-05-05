@@ -6,6 +6,7 @@ public interface VeriFastComment {
 
   public <R> R perform(
       Function<NoEscaping, R> noEscaping,
+      Function<SingleLine, R> singleLine,
       Function<Inline, R> inline,
       Function<Multiline, R> multiline,
       Function<EndLine, R> endLine);
@@ -16,10 +17,23 @@ public interface VeriFastComment {
     @Override
     public <R> R perform(
         Function<NoEscaping, R> noEscaping,
+        Function<SingleLine, R> singleLine,
         Function<Inline, R> inline,
         Function<Multiline, R> multiline,
         Function<EndLine, R> endLine) {
       return noEscaping.apply(this);
+    }
+  }
+
+  public record SingleLine(String commentBody) implements VeriFastComment {
+    @Override
+    public <R> R perform(
+        Function<NoEscaping, R> noEscaping,
+        Function<SingleLine, R> singleLine,
+        Function<Inline, R> inline,
+        Function<Multiline, R> multiline,
+        Function<EndLine, R> endLine) {
+      return singleLine.apply(this);
     }
   }
 
@@ -29,6 +43,7 @@ public interface VeriFastComment {
     @Override
     public <R> R perform(
         Function<NoEscaping, R> noEscaping,
+        Function<SingleLine, R> singleLine,
         Function<Inline, R> inline,
         Function<Multiline, R> multiline,
         Function<EndLine, R> endLine) {
@@ -41,6 +56,7 @@ public interface VeriFastComment {
     @Override
     public <R> R perform(
         Function<NoEscaping, R> noEscaping,
+        Function<SingleLine, R> singleLine,
         Function<Inline, R> inline,
         Function<Multiline, R> multiline,
         Function<EndLine, R> endLine) {
@@ -53,6 +69,7 @@ public interface VeriFastComment {
     @Override
     public <R> R perform(
         Function<NoEscaping, R> noEscaping,
+        Function<SingleLine, R> singleLine,
         Function<Inline, R> inline,
         Function<Multiline, R> multiline,
         Function<EndLine, R> endLine) {

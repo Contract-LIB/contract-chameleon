@@ -47,7 +47,6 @@ public final class LinkedCellListImpl extends LinkedCellList {
 
 final class NonEmptyLinkedCellList {
 
-
 /*@ predicate nellist(list<Cell> ll) =
          next |-> ?n
      &*& value |-> ?v
@@ -60,7 +59,7 @@ final class NonEmptyLinkedCellList {
     private NonEmptyLinkedCellList next;
 
     public NonEmptyLinkedCellList(Cell v)
-        //@ requires [_]payload(v);
+        //@ requires true;
         //@ ensures nellist(cons(v,nil));
     {
         value =v;

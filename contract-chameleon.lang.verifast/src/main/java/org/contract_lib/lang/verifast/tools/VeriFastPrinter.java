@@ -93,6 +93,11 @@ public class VeriFastPrinter {
     //TODO: Add import statements
     printNewLine();
     printVeriFastClass(spec.classEntity());
+
+    printOptional(spec.comment(), (comment) -> {
+      printNewLine();
+      this.printVeriFastComment(comment);
+    });
   }
 
   public void printVeriFastClass(VeriFastClass vfClass) {
@@ -463,6 +468,7 @@ public class VeriFastPrinter {
   public Void printVeriFastComment(VeriFastComment comment) {
     return comment.perform(
         this::printVeriFastCommentNoEscaping,
+        this::printVeriFastCommentSingleLine,
         this::printVeriFastCommentInline,
         this::printVeriFastCommentMultiline,
         this::printVeriFastCommentEndline);
@@ -470,6 +476,15 @@ public class VeriFastPrinter {
 
   public Void printVeriFastCommentNoEscaping(VeriFastComment.NoEscaping comment) {
     printIndentation();
+    print(comment.commentBody());
+    printNewLine();
+    return null;
+  }
+
+  public Void printVeriFastCommentSingleLine(VeriFastComment.SingleLine comment) {
+    printIndentation();
+    print(INLINE_COMMENT_OPEN);
+    print(SPACE);
     print(comment.commentBody());
     printNewLine();
     return null;

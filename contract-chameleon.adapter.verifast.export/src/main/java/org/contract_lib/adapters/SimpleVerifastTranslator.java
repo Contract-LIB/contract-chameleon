@@ -216,7 +216,8 @@ public class SimpleVerifastTranslator {
 
     VeriFastSpec spec = new VeriFastSpec(
         packageName,
-        vfc);
+        vfc,
+        Optional.empty());
 
     JavaFile file = new JavaFile(
         directoryName,
@@ -252,12 +253,14 @@ public class SimpleVerifastTranslator {
         new ArrayList<>(),
         methods,
         true,
+
         Optional.empty(),
         new ArrayList<>());
 
     VeriFastSpec spec = new VeriFastSpec(
         packageName,
-        vfc);
+        vfc,
+        Optional.empty());
 
     JavaSpecFile file = new JavaSpecFile(
         packageName,
@@ -284,15 +287,19 @@ public class SimpleVerifastTranslator {
     List<VeriFastPredicate> predicates = predicateTranslator.translatePredicateDef(
         implName,
         abstraction.datatypeDec().constructors().get(0),
-        Optional.of(
-            new VeriFastComment.Inline(
-                "TODO: Implement '" + nameExtractor.getPackageName() + "." + nameExtractor.getClassName() + ".pred'.")));
+        Optional.of(new VeriFastComment.Inline(String.format(
+            "TODO: Implement '%s.%s.pred'.",
+            nameExtractor.getPackageName(),
+            nameExtractor.getClassName()))));
 
     List<VeriFastMethod> methods = new ArrayList<>();
     List<VeriFastConstructor> constructors = new ArrayList<>();
     List<VeriFastComment> comments = new ArrayList<>();
 
-    comments.add(new VeriFastComment.NoEscaping(nameExtractor.getClassBodyPlaceholder()));
+    comments.add(new VeriFastComment.SingleLine(String.format(
+        "TODO: Implement '%s.%s.body'.",
+        nameExtractor.getPackageName(),
+        nameExtractor.getClassName())));
 
     VeriFastClass vfc = new VeriFastClass(
         implName,
@@ -305,7 +312,11 @@ public class SimpleVerifastTranslator {
 
     VeriFastSpec spec = new VeriFastSpec(
         packageName,
-        vfc);
+        vfc,
+        Optional.of(new VeriFastComment.SingleLine(String.format(
+            "TODO: Implement '%s.%s.file'.",
+            nameExtractor.getPackageName(),
+            nameExtractor.getClassName()))));
 
     JavaFile file = new JavaFile(
         packageName,
@@ -372,14 +383,6 @@ public class SimpleVerifastTranslator {
     extractor.getReturnType()
         .map((p) -> new Argument(p, RESULT_NAME))
         .flatMap(p -> predicateTranslator.createPredicate(p, termTranslator, true, false))
-        .ifPresent(ensuresPredicates::add);
-
-    extractor.getReturnType()
-        .map(this.typeTranslator::translate)
-        .filter(t -> !t.isLogicType())
-        .map((p) -> new VeriFastExpression.BinaryOperation("!=",
-            new VeriFastExpression.Variable(RESULT_NAME),
-            new VeriFastExpression.Variable(NULL)))
         .ifPresent(ensuresPredicates::add);
 
     TermTranslator.VeriFastPrePostExpression expressions = termTranslator.translateContractPairs(

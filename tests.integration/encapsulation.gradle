@@ -20,7 +20,7 @@ replaceWithImpl(
   "replace-vf-provider-encapsulation-example",
   "./build/results/encapsulation-example/vf-provider",
   "./build/replaced/encapsulation-example/vf-provider",
-  "./export/encapsulation-example/verifast_replacement.json")
+  "./export/encapsulation-example/verifast_replacement.toml")
 
 tasks.named('replace-vf-provider-encapsulation-example').configure {
   dependsOn('encapsulation-example-vf-provider')
@@ -30,7 +30,7 @@ replaceWithImpl(
   "replace-key-provider-encapsulation-example",
   "./build/results/encapsulation-example/key-provider",
   "./build/replaced/encapsulation-example/key-provider",
-  "./export/encapsulation-example/key_replacement.json")
+  "./export/encapsulation-example/key_replacement.toml")
 
 
 tasks.named('replace-key-provider-encapsulation-example').configure {

@@ -14,7 +14,7 @@
      (= (absVal result) 0))))
 
 (define-contract example.Cell.value
-    ((this (inout Cell))
+    ((this (in Cell))
      (result (out Int)))
     ((true
      (= result (absVal this)))))

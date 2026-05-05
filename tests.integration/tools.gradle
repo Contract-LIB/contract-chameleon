@@ -1,4 +1,14 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.apache.groovy:groovy-toml:5.0.5'
+    }
+}
+
 import groovy.json.JsonSlurper
+import groovy.toml.TomlSlurper
 
 // ===== Importing the generated files into the tools
 
@@ -119,17 +129,37 @@ ext.replaceWithImpl = {String taskName, String source, String destination, Strin
 
     group = "Integration Tests Copy / Replace"
     description = "Moves the created integration test source files and fills in the user implmentation."
-
-
+    
     def replacements = [:]
     doFirst {
-        replacements = new JsonSlurper().parse(jsonFile)
+
+        def conf = new TomlSlurper().parse(jsonFile)
+        conf.each { packageKey, classes -> 
+          classes.each { classKey, values ->
+              values.each { tag, value ->
+              //replacements["${packageKey}.${classKey}.${tag}"] = value
+                //println("${packageKey}.${classKey}.${tag} = ${value}")
+                //println()
+                replacements["${packageKey}.${classKey}.${tag}"] = value
+              }
+             //subvalue.each { tag, value ->
+              //replacements["${packageKey}.${classKey}.${tag}"] = value
+              //print("${packageKey}.${classKey}.${tag}")
+            //}
+          }
+        }
+
+        replacements.each{ key, v -> 
+          println(key)
+        }
+        //replacements =  new JsonSlurper().parse(jsonFile)
     }
 
     filter { String line ->
         //Singleline comment: // TODO: Implement 'example.Cell.init'.
         replacements.each { key, value ->
-            def target = "//TODO: Implement '${key}'."
+            def target = "// TODO: Implement '${key}'."
+            //println(target)
             if (line.contains(target)) {
                 line = line.replace(target, value)
             }
@@ -146,3 +176,5 @@ ext.replaceWithImpl = {String taskName, String source, String destination, Strin
     }
   }
 }
+
+
