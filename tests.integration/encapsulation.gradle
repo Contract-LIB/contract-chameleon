@@ -20,6 +20,13 @@ createClient("encapsulation-example-client-vf-provider", "./results/encapsulatio
 tasks.named('encapsulation-example-client-vf-provider').configure {
   dependsOn 'encapsulation-example-vf-provider'
 }
+
+
+createClient("encapsulation-example-client-vf-applicant", "./results/encapsulation-example/vf-applicant", "example", "_Client")
+
+tasks.named('encapsulation-example-client-vf-applicant').configure {
+  dependsOn 'encapsulation-example-vf-applicant'
+}
 // Copy to replaced
 
 replaceWithImpl(
@@ -31,6 +38,18 @@ replaceWithImpl(
 tasks.named('replace-vf-provider-encapsulation-example').configure {
   dependsOn "encapsulation-example-client-vf-provider"
 }
+
+
+replaceWithImpl(
+  "replace-vf-applicant-encapsulation-example",
+  "./results/encapsulation-example/vf-applicant",
+  "./replaced/encapsulation-example/vf-applicant",
+  "./export/encapsulation-example/verifast_replacement.toml")
+
+tasks.named('replace-vf-applicant-encapsulation-example').configure {
+  dependsOn "encapsulation-example-client-vf-applicant"
+}
+
 
 replaceWithImpl(
   "replace-key-provider-encapsulation-example",
@@ -66,10 +85,10 @@ runVerifast("run-encapsulation-vf-applicant", [
 "-c",
 "-allow_dead_code",
 "-shared",
-"./build/results/encapsulation-example/vf-applicant/sources.jarsrc"])
+"./build/replaced/encapsulation-example/vf-applicant/sources.jarsrc"])
 
 tasks.named('run-encapsulation-vf-applicant').configure {
-  dependsOn('encapsulation-example-vf-applicant')
+  dependsOn('replace-vf-applicant-encapsulation-example')
 }
 
 // Full run
