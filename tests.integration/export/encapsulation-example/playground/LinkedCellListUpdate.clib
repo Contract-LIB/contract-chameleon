@@ -42,6 +42,24 @@
     ((this (inout LinkedCellList))
      (result (out (Ref Cell))))
     (((not (= (absVal this) seq.empty))
-     (and (= result (seq.nth (absVal this) (- (seq.len (absVal this)) 1)))
-      (= (old (absVal this)) (absVal this))
-     ))))
+     (= result (seq.nth (absVal this) (- (seq.len (absVal this)) 1)))))) ; nth would need an welldefinedness check, sound bc. seq != empty
+
+(define-contract example.LinkedCellList.getLastUpdate
+    ((this (inout LinkedCellList))
+     (result (out (Ref Cell))))
+    (((not (= (absVal this) seq.empty))
+     (= result (last (absVal this) )))))
+
+(define-fun last  ; Undefined for l == seq.empty
+  (par (A) ((Seq A) l) A 
+  (seq.nth (absVal this) (- (seq.len (absVal this)) 1))
+  )
+)
+
+(define-fun-rec lastRec
+  (par (A) ((Seq (Ref A)) l) (Ref A) 
+  (match l (
+    (nil null)
+    ( (cons head tail) (ite (= tail nil) head (lastRec tail))) ; Undefined?
+  ))
+))

@@ -122,8 +122,11 @@ ext.replaceWithImpl = {String taskName, String source, String destination, Strin
 
     inputs.file(jsonFile)
 
-    from(source)
-    into(destination)
+    def sourceLocation = layout.buildDirectory.dir(source)
+    def destinationLocation = layout.buildDirectory.dir(destination)
+
+    from(sourceLocation)
+    into(destinationLocation)
 
     //outputs.dir(layout.buildDirectory.dir(destination)) 
 
@@ -177,4 +180,26 @@ ext.replaceWithImpl = {String taskName, String source, String destination, Strin
   }
 }
 
+// Create Client
+ext.createClient = { String taskName, String destination, String clientPackage, String clientName -> 
+  tasks.register(taskName) {
 
+      def clientFile = layout.buildDirectory
+        .dir(destination)
+        .map { it.dir(clientPackage.replace('.', '/')) }
+        .map { it.file("${clientName}.java") }
+        .get().asFile
+
+
+      def sourcesFile = layout.buildDirectory
+        .dir(destination)
+        .map { it.file("sources.jarsrc") }
+        .get().asFile
+
+      doLast {
+          clientFile.parentFile.mkdirs()
+          clientFile.text = "// TODO: Implement '${clientPackage}.${clientName}.file'."
+          sourcesFile << "${clientPackage.replace('.','/')}/${clientName}.java"
+      }
+  }
+}

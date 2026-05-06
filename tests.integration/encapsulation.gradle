@@ -13,25 +13,30 @@ runIntegrationTest("encapsulation-example-vf-provider", ["verifast-provider", ".
 runIntegrationTest("encapsulation-example-key-applicant", ["key-applicant", "./export/encapsulation-example/LinkedCellList.clib","-o", "./build/results/encapsulation-example/key-applicant",  "-m", "${mode}", "-l", "${log}"])
 runIntegrationTest("encapsulation-example-key-provider", ["key-provider", "./export/encapsulation-example/LinkedCellList.clib", "-o", "./build/results/encapsulation-example/key-provider", "-m", "${mode}", "-l", "${log}"])
 
+// Create Client File (in results)
 
-// Copy to to_proof
+createClient("encapsulation-example-client-vf-provider", "./results/encapsulation-example/vf-provider", "example", "_Client")
+
+tasks.named('encapsulation-example-client-vf-provider').configure {
+  dependsOn 'encapsulation-example-vf-provider'
+}
+// Copy to replaced
 
 replaceWithImpl(
   "replace-vf-provider-encapsulation-example",
-  "./build/results/encapsulation-example/vf-provider",
-  "./build/replaced/encapsulation-example/vf-provider",
+  "./results/encapsulation-example/vf-provider",
+  "./replaced/encapsulation-example/vf-provider",
   "./export/encapsulation-example/verifast_replacement.toml")
 
 tasks.named('replace-vf-provider-encapsulation-example').configure {
-  dependsOn('encapsulation-example-vf-provider')
+  dependsOn "encapsulation-example-client-vf-provider"
 }
 
 replaceWithImpl(
   "replace-key-provider-encapsulation-example",
-  "./build/results/encapsulation-example/key-provider",
-  "./build/replaced/encapsulation-example/key-provider",
+  "./results/encapsulation-example/key-provider",
+  "./replaced/encapsulation-example/key-provider",
   "./export/encapsulation-example/key_replacement.toml")
-
 
 tasks.named('replace-key-provider-encapsulation-example').configure {
   dependsOn('encapsulation-example-key-provider')
@@ -39,7 +44,7 @@ tasks.named('replace-key-provider-encapsulation-example').configure {
 
 //verifast -c -allow_dead_code -shared ./tests.integration/replaced/encapsulation-example/vf-provider/sources.jarsrc
 
-//TODO: Check arguments
+//TODO: Check arguments (disable integer overflow…)
 runVerifast("run-encapsulation-vf-provider", [
 "-c",
 "-allow_dead_code",
@@ -73,10 +78,10 @@ tasks.register('it-encapsulation-example') {
     description = "Run all task of the encapsulaiton example"
 
     dependsOn "encapsulation-example-vf-applicant",
-      "run-encapsulation-vf-applicant",
-      "encapsulation-example-vf-provider",//,
-      "replace-key-provider-encapsulation-example",
-      "run-encapsulation-vf-provider"
+              "run-encapsulation-vf-applicant",
+              "encapsulation-example-vf-provider",//,
+              "replace-key-provider-encapsulation-example",
+              "run-encapsulation-vf-provider"
       // "encapsulation-example-vf-applicant",
       //"encapsulation-example-vf-provider"//,
       //"encapsulation-example-key-applicant",
