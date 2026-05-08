@@ -51,34 +51,6 @@ tasks.register('check-tools-files') {
   println "===="
 }
 
-tasks.register("help-verifast", Exec) {
-  def verifast = project.findProperty("custom_verifast_exe") ?: contract_chameleon_verifast_exe
-  def verifast_file = new File(rootProject.rootDir, verifast)
-
-  group = "Help"
-  description = "Run the help command of verifast."
-
-  commandLine verifast_file.absolutePath, "--help"
-
-  dependsOn 'check-tools-files'
-}
-
-ext.runVerifast = { String taskName, List<String> argList ->
-
-  tasks.register(taskName, Exec) {
-    def verifast = project.findProperty("custom_verifast_exe") ?: contract_chameleon_verifast_exe
-    def verifast_file = new File(rootProject.rootDir, verifast)
-
-    group = "Integration Tests Verifast"
-    description = "Call the geneated code in verifast."
-
-    executable verifast_file.absolutePath
-    args(argList)
-
-    dependsOn 'check-tools-files'
-  }
-}
-
 tasks.register("help-key-ci", Exec) {
   def key = project.findProperty("custom_key_exe") ?: contract_chameleon_key_exe
   def ci_key = project.findProperty("custom_key_exe") ?: contract_chameleon_ci_key_exe
@@ -177,29 +149,5 @@ ext.replaceWithImpl = {String taskName, String source, String destination, Strin
         }
         return line
     }
-  }
-}
-
-// Create Client
-ext.createClient = { String taskName, String destination, String clientPackage, String clientName -> 
-  tasks.register(taskName) {
-
-      def clientFile = layout.buildDirectory
-        .dir(destination)
-        .map { it.dir(clientPackage.replace('.', '/')) }
-        .map { it.file("${clientName}.java") }
-        .get().asFile
-
-
-      def sourcesFile = layout.buildDirectory
-        .dir(destination)
-        .map { it.file("sources.jarsrc") }
-        .get().asFile
-
-      doLast {
-          clientFile.parentFile.mkdirs()
-          clientFile.text = "// TODO: Implement '${clientPackage}.${clientName}.file'."
-          sourcesFile << "${clientPackage.replace('.','/')}/${clientName}.java"
-      }
   }
 }

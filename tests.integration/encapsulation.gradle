@@ -1,110 +1,27 @@
-// Encapsulation example
-// - Calls CC
-// - Copy to new directory and replace placeholders with actual code
-// - Try to verify the provided implementation
 
-// - Runtime arguments
-def mode = "OVERWRITE" // To force override in CC 
-def log = "INFO" // To set log level in CC
+// List to store all creatd tasks
+def encapsulaiton_tests = []
 
-// Call CC (generate to results)
-runIntegrationTest("encapsulation-example-vf-applicant", ["verifast-applicant", "./export/encapsulation-example/LinkedCellList.clib", "-o", "./build/results/encapsulation-example/vf-applicant", "-m", "${mode}", "-l", "${log}"])
-runIntegrationTest("encapsulation-example-vf-provider", ["verifast-provider", "./export/encapsulation-example/LinkedCellList.clib", "-o", "./build/results/encapsulation-example/vf-provider", "-m", "${mode}", "-l", "${log}"])
-runIntegrationTest("encapsulation-example-key-applicant", ["key-applicant", "./export/encapsulation-example/LinkedCellList.clib","-o", "./build/results/encapsulation-example/key-applicant",  "-m", "${mode}", "-l", "${log}"])
-runIntegrationTest("encapsulation-example-key-provider", ["key-provider", "./export/encapsulation-example/LinkedCellList.clib", "-o", "./build/results/encapsulation-example/key-provider", "-m", "${mode}", "-l", "${log}"])
+// LinkedCellList example
+createVerifastPipeline(
+  "encapsulation-linked_cell_list",
+  "verifast-applicant",
+  "./export/encapsulation-example/LinkedCellList.clib",
+  "./export/encapsulation-example/verifast_replacement.toml"
+).each { t -> encapsulaiton_tests << t }
 
-// Create Client File (in results)
+createVerifastPipeline(
+  "encapsulation-linked_cell_list",
+  "verifast-provider",
+  "./export/encapsulation-example/LinkedCellList.clib",
+  "./export/encapsulation-example/verifast_replacement.toml"
+).each { t -> encapsulaiton_tests << t }
 
-createClient("encapsulation-example-client-vf-provider", "./results/encapsulation-example/vf-provider", "example", "_Client")
-
-tasks.named('encapsulation-example-client-vf-provider').configure {
-  dependsOn 'encapsulation-example-vf-provider'
-}
-
-
-createClient("encapsulation-example-client-vf-applicant", "./results/encapsulation-example/vf-applicant", "example", "_Client")
-
-tasks.named('encapsulation-example-client-vf-applicant').configure {
-  dependsOn 'encapsulation-example-vf-applicant'
-}
-// Copy to replaced
-
-replaceWithImpl(
-  "replace-vf-provider-encapsulation-example",
-  "./results/encapsulation-example/vf-provider",
-  "./replaced/encapsulation-example/vf-provider",
-  "./export/encapsulation-example/verifast_replacement.toml")
-
-tasks.named('replace-vf-provider-encapsulation-example').configure {
-  dependsOn "encapsulation-example-client-vf-provider"
-}
-
-
-replaceWithImpl(
-  "replace-vf-applicant-encapsulation-example",
-  "./results/encapsulation-example/vf-applicant",
-  "./replaced/encapsulation-example/vf-applicant",
-  "./export/encapsulation-example/verifast_replacement.toml")
-
-tasks.named('replace-vf-applicant-encapsulation-example').configure {
-  dependsOn "encapsulation-example-client-vf-applicant"
-}
-
-
-replaceWithImpl(
-  "replace-key-provider-encapsulation-example",
-  "./results/encapsulation-example/key-provider",
-  "./replaced/encapsulation-example/key-provider",
-  "./export/encapsulation-example/key_replacement.toml")
-
-tasks.named('replace-key-provider-encapsulation-example').configure {
-  dependsOn('encapsulation-example-key-provider')
-}
-
-//verifast -c -allow_dead_code -shared ./tests.integration/replaced/encapsulation-example/vf-provider/sources.jarsrc
-
-//TODO: Check arguments (disable integer overflow…)
-runVerifast("run-encapsulation-vf-provider", [
-"-c",
-"-allow_dead_code",
-"-shared",
-"./build/replaced/encapsulation-example/vf-provider/sources.jarsrc"])
-
-tasks.named('run-encapsulation-vf-provider').configure {
-  dependsOn('replace-vf-provider-encapsulation-example')
-}
-
-// Test tasks to fix vf provider without
-runVerifast("run-encapsulation-vf-provider-test", [
-"-c",
-"-allow_dead_code",
-"-shared",
-"./build/replaced/encapsulation-example/vf-provider/sources.jarsrc"])
-
-runVerifast("run-encapsulation-vf-applicant", [
-"-c",
-"-allow_dead_code",
-"-shared",
-"./build/replaced/encapsulation-example/vf-applicant/sources.jarsrc"])
-
-tasks.named('run-encapsulation-vf-applicant').configure {
-  dependsOn('replace-vf-applicant-encapsulation-example')
-}
 
 // Full run
 tasks.register('it-encapsulation-example') {
     group = "Integration Tests"
     description = "Run all task of the encapsulaiton example"
 
-    dependsOn "encapsulation-example-vf-applicant",
-              "run-encapsulation-vf-applicant",
-              "encapsulation-example-vf-provider",//,
-              "replace-key-provider-encapsulation-example",
-              "run-encapsulation-vf-provider"
-      // "encapsulation-example-vf-applicant",
-      //"encapsulation-example-vf-provider"//,
-      //"encapsulation-example-key-applicant",
-      //"encapsulation-example-key-provider",
-      //"replace-key-provider-encapsulation-example",
-      //"run-encapsulation-vf"
+    dependsOn encapsulaiton_tests
 }
