@@ -18,7 +18,6 @@ dependencies {
 
     implementation project(":contract-chameleon.core")
     implementation project(":contract-chameleon.lang.contract_lib")
-    implementation project(":contract-chameleon.lang.key")
     implementation project(":contract-chameleon.lang.contract_lib.tools")
 
     implementation project(":contract-chameleon.lang.verifast")
