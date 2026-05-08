@@ -28,8 +28,6 @@ tasks.register('check-tools-files') {
   println "Project dir: ${project.projectDir}"
   println "----"
 
-  def key = project.findProperty("custom_key_exe") ?: contract_chameleon_key_exe
-  def ci_key = project.findProperty("custom_key_exe") ?: contract_chameleon_ci_key_exe
   def verifast = project.findProperty("custom_verifast_exe") ?: contract_chameleon_verifast_exe
 
   //println "Default KeY executable: $contract_chameleon_key_exe"
@@ -40,12 +38,8 @@ tasks.register('check-tools-files') {
   //println "Using $ci_key"
   //println "Using $verifast"
 
-  def key_file = new File(rootProject.rootDir, key)
-  def ci_key_file = new File(rootProject.rootDir, ci_key)
   def verifast_file = new File(rootProject.rootDir, verifast)
 
-  println key_file.exists() ? "✅ KeY exists: ${key_file.absolutePath}" : "❌ KeY not found: ${key_file.absolutePath}"
-  println ci_key_file.exists() ? "✅ KeY CI exists: ${ci_key_file.absolutePath}" : "❌ KeY CI not found: ${ci_key_file.absolutePath}"
   println verifast_file.exists() ? "✅ VeriFast exists: ${verifast_file.absolutePath}" : "❌ VeriFast not found: ${verifast_file.absolutePath}"
 
   println "===="
@@ -77,34 +71,6 @@ ext.runVerifast = { String taskName, List<String> argList ->
 
     dependsOn 'check-tools-files'
   }
-}
-
-tasks.register("help-key-ci", Exec) {
-  def key = project.findProperty("custom_key_exe") ?: contract_chameleon_key_exe
-  def ci_key = project.findProperty("custom_key_exe") ?: contract_chameleon_ci_key_exe
-  def key_file = new File(rootProject.rootDir, key)
-  def ci_key_file = new File(rootProject.rootDir, ci_key)
-  
-  group = "Help"
-  description = "Run the help command of key ci."
-
-  commandLine "java", "-cp", "$ci_key_file:$key_file", "io.github.wadoon.keycitool.CheckerKt", "--help"
-
-  dependsOn 'check-tools-files'
-}
-
-tasks.register("help-key", Exec) {
-
-  def key = project.findProperty("custom_key_exe") ?: contract_chameleon_key_exe
-  def key_file = new File(rootProject.rootDir, key)
-
-  group = "Help"
-  description = "Run the help command of key."
-
-  commandLine "java", "-jar", key_file.absolutePath, "--help"
-  ignoreExitValue = true
-
-  dependsOn 'check-tools-files'
 }
 
 tasks.register("help--all") {

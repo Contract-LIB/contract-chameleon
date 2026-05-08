@@ -11,8 +11,6 @@ ext.runIntegrationTest = { String taskName, List<String> argList ->
 
         def sub = project(appModule)
         classpath = sub.sourceSets.main.runtimeClasspath +
-          project(":contract-chameleon.adapter.key.export").sourceSets.main.runtimeClasspath +
-          project(":contract-chameleon.adapter.key.import").sourceSets.main.runtimeClasspath +
           project(":contract-chameleon.adapter.verifast.export").sourceSets.main.runtimeClasspath
         mainClass.set(sub.application.mainClass)
 
