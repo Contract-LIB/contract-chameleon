@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
+import org.contract_lib.contract_chameleon.contexts.MessageContext;
 
 import org.contract_lib.lang.contract_lib.ast.Sort;
 import org.contract_lib.lang.contract_lib.ast.Term;
@@ -31,24 +32,26 @@ public final class PredicateTranslator {
 
   private static final String PREDICATE_NAME = "pred";
 
-  private final ChameleonMessageManager messageHandler;
+  private final MessageContext messageContext;
   private final Set<PredicateTranslation> allowedPredicates;
   private final Map<String, List<VeriFastArgument>> predicates;
   private final TypeTranslator typeTranslator;
   private final List<VeriFastArgument> availableArguments;
+  private final List<String> hasOldVariable; //those owners have also access to an old variable
 
   // This flag removes the this from this.pred(arg1, arg2),
   // so verifast can load it properly. Otherwise vf behaves quite bugy.
   private final boolean removeOwnerThis = true;
 
   public PredicateTranslator(
-      ChameleonMessageManager messageHandler,
+      MessageContext messageContext,
       TypeTranslator typeTranslator) {
-    this.messageHandler = messageHandler;
+    this.messageContext = messageContext;
     this.typeTranslator = typeTranslator;
     this.allowedPredicates = new HashSet<>();
     this.predicates = new HashMap<>();
     this.availableArguments = new ArrayList<>();
+    this.hasOldVariable = new ArrayList<>();
   }
 
   public List<VeriFastArgument> getAvailableArguments() {
@@ -57,6 +60,7 @@ public final class PredicateTranslator {
 
   public void clearAvailableArguments() {
     this.availableArguments.clear();
+    this.hasOldVariable.clear();
   }
 
   public VeriFastExpression.VariableAssignment generateVariableAssignment(PredicateTranslation translation) {
@@ -73,22 +77,22 @@ public final class PredicateTranslator {
     if (this.allowedPredicates.contains(result)) {
       return Optional.of(result);
     }
-    {
-      return Optional.empty();
-    }
+    return Optional.empty();
   }
 
-  public Optional<PredicateTranslation> translatePredicate(Term.MethodApplication term, boolean accessOld) {
+  public Optional<PredicateTranslation> translatePredicate(Term.MethodApplication term, boolean accessOldInstead) {
     PredicateTranslation result = translateTermMethodApplication(term);
-    if (accessOld) {
+
+    if (accessOldInstead) {
       result = new PredicateTranslation(result.field(), result.owner(), true);
+    }
+    if (!hasOldVariable.contains(result.owner())) {
+      result = new PredicateTranslation(result.field(), result.owner(), false);
     }
     if (this.allowedPredicates.contains(result)) {
       return Optional.of(result);
     }
-    {
-      return Optional.empty();
-    }
+    return Optional.empty();
   }
 
   public List<VeriFastPredicate> translatePredicateDef(String owner, Constructor constructor,
@@ -142,9 +146,20 @@ public final class PredicateTranslator {
     VeriFastType vfType = this.typeTranslator.translate(sort);
     String type = sort.getName();
 
+    termTranslator.addTranslation(
+        new TermTranslation.ConstantTranslation(
+            new Term.Identifier.IdentifierValue(new Symbol(owner)),
+            owner,
+            sort,
+            vfType));
+
+    //Add constant for value types
     if (!this.predicates.containsKey(type)) {
       this.createNewConstantArgument(termTranslator, owner, sort, vfType);
       return Optional.empty();
+    }
+    if (old) {
+      this.hasOldVariable.add(owner);
     }
 
     if (assignment) {
@@ -167,7 +182,6 @@ public final class PredicateTranslator {
                   this.predicates.get(type)
                       .stream()
                       .map((field) -> this.createTranslation(owner, field, old))
-
                       .map(PredicateTranslation::generateVariable)
                       .collect(Collectors.toList()))));
     }
@@ -198,6 +212,13 @@ public final class PredicateTranslator {
         name);
   }
 
+  public void infoLogAvailableTranslations() {
+    messageContext.logInfo(String.format("Avalable Predicate Translation: %n%s%nAvailable Arguments:%n%s%nHas Old Variables:%n%s",
+    this.predicates.keySet().stream().sorted().collect(Collectors.joining(System.lineSeparator())),
+    this.availableArguments.stream().map(VeriFastArgument::name).sorted().collect(Collectors.joining(System.lineSeparator())),
+    this.hasOldVariable.stream().sorted().collect(Collectors.joining(System.lineSeparator()))));
+  }
+
   private PredicateTranslation translateTermOld(Term term) {
     return term.perform(
         this::translateError,
@@ -216,8 +237,7 @@ public final class PredicateTranslator {
   private PredicateTranslation translateTermMethodApplication(Term.MethodApplication term) {
     String fieldName = term.identifier().getValue().identifier().identifier();
     if (term.parameters().size() != 1) {
-      //TODO: hanlde error
-      System.err.println("Predicates can only have one owner (parameter), term: " + term);
+      messageContext.logError("Predicates can only have one owner (parameter), term: " + term);
     }
     String owner = translateTerm(term.parameters().get(0));
     return new PredicateTranslation(fieldName, owner, false);
@@ -247,8 +267,7 @@ public final class PredicateTranslator {
   }
 
   private <T extends Term, R> R translateError(T term) {
-    System.err.println("The term cannot be translated, as it is defined as a predicate: " + term);
-    //TODO: Create error message
+    messageContext.logError("The term cannot be translated, as it is defined as a predicate: " + term);
     return null;
   }
 

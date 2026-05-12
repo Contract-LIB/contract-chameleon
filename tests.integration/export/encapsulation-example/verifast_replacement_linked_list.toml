@@ -8,23 +8,21 @@ init = "head = null;"
 
 add = """
 
-    if (head == null) {
-      head = new NonEmptyLinkedCellList(v);
-    } else {
-      head.add(v);
-    }
-"""
+      if (head == null) {
+        head = new NonEmptyLinkedCellList(v);
+      } else {
+        head.add(v);
+      }"""
 
 getLast = """
 
-    Cell result;
-    if (head == null) {
-      result = null;
-    } else { 
-      result = head.getLast(); 
-    } 
-    return result;
-"""
+      Cell result;
+      if (head == null) {
+        result = null;
+      } else { 
+        result = head.getLast(); 
+      } 
+      return result;"""
 
 file = """
 final class NonEmptyLinkedCellList {
@@ -93,6 +91,7 @@ public class _Client {
   //@ ensures true;
   {
     testCell();
+    testLinkedCellList();
   }
 
   public static void testCell() 
@@ -161,6 +160,11 @@ public class _Client {
     //@ assert r2 == 1;
     r3 = c3.value();
     //@ assert r3 == 5;
+
+    // Yes, we can add null to the list, as this is a valid reference.
+    l.add(null);
+    Cell c6 = l.getLast();
+    //@ assert c6 == null;
   }
 }
 """

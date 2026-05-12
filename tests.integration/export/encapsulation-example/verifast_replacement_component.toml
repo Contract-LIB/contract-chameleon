@@ -1,0 +1,63 @@
+[example.Component]
+body = "private Component comp;"
+pred = "= comp |-> ?c &*& (c == null ? absVal == nil : absVal == cons(c, nil) &*& c.pred(?r))"
+init = "this.comp = null;"
+setComponent = "this.comp = input;"
+getComponent = """
+        //@ open pred(?a);
+        //@ assert a == cons(comp, nil);
+        Component c = this.comp;
+        this.comp = null;
+        //@ assert (nth(0, this_absVal_old)) == c;
+        //@ close pred(?t);
+        //@ assert t == nil;
+        // @ assert false; // Add assertion to see the available predicates, r gets lost in the following
+        this.comp = null;
+        return c;"""
+brokenGetComponent = "return this.comp;"
+file = ""
+
+[example._Client]
+
+file = """
+package example;
+
+public class _Client {
+
+  public static void main(String[] args) 
+  //@ requires true;
+  //@ ensures true;
+  {
+    testComp();
+  }
+
+  public static void testComp() 
+  //@ requires true;
+  //@ ensures true;
+  {
+    Component c1 = Component.init();
+    Component c2 = Component.init();
+
+    //Here, we lose the state of c2, as it is not represented in c1 so far.
+    c1.setComponent(c2);
+    //@ assert c1.pred(cons(c2, nil));
+    
+    
+    // This is not possible as we don't have the predcate for c2 anymore.
+    // @ assert c2.pred(nil);
+    //c2.setComponent(t);
+  
+    Component c3 = c1.getComponent();
+    //@ assert c3 == c2;
+    
+    //@ assert c1.pred(nil);
+    //@ assert c2.pred(?r4);
+    //@ assert c3.pred(?r3);
+    // As a consequence of the loss of c2's state we are not able to recover the state of r3 / r4 anymore
+    // @ assert r4 == nil;
+    // @ assert r3 == nil;
+    // However, this condition still holds.
+    //@ assert r3 == r4;
+  }
+}
+"""

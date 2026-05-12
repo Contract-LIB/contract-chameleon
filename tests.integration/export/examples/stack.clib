@@ -3,6 +3,6 @@
     (example3.Stack 0)
   )
   ((
-     (Stack (absVal (Seq Int)) (test (Seq (Seq BoundInt))))
+     (Stack (absVal (Seq Int)))
   ))
 )

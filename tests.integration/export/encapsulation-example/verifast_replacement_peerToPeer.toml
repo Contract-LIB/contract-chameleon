@@ -1,0 +1,66 @@
+[example.Peer]
+body = "private int x;"
+pred = "= x |-> absVal"
+init = "this.x = 0;"
+value = "return this.x;"
+set = "this.x = v;"
+copyFrom = "this.x = peer.value();"
+file = ""
+
+[example._Client]
+
+file = """
+package example;
+
+public class _Client {
+
+  public static void main(String[] args) 
+  //@ requires true;
+  //@ ensures true;
+  {
+    testPeer();
+    testLinkedPeer();
+  }
+
+  public static void testPeer() 
+  //@ requires true;
+  //@ ensures true;
+  {
+    Peer c1 = Peer.init();
+    Peer c2 = Peer.init();
+
+    int r1 = c1.value();
+    int r2 = c2.value();
+    //@ assert r1 == 0;
+    //@ assert r2 == 0;
+
+    c1.set(1);
+    r1 = c1.value();
+    r2 = c2.value();
+    //@ assert r1 == 1;
+    //@ assert r2 == 0;
+  }
+
+  public static void testLinkedPeer() 
+  //@ requires true;
+  //@ ensures true;
+  {
+    Peer c1 = Peer.init();
+    Peer c2 = Peer.init();
+
+    int r1 = c1.value();
+    int r2 = c2.value();
+    //@ assert r1 == 0;
+    //@ assert r2 == 0;
+
+    c1.set(1);
+    r1 = c1.value();
+    //@ assert r1 == 1;
+
+    c1.copyFrom(c2);
+    
+    r1 = c1.value();
+    //@ assert r1 == 0;
+  }
+}
+"""
