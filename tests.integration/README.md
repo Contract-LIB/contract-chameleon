@@ -4,8 +4,8 @@
 
 | Tests | Idea | VeriFast | KeY |
 | ------------- | -------------- | -------------- | --- |
-| example.Counter | | ⭕️ | ⭕️ |
-| example.Stack | | ⭕️ | ⭕️ |
+| example.Counter | | ✅ | ⭕️ |
+| example.Stack | | ✅| ⭕️ |
 
 | Tests | Idea | VeriFast | KeY |
 | ------------- | -------------- | -------------- | --- |

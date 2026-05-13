@@ -1,0 +1,106 @@
+[example.Stack]
+body = """
+
+    private int[] comp;
+    private int size;
+    private final int MAX_SIZE = 1000;"""
+
+pred = "= comp |-> ?c &*& size |-> ?s &*& array_slice(c, 0, s, absVal) &*& array_slice(c, s, 1000, _) &*&s == length(absVal)"
+
+init = """
+
+      this.comp = new int[MAX_SIZE];
+      this.size = 0;"""
+
+peek = """
+
+      //@ not_empty_list(this_absVal);
+      //@ array_slice_split(comp, 0, this.size - 1);
+      return this.comp[this.size-1];"""
+
+push = """
+
+      this.comp[this.size] = v;
+      this.size++;"""
+
+pop = """
+
+        //@ not_empty_list(this_absVal_old);
+        //@ array_slice_split(comp, 0, this.size - 1);
+        this.size--;"""
+
+reset = "this.size = 0;"
+
+file = """
+/*@
+
+lemma_auto void append_length<t>(list<t> xs, list<t> ys)
+    requires true;
+    ensures length(append(xs, ys)) == length(xs) + length(ys);
+{ 
+    switch (xs) {
+        case nil:
+        case cons(h, t): append_length(t, ys); 
+    }    
+}
+
+lemma void not_empty_list<t>(list<t> xs)
+    requires xs != nil;
+    ensures length(xs) > 0;
+{}
+@*/
+"""
+
+[example._Client]
+
+file = """
+package example;
+
+public class _Client {
+
+  public static void main(String[] args) 
+  //@ requires true;
+  //@ ensures true;
+  {
+    testStack();
+  }
+
+  public static void testStack() 
+  //@ requires true;
+  //@ ensures true;
+  {
+    Stack c1 = Stack.init();
+    //@ assert c1.pred(nil);
+    c1.push(0);
+    //@ assert c1.pred(cons(0, nil));
+    
+    int r1 = c1.peek();
+    //@ assert c1.pred(cons(0, nil));
+    //@ assert r1 == 0;
+
+    c1.push(1);
+    //@ assert c1.pred(cons(0, cons(1, nil)));
+
+    int r2 = c1.peek();
+    //@ assert c1.pred(cons(0, cons(1, nil)));
+    //@ assert r2 == 1;
+
+    c1.push(2);
+    //@ assert c1.pred(cons(0, cons(1, cons(2, nil))));
+
+    int r3 = c1.peek();
+    //@ assert c1.pred(cons(0, cons(1, cons(2, nil))));
+    //@ assert r3 == 2;
+
+    c1.pop();
+    //@ assert c1.pred(cons(0, cons(1, nil)));
+
+    int r4 = c1.peek();
+    //@ assert c1.pred(cons(0, cons(1, nil)));
+    //@ assert r4 == 1;
+
+    c1.reset();
+    //@ assert c1.pred(nil);
+  }
+}
+"""

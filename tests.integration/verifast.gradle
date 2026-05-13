@@ -1,4 +1,7 @@
 
+ext.verifast_applicant = "verifast-applicant"
+ext.verifast_provider = "verifast-provider"
+
 //  Call VeriFast help to see if it is running / available
 tasks.register("help-verifast", Exec) {
   def verifast = project.findProperty("custom_verifast_exe") ?: contract_chameleon_verifast_exe
@@ -57,6 +60,9 @@ ext.createVerifastClient = { String taskName, String destination, String clientP
 def mode = "OVERWRITE" // To force override in CC 
 def log = "INFO" // To set log level in CC
 
+//TODO: Create examples that do not require this
+def disable_overflow_check = true
+
 // - Create a complete verifast pipeline 
 //   - contract-chameleon
 //   - client generation
@@ -100,11 +106,17 @@ ext.createVerifastPipeline = {
     "${replaced_destination}",
     "${replacement_file}")
 
-  runVerifast(verifast_task,
-    ["-c",
+  def args = ["-c",
      "-allow_dead_code",
-     "-shared",
-     "${replaced_destination}/sources.jarsrc"])
+     "-shared"]
+
+  if (disable_overflow_check) {
+    args << "-disable_overflow_check"
+  }
+
+  args << "${replaced_destination}/sources.jarsrc"
+
+  runVerifast(verifast_task,args)
 
   // dependencies of tasks
   tasks.named(client_task).configure {

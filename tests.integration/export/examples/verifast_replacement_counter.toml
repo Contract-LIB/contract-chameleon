@@ -1,0 +1,51 @@
+[example.Counter]
+body = "private int c;"
+pred = "= c |-> absVal"
+init = "this.c = 0;"
+value = "return this.c;"
+increment = "this.c += 1;"
+decrement = "this.c -= 1;"
+set = "this.c = value;"
+reset = "this.c = 0;"
+file = ""
+
+[example._Client]
+
+file = """
+package example;
+
+public class _Client {
+
+  public static void main(String[] args) 
+  //@ requires true;
+  //@ ensures true;
+  {
+    testCounter();
+  }
+
+  public static void testCounter() 
+  //@ requires true;
+  //@ ensures true;
+  {
+    Counter c1 = Counter.init();
+    int r1 = c1.value();
+    //@ assert r1 == 0;
+
+    c1.increment();
+    int r2 = c1.value();
+    //@ assert r2 == 1;
+
+    c1.decrement();
+    int r3 = c1.value();
+    //@ assert r3 == 0;
+
+    c1.set(10);
+    int r4 = c1.value();
+    //@ assert r4 == 10;
+
+    c1.reset();
+    int r5 = c1.value();
+    //@ assert r5 == 0;
+  }
+}
+"""

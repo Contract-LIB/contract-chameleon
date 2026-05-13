@@ -1,0 +1,54 @@
+
+// List to store all creatd tasks
+def encapsulaiton_tests = []
+
+// LinkedCellList example
+createVerifastPipeline(
+  "encapsulation-linked_cell_list",
+  "verifast-applicant",
+  "./export/encapsulation-example/LinkedCellList.clib",
+  "./export/encapsulation-example/verifast_replacement_linked_list.toml"
+).each { t -> encapsulaiton_tests << t }
+
+createVerifastPipeline(
+  "encapsulation-linked_cell_list",
+  "verifast-provider",
+  "./export/encapsulation-example/LinkedCellList.clib",
+  "./export/encapsulation-example/verifast_replacement_linked_list.toml"
+).each { t -> encapsulaiton_tests << t }
+
+
+// PeerToPeer example
+createVerifastPipeline(
+  "encapsulation-peer_to_peer",
+  "verifast-provider",
+  "./export/encapsulation-example/PeerToPeer.clib",
+  "./export/encapsulation-example/verifast_replacement_peerToPeer.toml"
+).each { t -> encapsulaiton_tests << t }
+
+/* Disabled, as it is experimental
+// Self owning component
+createVerifastPipeline(
+  "encapsulation-component",
+  "verifast-provider",
+  "./export/encapsulation-example/Component.clib",
+  "./export/encapsulation-example/verifast_replacement_component.toml"
+).each { t -> encapsulaiton_tests << t }
+*/
+
+/* Disabled work in progress
+createVerifastPipeline(
+  "encapsulation-int_tree_set",
+  "verifast-applicant",
+  "./export/encapsulation-example/IntTreeSet.clib",
+  "./export/encapsulation-example/verifast_replacement.toml"
+).each { t -> encapsulaiton_tests << t }
+*/
+
+// Full run
+tasks.register('it-encapsulation-example') {
+    group = "Integration Tests"
+    description = "Run all task of the encapsulaiton example"
+
+    dependsOn encapsulaiton_tests
+}

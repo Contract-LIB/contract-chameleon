@@ -56,5 +56,16 @@
   ((
     true
     (= (absVal this) value)
+  ))
+)
+
+
+(define-contract example.Counter.reset
+  (
+    (this (inout Counter))
   )
-))
+  ((
+    true
+    (= (absVal this) 0)
+  ))
+)

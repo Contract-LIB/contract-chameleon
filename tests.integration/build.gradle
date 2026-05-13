@@ -3,7 +3,8 @@ apply from: "tools.gradle"
 apply from: "key-ci.gradle" 
 apply from: "verifast.gradle" 
 
-apply from: "encapsulation.gradle" 
+apply from: "export/encapsulation-example/build.gradle" 
+apply from: "export/examples/build.gradle" 
 
 
 def mode = "OVERWRITE"
