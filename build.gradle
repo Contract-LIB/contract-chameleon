@@ -31,6 +31,7 @@ dependencies {
   runtimeOnly project(":contract-chameleon.adapter.key.export")
   runtimeOnly project(":contract-chameleon.adapter.verifast.export")
   runtimeOnly project(":contract-chameleon.adapter.key.import")
+  runtimeOnly project(":contract-chameleon.adapter.clib.lsp")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -45,6 +46,12 @@ java {
 
 application {
     mainClass = 'org.contract_lib.ContractChameleon'
+}
+
+
+run {
+    // Forward standard input to the Java application
+    standardInput = System.in
 }
 
 jar {
@@ -83,6 +90,7 @@ task lightShadowJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.Shado
     exclude(project(":contract-chameleon.adapter.key.export"))
     exclude(project(":contract-chameleon.adapter.key.import"))
     exclude(project(":contract-chameleon.adapter.verifast.export"))
+    exclude(project(":contract-chameleon.adapter.clib.lsp"))
   }
 }
 
