@@ -1,46 +1,34 @@
 package org.contract_lib.lang.contract_lib.generator;
 
 import java.io.IOException;
-
-import java.util.List;
-import java.util.ArrayList;
-
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.util.stream.Collectors;
-
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
-
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
-
 import org.contract_lib.lang.contract_lib.antlr4parser.ContractLIBLexer;
 import org.contract_lib.lang.contract_lib.antlr4parser.ContractLIBParser;
-
 import org.contract_lib.lang.contract_lib.ast.ContractLibAst;
-import org.contract_lib.lang.contract_lib.label.AstTranslatorExtension;
+import org.contract_lib.lang.contract_lib.label.ContractLibAstTranslatorExtension;
 
 public class ContractLibGenerator {
 
-  private List<AstTranslatorExtension> extensions;
+  private List<ContractLibAstTranslatorExtension> extensions;
   private ChameleonMessageManager manager;
 
   public ContractLibGenerator(
-    ChameleonMessageManager manager
-  ) {
+      ChameleonMessageManager manager) {
     this(
-      manager,
-      new ArrayList()
-    );
+        manager,
+        new ArrayList<>());
   }
-  
+
   public ContractLibGenerator(
-    ChameleonMessageManager manager,
-    List<AstTranslatorExtension> extensions
-  ) {
+      ChameleonMessageManager manager,
+      List<ContractLibAstTranslatorExtension> extensions) {
     this.manager = manager;
     this.extensions = extensions;
   }
@@ -56,20 +44,18 @@ public class ContractLibGenerator {
   }
 
   public ContractLibAst generate(
-    String locationId,
-    CharStream charStream
-  ) {
+      String locationId,
+      CharStream charStream) {
     ContractLIBLexer lexer = new ContractLIBLexer(charStream);
     CommonTokenStream tokenStream = new CommonTokenStream(lexer);
     ContractLIBParser parser = new ContractLIBParser(tokenStream);
-    
+
     ContractLibAstErrorListener errorHandler = new ContractLibAstErrorListener(
-      locationId,
-      manager
-    );
+        locationId,
+        manager);
 
     parser.addErrorListener(errorHandler);
-  
+
     ContractLIBParser.Start_Context parseTree = parser.start_();
 
     ContractLibAstTranslator translator = new ContractLibAstTranslator();

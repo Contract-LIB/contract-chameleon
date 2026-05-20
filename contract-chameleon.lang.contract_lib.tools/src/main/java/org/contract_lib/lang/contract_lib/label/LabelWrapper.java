@@ -10,7 +10,7 @@ import org.contract_lib.lang.contract_lib.ast.ContractLibAstElement;
 public class LabelWrapper<T> {
 
   //TODO: Write proper javadoc
-  
+
   //TODO: Remove alternative constructor
   /* This initializer might only be necessary,
    *  when the equals method of the key is changed.
@@ -20,9 +20,9 @@ public class LabelWrapper<T> {
     return new LabelWrapper(new IdentityHashMap());
   }
   */
-  
+
   public LabelWrapper() {
-    this(new HashMap());
+    this(new HashMap<>());
   }
 
   private LabelWrapper(Map<ContractLibAstElement, T> map) {
