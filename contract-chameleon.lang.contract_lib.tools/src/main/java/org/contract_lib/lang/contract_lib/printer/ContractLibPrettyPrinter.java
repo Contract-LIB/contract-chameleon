@@ -6,7 +6,6 @@ import java.io.Writer;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;

@@ -12,7 +12,6 @@ import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
 import org.contract_lib.lang.contract_lib.antlr4parser.ContractLIBLexer;
 import org.contract_lib.lang.contract_lib.antlr4parser.ContractLIBParser;
 import org.contract_lib.lang.contract_lib.ast.ContractLibAst;
-import org.contract_lib.lang.contract_lib.label.ContractLibAstTranslatorExtension;
 
 public class ContractLibGenerator {
 
@@ -58,7 +57,7 @@ public class ContractLibGenerator {
 
     ContractLIBParser.Start_Context parseTree = parser.start_();
 
-    ContractLibAstTranslator translator = new ContractLibAstTranslator();
+    ContractLibAstTranslator translator = new ContractLibAstTranslator(this.extensions);
 
     ContractLibAst ast = translator.translateStart(parseTree);
 

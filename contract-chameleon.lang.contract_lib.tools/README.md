@@ -34,7 +34,7 @@ though additional [tools](#available-tooling) working on the AST.
 
 ### Translator Extensions
 
-- _TODO:_ `FilePosition`:
+- `FilePosition`:
   The position of the AST node
   where it is defined in the `Contract-LIB` source file.
 - _TODO:_ `AddedIdentifier<Global>`:
@@ -44,8 +44,8 @@ though additional [tools](#available-tooling) working on the AST.
 
 ### Tool Extensions
 
-- _TODO_: `ExpressionsTypeSignature`:
-  The type signature of expressions for the AST node.
+- _TODO_: `TermTypeSignature`:
+  The type signature of term expressions for the AST node.
 - _TODO_: `AvailabeIdentifier<Sorts>`:
   Provides a list of sort identifiers that are available at this node.
 - _TODO_: `AvailabeIdentifier<FunctionIdentifer>`:

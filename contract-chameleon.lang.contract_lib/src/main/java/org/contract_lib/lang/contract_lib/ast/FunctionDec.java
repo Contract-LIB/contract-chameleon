@@ -6,5 +6,5 @@ public record FunctionDec(
     Symbol name,
     List<SortDec.Parameter> params,
     List<Sort> arguments,
-    Sort result
-) {}
+    Sort result) implements ContractLibAstElement {
+}

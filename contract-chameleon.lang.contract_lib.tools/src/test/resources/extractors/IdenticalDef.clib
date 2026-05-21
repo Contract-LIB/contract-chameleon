@@ -1,0 +1,23 @@
+(declare-abstractions 
+  (
+   (TestAbstraction 0)
+  )
+  (
+   (
+    (TestConstructorA)
+   )
+  )
+)
+
+
+(define-contract TestAbstraction.test
+  (
+   (test (in TestConstructor))
+  )
+  (
+   (
+    true
+    true
+   )
+  )
+)

@@ -103,6 +103,9 @@ class ContractLibAstTranslator {
   Assert translateAssert(final ContractLIBParser.Cmd_assertContext ctx) {
     final Term term = translateTerm(ctx.term());
     final Assert assertV = new Assert(term);
+
+    callExtensions(assertV, ctx, ContractLibAstTranslatorExtension::extendsionAssert);
+
     return assertV;
   }
 
@@ -110,17 +113,13 @@ class ContractLibAstTranslator {
     final Symbol symbol = translateSymbol(ctx.symbol());
     final SortDec.Def sort = new SortDec.Def(symbol, DEFAULT_RANK_DATATYPE_DECLARATION);
 
-    //TODO: Problem in how the datatypes of the abstraction are named? 
-    final SortDec.Def missingName = new SortDec.Def(new Symbol("missing_type_symbol"),
-        DEFAULT_RANK_DATATYPE_DECLARATION);
-
     final DatatypeDec datatypeDec = this.translateDatatypeDec(ctx.datatype_dec());
 
     final Abstraction abstraction = new Abstraction(
         sort,
         datatypeDec);
 
-    //TODO: call extensions 
+    callExtensions(abstraction, ctx, ContractLibAstTranslatorExtension::extendsionDeclareAbstraction);
 
     return abstraction;
   }
@@ -143,7 +142,8 @@ class ContractLibAstTranslator {
         .mapToObj(i -> new Abstraction(
             sortDec.get(i),
             helpers.get(i)));
-    //TODO: call extensions 
+
+    callExtensions(abstractions, ctx, ContractLibAstTranslatorExtension::extendsionDeclareAbstractions);
 
     return abstractions;
   }
@@ -154,7 +154,7 @@ class ContractLibAstTranslator {
 
     final Constant constant = new Constant(symbol, sort);
 
-    //TODO: call extensions 
+    callExtensions(constant, ctx, ContractLibAstTranslatorExtension::extendsionDeclareConstant);
 
     return constant;
   }
@@ -168,7 +168,8 @@ class ContractLibAstTranslator {
     final Datatype datatype = new Datatype(
         sort,
         dtDec);
-    //TODO: call extensions 
+
+    callExtensions(datatype, ctx, ContractLibAstTranslatorExtension::extendsionDeclareDatatype);
 
     return datatype;
   }
@@ -194,7 +195,7 @@ class ContractLibAstTranslator {
             sortDec.get(i),
             helpers.get(i)));
 
-    //TODO: call extensions 
+    callExtensions(datatypes, ctx, ContractLibAstTranslatorExtension::extendsionDeclareDatatypes);
 
     return datatypes;
   }
@@ -211,11 +212,13 @@ class ContractLibAstTranslator {
 
     final FunctionDec function = new FunctionDec(
         symbol,
-        new ArrayList(),
+        new ArrayList<>(),
         arguments,
         result);
-    //TODO: call extensions 
-    return null;
+
+    callExtensions(function, ctx, ContractLibAstTranslatorExtension::extendsionDeclareFun);
+
+    return function;
   }
 
   SortDec.Def translateDeclareSort(final ContractLIBParser.Cmd_declareSortContext ctx) {
@@ -227,9 +230,10 @@ class ContractLibAstTranslator {
     if (numeral == null) {
       return null;
     }
+
     final SortDec.Def sort = new SortDec.Def(symbol, numeral);
 
-    //TODO: call extensions 
+    callExtensions(sort, ctx, ContractLibAstTranslatorExtension::extendsionDeclareSort);
 
     return sort;
   }
@@ -276,6 +280,7 @@ class ContractLibAstTranslator {
     final PrePostPair prePost = new PrePostPair(
         pre,
         post);
+
     //TODO: Implement
     return prePost;
   }
@@ -429,6 +434,7 @@ class ContractLibAstTranslator {
     }
 
     callExtensions(term, ctx, ContractLibAstTranslatorExtension::extendsionTerm);
+
     return term;
     //TODO: Allow parameters
   }

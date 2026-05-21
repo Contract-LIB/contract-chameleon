@@ -4,7 +4,7 @@ package org.contract_lib.lang.contract_lib.ast;
 import java.util.List;
 import java.util.function.Function;
 
-public interface Pattern {
+public interface Pattern extends ContractLibAstElement {
 
   <R> R perform(Function<Case, R> patternCase,
       Function<WithParameters, R> patternWithParameters);
