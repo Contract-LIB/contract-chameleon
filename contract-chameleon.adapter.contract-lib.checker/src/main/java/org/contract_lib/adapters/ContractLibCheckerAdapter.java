@@ -1,31 +1,22 @@
 package org.contract_lib.adapters;
 
-import java.io.IOException;
-import java.nio.file.Path;
-
 import org.contract_lib.contract_chameleon.Adapter;
-import org.contract_lib.contract_chameleon.adapters.ExportAdapter;
-import org.contract_lib.contract_chameleon.contexts.ResultDirectoryContext.Dir;
-import org.contract_lib.lang.contract_lib.ast.ContractLibAst;
-import org.contract_lib.lang.contract_lib.generator.ContractLibGenerator;
+import org.contract_lib.contract_chameleon.adapters.CheckerAdapter;
 
 import com.google.auto.service.AutoService;
 
 @AutoService(Adapter.class)
-public final class ContractLibCheckerAdapter extends ExportAdapter {
+public final class ContractLibCheckerAdapter extends CheckerAdapter {
 
   public String getAdapterName() {
     return "contract-lib-identifier-checker";
   }
 
   @Override
-  public void performForPath(Path p, Dir finalDir) {
-    try {
-      ContractLibGenerator generator = new ContractLibGenerator(getMessageContext().getMessageManager());
-      ContractLibAst ast = generator.generateFromPath(p);
+  public CheckerAdapterResult performCheck() {
 
-    } catch (IOException e) {
-      getMessageContext().logException(e);
-    }
+    this.getMessageContext().logError("No checks performed!");
+
+    return CheckerAdapterResult.FAILURE;
   }
 }

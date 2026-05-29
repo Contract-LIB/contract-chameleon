@@ -1,11 +1,10 @@
+
 package org.contract_lib.lang.contract_lib.ast;
 
 import java.util.function.Function;
 
-public record Assert(
-    Term term) implements Command {
+public interface Command extends ContractLibAstElement {
 
-  @Override
   public <R> R perform(
       Function<Abstraction, R> decAbstraction,
       Function<JoinedCommand<Abstraction>, R> decAbstractions,
@@ -20,7 +19,5 @@ public record Assert(
       Function<FunctionDec, R> defFunction,
       Function<FunctionDec, R> defFunctionRec,
       Function<JoinedCommand<FunctionDec>, R> defFunctionsRec,
-      Function<Assert, R> assertion) {
-    return assertion.apply(this);
-  }
+      Function<Assert, R> assertion);
 }

@@ -1,9 +1,16 @@
 package org.contract_lib.lang.contract_lib.ast;
 
+import java.util.List;
 import java.util.function.Function;
 
-public record Assert(
-    Term term) implements Command {
+/**
+ * This command is not diretly part of the AST,
+ * but is needed to join multiple AST nodes together,
+ * when they are created in the same command call. 
+ * 
+ * At the moment this counts for {@code Datatype}, {@code Abstraction} {@code FunctionDec}.
+ * NOTE:There always has to be at least one command. */
+public record JoinedCommand<C extends JoinableCommand<C>>(List<C> commands) implements Command {
 
   @Override
   public <R> R perform(
@@ -21,6 +28,7 @@ public record Assert(
       Function<FunctionDec, R> defFunctionRec,
       Function<JoinedCommand<FunctionDec>, R> defFunctionsRec,
       Function<Assert, R> assertion) {
-    return assertion.apply(this);
+    return commands.getFirst().select(decAbstractions, decDatatypes, defFunctionsRec).apply(this);
   }
+
 }

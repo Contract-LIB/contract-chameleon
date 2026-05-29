@@ -1,46 +1,73 @@
 # Contract-LIB Tools
 
 This module defines [generators](#generators)
-for the creation of `Contract-LIB` AST
-and [tooling](#available-tooling) working on the generated `Contract-LIB` AST.
-Additionally, this module defines [labels](#ast-labels) for the generated AST nodes,
+for the creation of `Contract-LIB` `AST`
+and [tooling](#available-tooling) working on the generated `Contract-LIB AST`.
+Additionally, this module defines [labels](#ast-labels) for the generated `AST` nodes,
 providing additional information about the specific node.
 
-## Generators
+## Available Contexts (Tooling)
 
-- `ContractLibGenerator`:
-  Generate a `Contract-LIB` from the `antlr4` parse tree.
+- `JavaSignatureContext`
+  - `ClassNameExtractor`:
+    Extract the identifier of `Java` class (and package identifier)
+    from a `Contract-LIB` abstraction.
+  - `JavaMethodSignatureExtractor`:
+    Extract the `Java` signature of a method from a `Contract-LIB` contract.
 
-## Available Tooling
+- `ContractLibAstContext`
+  - `ContractLibGenerator`:
+    Generate a `Contract-LIB` from the `antlr4` parse tree.
+  - Extensions
+    - `FilePositionLinker` links the `AST` nodes to their position in the file.
+    - `ParentLinker` access the parent `AST` node, if available.
+    - `CommandOrderExtractor` represents the order where the commands where executed.
+    - `DefFunctionIdentiferExtractor`
+      collects all function identifiers defined by a `AST` node.
+    - `DefSortIdentiferExtractor`
+      collects all sort identifiers defined by a `AST` node.
+    - `DefVariableIdentiferExtractor`
+      collects all variable identifiers defined by a `AST` node.
 
-- `ClassNameExtractor`:
-  Extract the identifier of `Java` class (and package identifier)
-  from a `Contract-LIB` abstraction.
-- `JavaMethodSignatureExtractor`:
-  Extract the `Java` signature of a method from a `Contract-LIB` contract.
-- _TODO:_ `ExpressionsTypeResolver`:
-  Resolves the full type of each `Contract-LIB` expression.
+- `AvailableIdentifierContext`:
+  - `AvailableIdentifier<FunctionIdentifer>`:
+    Access all available function identifiers (global).
+  - `AvailableIdentifier<SortIdentifier>`:
+    Access all available sort identifiers (global).
+  - `AvailableIdentifier<VariableIdentifer>`:
+    Access all available variable identifiers
+    (for each scope in the `AST`).
+
+- `ContractLibTypeContext`
+  - _TODO:_ `ExpressionsTypeResolver`:
+    Resolves the full type of each `Contract-LIB` expression.
+
+## Checkers
+
 - _TODO:_ `IdentifierDefinitionChecker`:
   Check if new defines identifier are unambiguous.
 - _TODO:_ `IdentifierUsageChecker`:
-  Check if accessed identifier are defined.
+  Check if accessed identifier are defined. (compare `TestVariableScopes`)
 
-## AST Labels
+## `AST` Labels
 
-The `Contract-LIB` AST nodes can be extended with labels.
+The `Contract-LIB` `AST` nodes can be extended with labels.
 This can happen directly in the translation from the parse tree
 (`ContractLibAstTranslatorExtension`) or
-though additional [tools](#available-tooling) working on the AST.
+though additional [tools](#available-tooling) working on the `AST`.
 
 ### Translator Extensions
 
 - `FilePosition`:
   The position of the AST node
   where it is defined in the `Contract-LIB` source file.
-- _TODO:_ `AddedIdentifier<Global>`:
-  The identifier added by this node to the global scope.
-- _TODO:_ `AddedIdentifier<Local>`:
-  The identifier added by this node to the local scope.
+- `ParentLinker`: Access the parent `AST` node, if available.
+- `FunctionIdentiferExtractor`:
+  Collect all function identifiers defined by a `AST` node.
+- `SortIdentiferExtractor`
+  Collect all sort identifiers defined by a `AST` node.
+- `VariableIdentiferExtractor`
+  Collect all variable identifiers defined by a `AST` node.
 
 ### Tool Extensions
 

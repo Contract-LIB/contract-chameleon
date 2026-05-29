@@ -30,6 +30,7 @@ public abstract class ExportAdapter extends TranslationAdapter {
     if (sourcesContext.get().getPaths().size() == 1) {
       this.performForPath(sourcesContext.get().getPaths().getFirst(), this.result.getResultDirectory());
     } else {
+      //NOTE: As there might be multiple Contract-LIB files that have the same name, this will just override I think.
       sourcesContext.get().getPaths().forEach(this::performAddingSubdir);
     }
   }
@@ -37,7 +38,6 @@ public abstract class ExportAdapter extends TranslationAdapter {
   final void performAddingSubdir(Path p) {
     String filename = p.getFileName().toString();
     Dir finalDir = result.getResultDirectory().addSubDirectories(filename);
-    //NOTE: As there might be multiple Contract-LIB files that have the same name, this will just override I think.
     performForPath(p, finalDir);
   }
 

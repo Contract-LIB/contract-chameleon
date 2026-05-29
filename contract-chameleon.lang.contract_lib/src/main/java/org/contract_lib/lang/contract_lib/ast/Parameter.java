@@ -1,10 +1,11 @@
+
 package org.contract_lib.lang.contract_lib.ast;
 
 import java.util.function.Function;
 
-public record Assert(
-    Term term) implements Command {
-
+public record Parameter(
+    Symbol name //TODO: replace Symbol with String
+) implements Command {
   @Override
   public <R> R perform(
       Function<Abstraction, R> decAbstraction,
@@ -21,6 +22,6 @@ public record Assert(
       Function<FunctionDec, R> defFunctionRec,
       Function<JoinedCommand<FunctionDec>, R> defFunctionsRec,
       Function<Assert, R> assertion) {
-    return assertion.apply(this);
+    return decParameter.apply(this);
   }
 }
