@@ -44,7 +44,7 @@
 | ------------- | -------------- | -------------- | --- |
 | Kärkkäinen-Sanders algorithm | Creates a suffix array | ⭕️ | ⭕️ |
 |  - The algorithm itself |  | ⭕️ | ⭕️ |
-|  - The RB-Tree |  | ⭕️ | ⭕️ |
+|  - [projects.RB-Tree](#rbtree) |  | ⭕️ | ⭕️ |
 
 - ✅: Test successful
 - ❎: Exploration of theoretical limitation (Test disabled)
@@ -70,13 +70,19 @@ and the problems that arise at the moment.
 
 A component persists of list of more components (recursively).
 
+### projects.RB-Tree {#rbtree}
+
+At [verification](./projects/rbtree-verification/) the original implementation
+of the rb-tree can be found.
+There was a `Contract-LIB` specification added.
+
 ## Ideas for Case Studies
 
 | Tests | Idea | VeriFast | KeY |
 | ------------- | -------------- | -------------- | --- |
+|  - [The RB-Tree](https://github.com/KeYProject/rbtree-verification) |  | ⭕️ | ⭕️ |
 | Kärkkäinen-Sanders algorithm | Creates a suffix array | ⭕️ | ⭕️ |
 |  - The algorithm itself |  | ⭕️ | ⭕️ |
-|  - The RB-Tree |  | ⭕️ | ⭕️ |
 
 ### Created with [ChatGPT-5.5](https://ki-toolbox.scc.kit.edu/c/e3eaf169-67c4-44f5-bcc9-c1248e18e1eb)
 

@@ -22,7 +22,7 @@ createVerifastPipeline(
   counter_replace
 ).each { t -> tests << t }
 
-// - Counter example
+// - Stack example
 
 def examples_stack = "examples-stack"
 def stack_clib = "./export/examples/Stack.clib"
