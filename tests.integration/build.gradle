@@ -5,6 +5,8 @@ apply from: "verifast.gradle"
 
 apply from: "export/encapsulation-example/build.gradle" 
 apply from: "export/examples/build.gradle" 
+apply from: "export/theories/build.gradle" 
+apply from: "export/projects/build.gradle" 
 
 
 def mode = "OVERWRITE"

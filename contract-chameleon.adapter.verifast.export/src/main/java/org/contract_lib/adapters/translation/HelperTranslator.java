@@ -1,6 +1,7 @@
 package org.contract_lib.adapters.translation;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.ArrayList;
 
 import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
@@ -8,6 +9,7 @@ import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
 import org.contract_lib.lang.verifast.ast.VeriFastExpression;
 import org.contract_lib.lang.verifast.ast.VeriFastType;
 import org.contract_lib.lang.verifast.ast.VeriFastHelperSpecification;
+import org.contract_lib.lang.verifast.ast.VeriFastPredicate;
 import org.contract_lib.lang.verifast.ast.VeriFastHelper;
 import org.contract_lib.lang.verifast.ast.VeriFastFixpoint;
 import org.contract_lib.lang.verifast.ast.VeriFastArgument;
@@ -36,7 +38,36 @@ public final class HelperTranslator {
           List.of(
               new VeriFastArgument(BOOLEAN_TYPE, "a"),
               new VeriFastArgument(BOOLEAN_TYPE, "b")),
-          new VeriFastExpression.Variable("!a || b"))
+          new VeriFastExpression.Variable("!a || b")),
+
+      new VeriFastPredicate("implies",
+          List.of(
+              new VeriFastArgument(BOOLEAN_TYPE, "a"),
+              new VeriFastArgument(BOOLEAN_TYPE, "b")),
+          Optional.of(new VeriFastExpression.Fixpoint("implies",
+              List.of(
+                  new VeriFastExpression.Variable("a"),
+                  new VeriFastExpression.Variable("b")))),
+          Optional.empty()),
+
+      new VeriFastPredicate("xor",
+          List.of(
+              new VeriFastArgument(BOOLEAN_TYPE, "a"),
+              new VeriFastArgument(BOOLEAN_TYPE, "b")),
+          Optional.of(new VeriFastExpression.Fixpoint("xor",
+              List.of(
+                  new VeriFastExpression.Variable("a"),
+                  new VeriFastExpression.Variable("b")))),
+          Optional.empty()),
+
+      new VeriFastFixpoint(
+          "ite<t>",
+          GEN_EL,
+          List.of(
+              new VeriFastArgument(BOOLEAN_TYPE, "a"),
+              new VeriFastArgument(GEN_EL, "b"),
+              new VeriFastArgument(GEN_EL, "c")),
+          new VeriFastExpression.Variable("a ? b : c"))
   /*
       new VeriFastFixpoint(
           "contains<t>",
@@ -52,17 +83,6 @@ public final class HelperTranslator {
               """))
   */
   /*@
-  // Extension of Boolean logic
-  
-  fixpoint boolean =>(boolean a, boolean b) {
-  return a ? b : true;
-  }
-  fixpoint boolean implies(boolean a, boolean b) {
-  return a ? b : true;
-  }
-  
-  predicate =>(boolean p, boolean q) = =>(p, q) == true;
-  predicate implies(boolean p, boolean q) = =>(p, q) == true;
   
   
   fixpoint boolean chain4f(boolean a, boolean b, boolean c, boolean d) {

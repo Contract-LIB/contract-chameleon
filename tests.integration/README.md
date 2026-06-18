@@ -23,7 +23,7 @@
 
 | Tests | Idea | VeriFast | KeY |
 | ------------- | -------------- | -------------- | --- |
-| theories.Core |   | ⭕️ | ⭕️ |
+| theories.Core |   | ✅ | ⭕️ |
 | theories.Ref |   | ⭕️ | ⭕️ |
 | theories.Seq |   | ⭕️ | ⭕️ |
 | theories.FiniteMap |   | ⭕️ | ⭕️ |
