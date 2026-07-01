@@ -118,16 +118,6 @@ with its dependencies by following the following steps:
     git pull --rebase --recurse-submodules
     ```
 
-1. Publish custom JML-Parser
-
-    ```sh
-    # Ensure to be at root of contract chameleon
-    # cd contract-chameleon (or your folder name)
-    cd libs/jmlparser
-    ./mvnw clean install -DskipTests
-    ls ~/.m2/repository/io/github/jmltoolkit/jmlparser-core/ #check that snapshot exists
-    ```
-
 1. Build `contract-chameleon` with `gradle`
 
     ```sh

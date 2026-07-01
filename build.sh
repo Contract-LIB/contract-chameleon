@@ -14,14 +14,7 @@
 git submodule update --init --recursive
 
 # pull changes from submodules
-git pull --rebase --recurse-submodules 
-
-# publish custom jml parser
-cd libs/jmlparser
-./mvnw clean install -DskipTests
-#check that snapshot exists
-ls ~/.m2/repository/io/github/jmltoolkit/jmlparser-core/ 
-cd ../..
+git pull --rebase --recurse-submodules
 
 # build with gradle
 ./gradlew clean build

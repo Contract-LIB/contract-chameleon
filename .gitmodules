@@ -1,12 +1,3 @@
-[submodule "libs/jmltoolkit"]
-	path = libs/jmlparser
-	url = https://github.com/Contract-LIB/jmlparser.git
-[submodule "libs/key"]
-	path = libs/key
-	url = https://github.com/KeYProject/key.git
-[submodule "keyCI"]
-	path = libs/keyCI
-	url = https://github.com/wadoon/key-citool.git
 [submodule "libs/verifast"]
 	path = libs/verifast
 	url = git@github.com:verifast/verifast.git
