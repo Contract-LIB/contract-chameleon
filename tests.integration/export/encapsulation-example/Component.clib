@@ -49,6 +49,7 @@
   ))
 )
 
+
 ; - This contract is not possible to verify as the component would exist `inside` and `outsite` of the parent component.
 ;(define-contract example.Component.brokenGetComponent
 ;  (

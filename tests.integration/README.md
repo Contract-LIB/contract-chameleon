@@ -42,6 +42,8 @@
 
 | Tests | Idea | VeriFast | KeY |
 | ------------- | -------------- | -------------- | --- |
+| Ticket Scan / Entry | | | |
+| - | - | - | - |
 | Kärkkäinen-Sanders algorithm | Creates a suffix array | ⭕️ | ⭕️ |
 |  - The algorithm itself |  | ⭕️ | ⭕️ |
 |  - [projects.RB-Tree](#rbtree) |  | ⭕️ | ⭕️ |
@@ -138,7 +140,7 @@ There was a `Contract-LIB` specification added.
 
 #### Greedy / scheduling algorithms
 
-- - Interval scheduling
+- Interval scheduling
 - Ordered set of intervals by end time
 - Meeting room allocation
 - multiset of current ending times
