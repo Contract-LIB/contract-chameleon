@@ -1,8 +1,11 @@
 package org.contract_lib.lang.contract_lib.modifier;
 
 import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
+import org.contract_lib.lang.contract_lib.ast.Contract;
+import org.contract_lib.lang.contract_lib.ast.Formal;
 import org.contract_lib.lang.contract_lib.ast.MatchCase;
 import org.contract_lib.lang.contract_lib.ast.Pattern;
+import org.contract_lib.lang.contract_lib.ast.PrePostPair;
 import org.contract_lib.lang.contract_lib.ast.SortedVar;
 import org.contract_lib.lang.contract_lib.ast.Symbol;
 import org.contract_lib.lang.contract_lib.ast.Term;
@@ -27,15 +30,15 @@ import org.contract_lib.lang.contract_lib.modifier.substitution.SubstitutionConf
 
 public class IdentifierSubstitution {
 
-  private final ShouldSubstituteInterface<IdentifierValue> shouldSubstitute;
-  private final SubstitutionConflict<IdentifierValue> substitutionConflict;
-  private final Substitution<IdentifierValue> substitution;
+  private final ShouldSubstituteInterface<Symbol> shouldSubstitute;
+  private final SubstitutionConflict<Symbol> substitutionConflict;
+  private final Substitution<Symbol> substitution;
 
   private final ChameleonMessageManager messageManager;
 
   public IdentifierSubstitution(
-      IdentifierValue identifier,
-      IdentifierValue with,
+      String identifier,
+      String with,
       ChameleonMessageManager messageManager) {
 
     //TODO: add access to the position of the element in the file,…
@@ -44,24 +47,60 @@ public class IdentifierSubstitution {
     //TODO: check that `with` does not conflic with any predefined
     //method names, constant identifiers,…
 
-    this.shouldSubstitute = e -> e.getValue().identifier().identifier()
-        .equals(with.getValue().identifier().identifier());
+    this.shouldSubstitute = e -> e.identifier()
+        .equals(identifier);
 
-    this.substitution = e -> e.getValue().identifier().identifier()
-        .equals(identifier.getValue().identifier().identifier()) ? with : e;
+    this.substitution = e -> e.identifier()
+        .equals(identifier) ? new Symbol(with) : e;
 
     this.substitutionConflict = (e, m) -> {
-      if (e.getValue().identifier().identifier().equals(with.getValue().identifier().identifier())) {
+      if (e.identifier().equals(with)) {
         m.report(
             //TODO: add access to the position fo the element
             new SubstitutionError("undef", 0, 0,
-                String.format("The element %s could not be substituted with %s%",
-                    e.getValue().identifier().identifier(),
-                    with.getValue().identifier().identifier())));
+                String.format("The element %s could not be substituted with %s",
+                    e.identifier(),
+                    with)));
       }
     };
 
     this.messageManager = messageManager;
+  }
+
+  public Symbol applySymbolSubstition(Symbol element) {
+
+    substitutionConflict.substitutionConflict(element, messageManager);
+
+    if (shouldSubstitute.shouldSubstitute(element)) {
+      return substitution.substitue(element);
+    } else {
+      return element;
+    }
+  }
+
+  public Symbol blockSymbolSubstition(Symbol element) {
+    substitutionConflict.substitutionConflict(element, messageManager);
+    return element;
+  }
+
+  public Contract applyContract(Contract element) {
+    return new Contract(
+        this.blockSymbolSubstition(element.identifier()),
+        element.formals().stream().map(this::applyFormal).toList(),
+        element.pairs().stream().map(this::applyPrePostPair).toList());
+  }
+
+  public Formal applyFormal(Formal formal) {
+    return new Formal(
+        this.applySymbolSubstition(formal.identifier()),
+        formal.argumentMode(),
+        formal.sort());
+  }
+
+  public PrePostPair applyPrePostPair(PrePostPair prePostPair) {
+    return new PrePostPair(
+        this.apply(prePostPair.pre()),
+        this.apply(prePostPair.post()));
   }
 
   public Term apply(Term element) {
@@ -84,18 +123,7 @@ public class IdentifierSubstitution {
   }
 
   public IdentifierValue applyIdentifierValue(IdentifierValue element) {
-    substitutionConflict.substitutionConflict(element, messageManager);
-
-    if (shouldSubstitute.shouldSubstitute(element)) {
-      return substitution.substitue(element);
-    } else {
-      return element;
-    }
-  }
-
-  public Symbol applySymbol(Symbol element) {
-    substitutionConflict.substitutionConflict(new IdentifierValue(element), messageManager);
-    return element;
+    return new IdentifierValue(this.applySymbolSubstition(element.identifier()));
   }
 
   public IdentifierAs applyIdentifierAs(IdentifierAs element) {
@@ -127,11 +155,11 @@ public class IdentifierSubstitution {
   }
 
   public VarBinding applyVarBinding(VarBinding element) {
-    return new VarBinding(this.applySymbol(element.name()), this.apply(element.type()));
+    return new VarBinding(this.blockSymbolSubstition(element.name()), this.apply(element.type()));
   }
 
   public SortedVar applySortedVar(SortedVar element) {
-    return new SortedVar(this.applySymbol(element.symbol()), element.sort());
+    return new SortedVar(this.blockSymbolSubstition(element.symbol()), element.sort());
   }
 
   public QuantorBinding applyQuantorBinding(QuantorBinding element) {
@@ -156,14 +184,13 @@ public class IdentifierSubstitution {
   }
 
   public Case applyCase(Case matchCase) {
-    this.applySymbol(matchCase.symbol());
-    return matchCase;
+    return new Case(this.blockSymbolSubstition(matchCase.symbol()));
   }
 
   public WithParameters applyWithParameters(WithParameters withParameters) {
     return new WithParameters(
-        this.applySymbol(withParameters.symbol()),
-        withParameters.parameters().stream().map(this::applySymbol).toList());
+        this.blockSymbolSubstition(withParameters.symbol()),
+        withParameters.parameters().stream().map(this::blockSymbolSubstition).toList());
   }
 
   public Attributes applyAttributes(Attributes attributes) {
