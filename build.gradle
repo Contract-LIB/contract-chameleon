@@ -28,9 +28,7 @@ dependencies {
   //runtimeOnly 'org.tool.b:adapter-extension-b:1.0.0-SNAPSHOT'
   
   // adapters from this repository
-  runtimeOnly project(":contract-chameleon.adapter.key.export")
   runtimeOnly project(":contract-chameleon.adapter.verifast.export")
-  runtimeOnly project(":contract-chameleon.adapter.key.import")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -80,8 +78,6 @@ task lightShadowJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.Shado
 
   manifest.from tasks.jar.manifest
   dependencies {
-    exclude(project(":contract-chameleon.adapter.key.export"))
-    exclude(project(":contract-chameleon.adapter.key.import"))
     exclude(project(":contract-chameleon.adapter.verifast.export"))
   }
 }

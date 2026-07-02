@@ -213,10 +213,12 @@ public final class PredicateTranslator {
   }
 
   public void infoLogAvailableTranslations() {
-    messageContext.logInfo(String.format("Avalable Predicate Translation: %n%s%nAvailable Arguments:%n%s%nHas Old Variables:%n%s",
-    this.predicates.keySet().stream().sorted().collect(Collectors.joining(System.lineSeparator())),
-    this.availableArguments.stream().map(VeriFastArgument::name).sorted().collect(Collectors.joining(System.lineSeparator())),
-    this.hasOldVariable.stream().sorted().collect(Collectors.joining(System.lineSeparator()))));
+    messageContext
+        .logInfo(String.format("Avalable Predicate Translation: %n%s%nAvailable Arguments:%n%s%nHas Old Variables:%n%s",
+            this.predicates.keySet().stream().sorted().collect(Collectors.joining(System.lineSeparator())),
+            this.availableArguments.stream().map(VeriFastArgument::name).sorted()
+                .collect(Collectors.joining(System.lineSeparator())),
+            this.hasOldVariable.stream().sorted().collect(Collectors.joining(System.lineSeparator()))));
   }
 
   private PredicateTranslation translateTermOld(Term term) {

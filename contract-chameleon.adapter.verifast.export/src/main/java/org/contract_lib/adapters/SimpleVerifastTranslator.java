@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import org.contract_lib.contract_chameleon.contexts.MessageContext;
 import org.contract_lib.contract_chameleon.contexts.ResultDirectoryContext.TranslationResult;
 import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
-import org.contract_lib.contract_chameleon.error.ChameleonWarning;
 import org.contract_lib.lang.contract_lib.ast.ContractLibAst;
 import org.contract_lib.lang.contract_lib.ast.Abstraction;
 import org.contract_lib.lang.contract_lib.ast.Argument;
@@ -227,7 +226,7 @@ public class SimpleVerifastTranslator {
         name,
         spec);
 
-    System.err.println(directoryName);
+    addAbstractionType(name);
 
     javaFiles.add(directoryName + "/" + name + ".java");
     results.add(file);
@@ -341,7 +340,7 @@ public class SimpleVerifastTranslator {
     String contractIdentifier = contract.identifier().identifier();
 
     messageContext.logInfo(String.format(
-    "-> Translate Contract: %s", contractIdentifier));
+        "-> Translate Contract: %s", contractIdentifier));
 
     JavaMethodSignaturExtractor extractor = new JavaMethodSignaturExtractor(contract, messageManager);
 
