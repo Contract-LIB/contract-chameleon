@@ -12,6 +12,12 @@ which bring the following conditions along.
 This is our first base abstractions,
 working as a `Int` wrapper.
 
+### A Simple Abstraction
+
+This abstraction wraps a simple integer value.
+However, this might be a more complex abstract state,
+that is encapsulated by this abstraction.
+
 ```lisp
 (declare-abstractions
   (
@@ -54,8 +60,9 @@ working as a `Int` wrapper.
       true
       (= (absVal this) value)
     ))
-)
 ```
+
+### Abstractions with Payloads
 
 Our second base abstraction is a wrapper for a reference,
 or an alias.
@@ -116,6 +123,142 @@ from a `Ref T` variable or argument.
     ))
 )
 ```
+
+### Owning Abstractions
+
+This abstraction uses an abstraction,
+as one of its state.
+Instead of an abstraction,
+we could also have used a data type.
+Here, the outer abstraction owns the inner abstraction completely.
+As a consequence, accessing the inner abstraction always creates a copy
+of the inner abstraction cloning its state.
+
+```lisp
+(declare-abstractions
+  (
+    (OwnedAbstraction 0)
+  )
+  (
+    ((OwnedAbstraction (absVal IntAbstraction)))
+  )
+)
+; Constructor
+(define-contract alias.OwnedAbstraction.init
+    (
+      (result (out OwnedAbstraction))
+    )
+    ((
+      true
+      (= (absVal (absVal result)) 0)
+    ))
+)
+
+; Getter
+(define-contract alias.OwnedAbstraction.getAbsValue
+    (
+      (this (in OwnedAbstraction))
+      (result (out Int))
+    )
+    ((
+      true
+      (= (absVal (absVal this)) result)
+    ))
+)
+(define-contract alias.OwnedAbstraction.getAbstraction
+    (
+      (this (in OwnedAbstraction))
+      (result (out IntAbstraction))
+    )
+    ((
+      true
+      (= (absVal (absVal this)) (absVal result))
+    ))
+)
+
+; Setter
+(define-contract alias.OwnedAbstraction.setAbsVal
+    (
+      (this (inout OwnedAbstraction))
+      (value (in Int))
+    )
+    ((
+      true
+      (= (absVal this) value)
+    ))
+)
+
+(define-contract alias.OwnedAbstraction.setAbstraction
+    (
+      (this (inout OwnedAbstraction))
+      (value (in IntAbstraction))
+    )
+    ((
+      true
+      (= (absVal (absVal this) (absVal value))
+    ))
+)
+```
+
+> [!NOTE]: Syntax for abstractions
+> At the moment an abstractions is defined analogue to an datatype.
+> However, I would propose, that an abstraction just is a sort with field,
+> `absVal` which represents the whole state of the abstraction.
+> As a consequence one might be needed too define an additional datatype per abstraction,
+> but the semantics, what is the state and what is the encapsulated object with
+> that states become more direct to see.
+> Additionally, this differentiation would make sense
+> regarding the equality of two abstractions,
+> as we don't have to think about the problem
+> if their equality is defined over the reference,
+> or the state (value).
+
+## Equality of Different Sorts
+
+> [!NOTE]
+> TODO: define value and reference equality semantics
+
+Basic sorts (e.g. `Boolean`, `Int`, …) have value semantics.
+This also applies for data types.
+Especially the `Ref T` sort, has this value semantics too.
+As we cannot access any fields of the parameter `T`,
+we can only compare whether two references are equal.
+As a consequence we also have reference semantics here,
+as the memory location is identical to the represented state.
+
+Abstractions also have this reference semantics,
+where two abstractions are equal if they are at the same memory location
+Note that in the getter and setter contracts,
+we access the fields and not the abstraction itself.
+As abstractions have reference semantics regarding equality,
+we require in the parameter definition that the abstractions are disjunct
+before and after our contract execution.
+As a consequence setting `(= (absVal this) value)`
+can never be satisfied.
+
+> [!NOTE]
+> Check if abstractions can really hold abstractions (or better should not!)
+>
+> - KeY:
+>   - `this` can be part of the `fp`
+>   - disjunct condition is not violated
+>   - class reference equality semantics hold
+> - VeriFast
+>   - we can add `this` to the abstraction predicate (by replacing `null`)
+>   - however we cannot at the `predicate pred(OwnedAbstraction absVal) = ref |-> absVal &*& ref.pred(absVal)`,
+>     as our separating condition is not fulfilled.
+>
+> ```
+>(define-contract alias.OwnedAbstraction.setSelf
+>    (
+>      (this (inout OwnedAbstraction))
+>    )
+>    ((
+>      true
+>      (= (absVal this) this)
+>    ))
+>)
+>```
 
 ## Two Abstraction Contracts
 
@@ -189,9 +332,12 @@ that this is not the case.
     (alias.LoosingAbstraction 0)
   )
   (
-    ((LoosingAbstraction (absValRef (Ref LoosingAbstraction)) (absVal Int)))
+    ((LoosingAbstraction 
+      (absValRef (Ref LoosingAbstraction))
+      (absVal Int)))
   )
 )
+; Getter Ref
 (define-contract alias.LoosingAbstraction.getRef
     (
       (this (in LoosingAbstraction))
@@ -199,10 +345,24 @@ that this is not the case.
     )
     ((
       true
-      (= (absValRef this) result)
+      (and
+        (= (absValRef result) null)
+        (= (absVal result) 0)
+      )
     ))
 )
-
+; Getter Value
+(define-contract alias.SpecialAbstraction.getValue
+    (
+      (this (in SpecialAbstraction))
+      (result (out Int))
+    )
+    ((
+      true
+      (= (absVal this) result)
+    ))
+)
+; Setter Ref
 (define-contract alias.LoosingAbstraction.setRef
     (
       (this (inout LoosingAbstraction))
@@ -210,7 +370,24 @@ that this is not the case.
     )
     ((
       true
-      (= (absValRef this) value)
+      (and
+        (= (absValRef this) value)
+        (= (absVal this) (old (absVal  this)))
+      )
+    ))
+)
+; Setter Value
+(define-contract alias.SpecialAbstraction.setValue
+    (
+      (this (inout SpecialAbstraction))
+      (value (in Int))
+    )
+    ((
+      true
+      (and
+        (= (absVal this) value)
+        (= (absValRef this) (old (absValRef this)))
+      )
     ))
 )
 ```
@@ -280,7 +457,14 @@ void client() {
 }
 ```
 
-## The Alias Problem in `KeY`
+----
+
+The following section plays around with different edge cases,
+and explains why some restrictions on `Ref T` are not allowed,
+as well as where a bad chosen implementation can make
+proofing defined contracts super hard.
+
+## Playing Around with The Alias Problem in `KeY`
 
 An issue arises,
 when we use an abstraction as an internal owned field,
@@ -288,12 +472,13 @@ and provide a contract where we can link this owned field,
 to another outside abstraction,
 as well as provide a direct setter to this owned field.
 
-However, this comes down to a super specific implementation detail,
-where we intensionally break the well encapsulation property.
-This also only affects the provider,
-where we provide a malicious implementation,
-which intensionally breaks the access restriction of the `Ref` type.
-This access restriction cannot be enforced by `KeY` at the moment.
+However, we can try to find contracts and proof a malicious implementation,
+but as `KeY` itself is sound our implementation
+cannot satisfy the contracts generated.
+This especially holds when we try to mix `Ref T` and abstractions.
+
+I want to show that we need some kind of restrictions on the footprint,
+to ensure, that the references cannot trigger unexpected side-effects.
 
 See the following example for more details:
 
@@ -406,10 +591,13 @@ See the following example for more details:
 
 ### The Malicious `KeY` Implementation
 
-If we translate this straight forward to a `JML` contract,
-we could run into error,
-but as this is not a valid `ContractLIB` specification,
-our `Ref` type protects us from these invalid accesses.
+In the following implementation we
+would need the state if `ref == this` or not,
+to proof the contracts (as they would behave differently)
+depending whether it is the case or not.
+However, as ref itself is not part of our abstract state,
+we are not able to provide this information and
+as a consequence we are not able to proof this (rather complicated) implementation.
 
 ```java
 
@@ -440,7 +628,7 @@ public abstract void invalid(BadAliasAbstraction value) {
   */
 
   // We need to update our footprint
-  //@ set this.fp = \all_fields(this);
+  //@ set this.fp = \all_fields(this) + ref.fp;
   // And updtate our absState
   //@ set this.absState = 10;
 }
@@ -459,6 +647,7 @@ public abstract void setState(int value) {
   } else {
     this.ref.setValue(value);
   }
+  //@ set this.absState = value;
 }
 ```
 
@@ -480,8 +669,11 @@ requires this.ref != this; //TODO: Test this requirement
 */
 void invalidClient() {
     BadAliasAbstraction a = BadAliasAbstraction.init();
+    a.setValue(10);
+
     BadAliasAbstraction b = BadAliasAbstraction.init();
-    // a.absValState == b.absVal;
+    b.setValue(10);
+
     a.invalid(b);
 
     // ERROR: This would trigger a sideeffect on b
@@ -510,6 +702,9 @@ void invalidClientSelf() {
     //@ assert a.absValue == 10; // this is not intended!
 }
 ```
+
+This example shows
+why we would need the `\disjoint(fp, value.pf)` clause in the reference contracts.
 
 ### Solutions to the Alias Problem
 
@@ -543,6 +738,8 @@ public abstract void invalid(Counter value) {
   //@ set this.absValState = 10;
 }
 ```
+
+#### This == value || \disjoint(fp, value.fp)
 
 #### Idea: State Independence
 
@@ -616,12 +813,67 @@ public abstract void invalid(/*@ opaque @*/BadSpecialAbstraction value) {
 }
 ```
 
-### Conclusion
+## Limitation of `KeY` Payload
 
-- dynamic frames cannot handle arbitrary payloads
+This example shows,
+that we are able to verify `assert false;`
+when we add a footprint restriction to the `Ref` type
+in a multi-tool setup.
+
+```java
+// Verified with VF
+class Client {
+    static void client() {
+        C c = new C();
+        
+        c.proc(c);
+    }
+}
+
+// Verified with KeY
+class C {
+    //@ invariant fp not empty
+
+    // @ requires \disjoint(fp, p.fp); // ←− \reachLocs(p)
+    //@ ensures \disjoint(fp, p.fp); // ←− \reachLocs(p)
+    //@ ensures \new_elems_fresh(fp) && φ3 (absVal, \old(absVal));
+    //@ assignable fp;
+    void proc(C p) {
+        if (p == this) {
+            assert false;
+        } else {
+            ...
+        }
+    
+    }
+}
+```
+
+### Solutions
+
+#### `SemiRef`
+
+Enforces on all instances that the following predicate holds `ref != this`,
+additionally to the footprint restrictions.
+This is not a general payload type,
+but one that we can express with `KeY`'s dynamic frames.
+
+By adding this predicate to all terms,
+the translation becomes semantics-maintaining,
+between the different tools.
+
+However, this type has this special restriction,
+we would not expect from a `Payload` type.
+
+#### Universe Type System
+
+Using a `Universe Type System`'s `Payload` attribute,
+we can express the payload properties in `KeY`.
+
+## Conclusion
+
+- dynamic frames cannot handle arbitrary payloads (limitation regarding `this`)
 - dynamic frames with universe types can handle this problem
-
-----
 
 ## Notes
 
