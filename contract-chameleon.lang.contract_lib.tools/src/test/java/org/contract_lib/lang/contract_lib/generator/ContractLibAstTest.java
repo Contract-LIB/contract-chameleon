@@ -38,6 +38,12 @@ public class ContractLibAstTest {
     });
     sharedContextManager = new SharedContextManager(messageContext);
     messageManager = sharedContextManager.getMessageContext().getMessageManager();
+
+    AstExtensionContext extensionContext = sharedContextManager
+        .getContext(new AstExtensionContextProvider())
+        .get();
+    filePositionExtractor = extensionContext.getFilePositionLinker();
+    commandOrderExtractor = extensionContext.getCommandOrderExtractor();
   }
 
   public ContractLibAst createAstFromResourcePath(String path) throws IOException {
@@ -47,18 +53,12 @@ public class ContractLibAstTest {
 
       CharStream charStream = CharStreams.fromStream(in);
 
-      AstExtensionContextProvider extensionContextProvider = new AstExtensionContextProvider();
-      AstExtensionContext extensionContext = extensionContextProvider.createContext(sharedContextManager);
-
       ContractLibAstContextProvider provider = new ContractLibAstContextProvider(
           path,
           charStream);
 
       ContractLibAstContext context = provider
           .createContext(sharedContextManager);
-
-      filePositionExtractor = extensionContext.getFilePositionLinker();
-      commandOrderExtractor = extensionContext.getCommandOrderExtractor();
 
       return context.getAst();
     } catch (IOException exception) {

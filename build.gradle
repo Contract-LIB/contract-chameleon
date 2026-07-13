@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'org.contract_lib'
-version = '1.0.0-SNAPSHOT' // <--- 2. MUST end in '-SNAPSHOT' for Maven to treat it as such
+version = '1.1.0-SNAPSHOT' // <--- 2. MUST end in '-SNAPSHOT' for Maven to treat it as such
 
 repositories {
     mavenLocal()
