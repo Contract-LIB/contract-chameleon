@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -12,9 +13,9 @@ import org.contract_lib.contract_chameleon.contexts.MessageContext;
 import org.contract_lib.contract_chameleon.contexts.MessageContext.StringLogger;
 import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
 import org.contract_lib.lang.contract_lib.ast.ContractLibAst;
-import org.contract_lib.lang.contract_lib.context_provider.AstExtensionContextProvider;
 import org.contract_lib.lang.contract_lib.context_provider.ContractLibAstContextProvider;
-import org.contract_lib.lang.contract_lib.contexts.AstExtensionContext;
+import org.contract_lib.lang.contract_lib.context_provider.ast_extensions.CommandOrderContextProvider;
+import org.contract_lib.lang.contract_lib.context_provider.ast_extensions.FilePositionLinkerContextProvider;
 import org.contract_lib.lang.contract_lib.contexts.ContractLibAstContext;
 import org.contract_lib.lang.contract_lib.translator_extensions.CommandOrderExtractor;
 import org.contract_lib.lang.contract_lib.translator_extensions.FilePositionLinker;
@@ -39,11 +40,14 @@ public class ContractLibAstTest {
     sharedContextManager = new SharedContextManager(messageContext);
     messageManager = sharedContextManager.getMessageContext().getMessageManager();
 
-    AstExtensionContext extensionContext = sharedContextManager
-        .getContext(new AstExtensionContextProvider())
-        .get();
-    filePositionExtractor = extensionContext.getFilePositionLinker();
-    commandOrderExtractor = extensionContext.getCommandOrderExtractor();
+    filePositionExtractor = sharedContextManager
+        .getContext(new FilePositionLinkerContextProvider())
+        .get()
+        .getTranslatorExtension();
+    commandOrderExtractor = sharedContextManager
+        .getContext(new CommandOrderContextProvider())
+        .get()
+        .getTranslatorExtension();
   }
 
   public ContractLibAst createAstFromResourcePath(String path) throws IOException {
@@ -55,7 +59,10 @@ public class ContractLibAstTest {
 
       ContractLibAstContextProvider provider = new ContractLibAstContextProvider(
           path,
-          charStream);
+          charStream,
+          List.of(
+              new FilePositionLinkerContextProvider(),
+              new CommandOrderContextProvider()));
 
       ContractLibAstContext context = provider
           .createContext(sharedContextManager);

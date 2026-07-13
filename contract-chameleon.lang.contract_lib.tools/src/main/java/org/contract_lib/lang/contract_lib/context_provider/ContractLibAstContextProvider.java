@@ -3,7 +3,6 @@ package org.contract_lib.lang.contract_lib.context_provider;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -26,29 +25,44 @@ public class ContractLibAstContextProvider
   private final String sourcePath;
   private final CharStream charStream;
 
+  private final List<? extends AstExtensionHelper<?>> astExtensions;
+
   public ContractLibAstContextProvider(String filePath) throws IOException {
-    this(filePath, CharStreams.fromFileName(filePath));
+    this(filePath, CharStreams.fromFileName(filePath), List.of());
+  }
+
+  public ContractLibAstContextProvider(String filePath,
+      List<AstExtensionHelper<?>> astExtensions)
+      throws IOException {
+    this(filePath, CharStreams.fromFileName(filePath), astExtensions);
+  }
+
+  public ContractLibAstContextProvider(Path filePath,
+      List<AstExtensionHelper<?>> astExtensions)
+      throws IOException {
+    this(filePath.toString(), CharStreams.fromPath(filePath), astExtensions);
   }
 
   public ContractLibAstContextProvider(Path filePath) throws IOException {
-    this(filePath.toString(), CharStreams.fromPath(filePath));
+    this(filePath.toString(), CharStreams.fromPath(filePath), List.of());
   }
 
   public ContractLibAstContextProvider(
       String source,
-      CharStream stream) {
+      CharStream stream,
+      List<AstExtensionHelper<?>> astExtensions) {
     this.sourcePath = source;
     this.charStream = stream;
+    this.astExtensions = astExtensions;
   }
 
   @Override
   public ContractLibAstContext createContext(SharedContextManager sharedContextManager) {
 
-    Optional<AstExtensionContext> extensionContext = sharedContextManager
-        .getContext(new AstExtensionContextProvider());
-
-    List<ContractLibAstTranslatorExtension> extensions = extensionContext.map(AstExtensionContext::getAllExtensions)
-        .orElseGet(() -> List.of());
+    List<ContractLibAstTranslatorExtension> extensions = astExtensions
+        .stream()
+        .map(p -> this.getContext(sharedContextManager, p))
+        .toList();
 
     ContractLIBLexer lexer = new ContractLIBLexer(charStream);
     CommonTokenStream tokenStream = new CommonTokenStream(lexer);
@@ -74,5 +88,11 @@ public class ContractLibAstContextProvider
   @Override
   public Class<ContractLibAstContext> getContext() {
     return ContractLibAstContext.class;
+  }
+
+  private <C extends AstExtensionContext<?>> ContractLibAstTranslatorExtension getContext(
+      SharedContextManager sharedContextManager,
+      SharedContextProvider<C> contextProvider) {
+    return sharedContextManager.getContext(contextProvider).get().getTranslatorExtension();
   }
 }
