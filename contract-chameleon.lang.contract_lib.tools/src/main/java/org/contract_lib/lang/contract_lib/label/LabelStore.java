@@ -33,4 +33,8 @@ public class LabelStore<T> {
   public Set<Entry<ContractLibAstElement, T>> getEntries() {
     return new HashSet<>(elementToLabelMap.entrySet());
   }
+
+  public Set<ContractLibAstElement> getKeys() {
+    return new HashSet<>(elementToLabelMap.keySet());
+  }
 }

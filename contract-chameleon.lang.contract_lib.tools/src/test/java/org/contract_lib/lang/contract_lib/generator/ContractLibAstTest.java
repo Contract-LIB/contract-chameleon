@@ -17,17 +17,17 @@ import org.contract_lib.lang.contract_lib.context_provider.ContractLibAstContext
 import org.contract_lib.lang.contract_lib.context_provider.ast_extensions.CommandOrderContextProvider;
 import org.contract_lib.lang.contract_lib.context_provider.ast_extensions.FilePositionLinkerContextProvider;
 import org.contract_lib.lang.contract_lib.contexts.ContractLibAstContext;
-import org.contract_lib.lang.contract_lib.translator_extensions.CommandOrderExtractor;
-import org.contract_lib.lang.contract_lib.translator_extensions.FilePositionLinker;
+import org.contract_lib.lang.contract_lib.contexts.ast_extensions.CommandOrderContext;
+import org.contract_lib.lang.contract_lib.contexts.ast_extensions.FilePositionLinkerContext;
 import org.junit.jupiter.api.BeforeEach;
 
 public class ContractLibAstTest {
 
-  protected MessageContext messageContext = null;
   protected SharedContextManager sharedContextManager = null;
+  protected MessageContext messageContext = null;
   protected ChameleonMessageManager messageManager = null;
-  protected FilePositionLinker filePositionExtractor = null;
-  protected CommandOrderExtractor commandOrderExtractor = null;
+  protected FilePositionLinkerContext filePositionExtractor = null;
+  protected CommandOrderContext commandOrderExtractor = null;
 
   @BeforeEach
   void setupContext() {
@@ -39,15 +39,8 @@ public class ContractLibAstTest {
     });
     sharedContextManager = new SharedContextManager(messageContext);
     messageManager = sharedContextManager.getMessageContext().getMessageManager();
-
-    filePositionExtractor = sharedContextManager
-        .getContext(new FilePositionLinkerContextProvider())
-        .get()
-        .getTranslatorExtension();
-    commandOrderExtractor = sharedContextManager
-        .getContext(new CommandOrderContextProvider())
-        .get()
-        .getTranslatorExtension();
+    filePositionExtractor = sharedContextManager.getContext(new FilePositionLinkerContextProvider()).get();
+    commandOrderExtractor = sharedContextManager.getContext(new CommandOrderContextProvider()).get();
   }
 
   public ContractLibAst createAstFromResourcePath(String path) throws IOException {
@@ -59,13 +52,11 @@ public class ContractLibAstTest {
 
       ContractLibAstContextProvider provider = new ContractLibAstContextProvider(
           path,
-          charStream,
-          List.of(
+          charStream, List.of(
               new FilePositionLinkerContextProvider(),
               new CommandOrderContextProvider()));
 
-      ContractLibAstContext context = provider
-          .createContext(sharedContextManager);
+      ContractLibAstContext context = sharedContextManager.getContext(provider).get();
 
       return context.getAst();
     } catch (IOException exception) {

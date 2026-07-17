@@ -19,6 +19,7 @@ import org.contract_lib.lang.contract_lib.label.IdentifierType.VariableIdentifie
 import org.contract_lib.lang.contract_lib.translator_extensions.IdentifierExtractor;
 import org.contract_lib.lang.contract_lib.translator_extensions.ParentLinker;
 
+@Deprecated
 public class AvailableIdentifierContext implements SharedContext {
 
   //private final IdentifierAddedExtractor<Global, SortIdentifier> sortIdentifers;

@@ -1,5 +1,6 @@
 package org.contract_lib.lang.contract_lib.translator_extensions;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -68,6 +69,16 @@ public class IdentifierExtractor<M extends IdentifierMode, I extends IdentifierS
         .flatMap(Set::stream)
         .collect(Collectors.toSet());
     return new Identifier<>(ids);
+  }
+
+  public Set<ContractLibAstElement> allKeys() {
+    return store
+        .getKeys();
+  }
+
+  public Set<Entry<ContractLibAstElement, Identifier<M, I, T>>> allEntries() {
+    return store
+        .getEntries();
   }
 
   final void addToStore(ContractLibAstElement element, Identifier<M, I, T> addedIdentifier) {
