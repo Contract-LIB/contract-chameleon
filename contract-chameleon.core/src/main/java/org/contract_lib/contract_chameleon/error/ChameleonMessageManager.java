@@ -68,6 +68,19 @@ public class ChameleonMessageManager {
     return messages.stream();
   }
 
+  public Stream<ChameleonReportable> getFlattendedMessages() {
+    return messages
+        .stream()
+        .flatMap(
+            (m) -> {
+              if (m instanceof ChameleonMessageGroup) {
+                return ((ChameleonMessageGroup) m).getMessages().stream();
+              } else {
+                return Stream.of(m);
+              }
+            });
+  }
+
   public void writeStdErr() {
     System.err.println();
     System.err.println(

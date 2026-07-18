@@ -1,0 +1,68 @@
+(declare-sort BaseA 0)
+(declare-sort BaseB 0)
+
+; TODO: Add to test
+;(define-sort S_A 0)
+
+(declare-datatype DT
+    (
+      (Test (a BaseA) (b BaseB))
+    )
+)
+
+(declare-datatypes
+  (
+    (DT_A 0)
+    (DT_B 0)
+  )
+  (
+    (
+      (Test (a BaseA) (b BaseB))
+    )
+    (
+      (Test (a BaseA) (b BaseB))
+    )
+  )
+)
+
+(declare-abstraction AS
+  (
+    (Test (a BaseA) (b BaseB))
+  )
+)
+
+(declare-abstractions
+  (
+    (AS_A 0)
+    (AS_B 0)
+  )
+  (
+    (
+      (Test (a BaseA) (b BaseB))
+    )
+    (
+      (Test (a BaseA) (b BaseB))
+    )
+  )
+)
+
+
+(define-contract AS_A.test
+  (
+    (this (in BaseA))
+    (b (in BaseB))
+  )
+  (
+    (
+      true
+      true
+    )
+  )
+)
+
+; TODO: Appearances in terms
+; (forall ((a BaseA) (b BaseB)) true)
+; (exists ((a BaseA) (b BaseB)) true)
+
+; (let (a true) (b true) true)
+; (match v (a true) (b true))

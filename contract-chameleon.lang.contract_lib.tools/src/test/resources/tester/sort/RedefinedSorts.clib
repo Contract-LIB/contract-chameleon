@@ -1,0 +1,80 @@
+(declare-sort Dup 0)
+
+(declare-sort S_A 0)
+(declare-sort S_B 0)
+(declare-sort S_C 0)
+
+;(declare-sort-parameter P_A)
+;(declare-sort-parameter P_B)
+
+(declare-datatype DT
+    (
+      (Test)
+    )
+)
+
+(declare-datatypes
+  (
+    (DT_A 0)
+    (DT_B 0)
+  )
+  (
+    (
+      (Test)
+    )
+    (
+      (Test)
+    )
+  )
+)
+(declare-datatypes
+  (
+    (DT_C 0)
+    (DT_D 0)
+  )
+  (
+    (
+      (Test)
+    )
+    (
+      (Test)
+    )
+  )
+)
+
+(declare-abstraction AS
+    (
+      (Test)
+    )
+)
+
+(declare-abstractions
+  (
+    (AS_A 0)
+    (AS_B 0)
+  )
+  (
+    (
+      (Test)
+    )
+    (
+      (Test)
+    )
+  )
+)
+
+
+(declare-abstractions
+  (
+    (AS_C 0)
+    (AS_D 0)
+  )
+  (
+    (
+      (Test)
+    )
+    (
+      (Test)
+    )
+  )
+)

@@ -62,7 +62,7 @@ public class IdentifierExtractor<M extends IdentifierMode, I extends IdentifierS
         this.store.getLabel(element));
   }
 
-  public Identifier<M, Total, T> allIdentifer() {
+  public Identifier<M, Total, T> allIdentifier() {
     Set<String> ids = store.getEntries().stream()
         .map(Entry::getValue)
         .map(Identifier::identifier)

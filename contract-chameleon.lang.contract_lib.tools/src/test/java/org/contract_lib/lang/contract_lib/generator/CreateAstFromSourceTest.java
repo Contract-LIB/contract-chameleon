@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.stream.Stream;
 
+import org.contract_lib.lang.contract_lib.ContractLibAstTest;
 import org.contract_lib.lang.contract_lib.ast.ContractLibAst;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

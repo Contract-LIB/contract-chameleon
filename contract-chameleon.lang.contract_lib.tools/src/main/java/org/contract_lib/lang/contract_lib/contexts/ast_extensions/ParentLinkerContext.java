@@ -4,6 +4,7 @@ package org.contract_lib.lang.contract_lib.contexts.ast_extensions;
 import java.util.List;
 import java.util.Optional;
 
+import org.contract_lib.lang.contract_lib.ast.Command;
 import org.contract_lib.lang.contract_lib.ast.ContractLibAstElement;
 import org.contract_lib.lang.contract_lib.contexts.AstExtensionContext;
 import org.contract_lib.lang.contract_lib.generator.ContractLibAstTranslatorExtension;
@@ -25,5 +26,11 @@ public class ParentLinkerContext implements AstExtensionContext {
 
   public Optional<ContractLibAstElement> getParent(ContractLibAstElement element) {
     return parentLinker.getParent(element);
+  }
+
+  public Optional<Command> getCommand(ContractLibAstElement element) {
+    Optional<ContractLibAstElement> parent = getParent(element);
+
+    return Optional.empty(); //parent.map()
   }
 }

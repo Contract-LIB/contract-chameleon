@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import org.contract_lib.lang.contract_lib.ContractLibAstTest;
 import org.contract_lib.lang.contract_lib.ast.ContractLibAst;
 import org.contract_lib.lang.contract_lib.ast.ContractLibAstElement;
-import org.contract_lib.lang.contract_lib.generator.ContractLibAstTest;
 import org.junit.jupiter.api.Test;
 
 class TestFilePositionLinker extends ContractLibAstTest {

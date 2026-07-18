@@ -1,13 +1,12 @@
 package org.contract_lib.lang.contract_lib.contexts.ast_extensions;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.contract_lib.lang.contract_lib.contexts.AstExtensionContext;
 import org.contract_lib.lang.contract_lib.generator.ContractLibAstTranslatorExtension;
 import org.contract_lib.lang.contract_lib.label.Identifier;
 import org.contract_lib.lang.contract_lib.label.IdentifierMode.Defined;
-import org.contract_lib.lang.contract_lib.label.IdentifierScope.Global;
+import org.contract_lib.lang.contract_lib.label.IdentifierScope.Total;
 import org.contract_lib.lang.contract_lib.label.IdentifierType.FunctionIdentifier;
 import org.contract_lib.lang.contract_lib.translator_extensions.DefFunctionIdentifierExtractor;
 
@@ -27,8 +26,7 @@ public class AvailableFunctionIdentifierContext implements AstExtensionContext {
     return List.of(defFunctionIdentifierExtractor);
   }
 
-  public Optional<Identifier<Defined, Global, FunctionIdentifier>> getAvailableIdentifierFor() {
-    //TODO: Implement
-    return Optional.empty();
+  public Identifier<Defined, Total, FunctionIdentifier> getAvailableIdentifierFor() {
+    return defFunctionIdentifierExtractor.allIdentifier();
   }
 }

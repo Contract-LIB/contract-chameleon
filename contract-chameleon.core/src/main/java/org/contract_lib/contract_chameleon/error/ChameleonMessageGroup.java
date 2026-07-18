@@ -37,7 +37,7 @@ public final class ChameleonMessageGroup implements ChameleonReportable {
 
   private String messageDescription(ChameleonFileReportable message) {
     return String.format(
-        "%s in %s: %d|%d -> %s",
+        "%s in %s: %d:%d -> %s",
         message.messageType(),
         message.getLocationIdentifier(),
         message.getLine(),

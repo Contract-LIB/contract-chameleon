@@ -5,45 +5,52 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.function.Supplier;
 
-import org.contract_lib.contract_chameleon.SharedContextManager;
 import org.contract_lib.contract_chameleon.adapters.CheckerAdapter.CheckerAdapterResult;
 import org.contract_lib.contract_chameleon.contexts.MessageContext;
 import org.contract_lib.lang.contract_lib.ast.ContractLibAstElement;
-import org.contract_lib.lang.contract_lib.contexts.ast_extensions.AvailableSortIdentifierContext;
+import org.contract_lib.lang.contract_lib.contexts.AvailableSortIdentifierContext;
+import org.contract_lib.lang.contract_lib.contexts.CurrentFileIdentifierContext;
+import org.contract_lib.lang.contract_lib.contexts.ast_extensions.AccessSortIdentifierContext;
+import org.contract_lib.lang.contract_lib.contexts.ast_extensions.DefinedSortIdentifierContext;
+import org.contract_lib.lang.contract_lib.contexts.ast_extensions.FilePositionLinkerContext;
+import org.contract_lib.lang.contract_lib.error.IdentifierError;
 import org.contract_lib.lang.contract_lib.label.Identifier;
 import org.contract_lib.lang.contract_lib.label.IdentifierMode.Accessed;
 import org.contract_lib.lang.contract_lib.label.IdentifierMode.Defined;
 import org.contract_lib.lang.contract_lib.label.IdentifierScope.Global;
 import org.contract_lib.lang.contract_lib.label.IdentifierScope.Local;
 import org.contract_lib.lang.contract_lib.label.IdentifierType.SortIdentifier;
-import org.contract_lib.lang.contract_lib.translator_extensions.AccSortIdentifierExtractor;
-import org.contract_lib.lang.contract_lib.translator_extensions.DefSortIdentifierExtractor;
 
 public class TestSorts {
 
   private final MessageContext messageContext;
 
-  private AccSortIdentifierExtractor accSortIdentifierExtractor;
-  private DefSortIdentifierExtractor defSortIdentifierExtractor;
+  private FilePositionLinkerContext parentLinkerContext;
+  private CurrentFileIdentifierContext fileIdentifierContext;
 
-  private Set<String> availableIdentifiers;
+  private DefinedSortIdentifierContext definedSortIdentifierContext;
+  private AccessSortIdentifierContext accSortIdentifierExtractor;
+  private AvailableSortIdentifierContext availableSortIdentifierContext;
 
   //TODO: Add static symbols that can appear as identifer, remove from extractors.
   // private final … theory sorts
 
-  private AvailableSortIdentifierContext availableSortIdentifierContext;
-
-  public TestSorts(MessageContext messageContext) {
+  public TestSorts(
+      MessageContext messageContext) {
     this.messageContext = messageContext;
   }
 
   public CheckerAdapterResult testSorts(
-      SharedContextManager sharedContextManager) {
+      CurrentFileIdentifierContext fileIdentifierContext,
+      FilePositionLinkerContext parentLinkerContext,
+      DefinedSortIdentifierContext availableSortIdentifierContext,
+      AccessSortIdentifierContext accessSortIdentifierContext) {
 
-    //accVariableIdentifierExtractor = //TODO: Load from shared context
-    //availableVariableIdentifierContext = //TODO: Load from shared context
+    this.parentLinkerContext = parentLinkerContext;
+    this.fileIdentifierContext = fileIdentifierContext;
 
-    availableIdentifiers = availableSortIdentifierContext.allIdentifier().identifier();
+    this.accSortIdentifierExtractor = accessSortIdentifierContext;
+    this.definedSortIdentifierContext = availableSortIdentifierContext;
 
     List<Supplier<CheckerAdapterResult>> variableChecks = List.of(
         this::testVariableAccess,
@@ -58,7 +65,7 @@ public class TestSorts {
 
   /// Using the extreactors of this class, test that all variable definitions are valid (they shadow nothing).
   private CheckerAdapterResult testVariableDef() {
-    return defSortIdentifierExtractor
+    return definedSortIdentifierContext.getExtractor()
         .allEntries()
         .stream()
         .map(this::checkAstSortDef)
@@ -78,13 +85,18 @@ public class TestSorts {
 
     return definedIdentifiers.stream()
         .map((i) -> {
-          if (availableIdentifiers.contains(i)) {
-            return CheckerAdapterResult.SUCCESS;
-          } else {
-
-            //TODO: Better log message
-            messageContext.logError(String.format("Identifier '%s' is redefined at node: ", i, node));
+          if (availableSortIdentifierContext.availableSortIdentifier(node).identifier().contains(i)) {
+            messageContext.logReporotable(
+                new IdentifierError(
+                    IdentifierError.IdentifierErrorKind.REDEFINED,
+                    i,
+                    new SortIdentifier(),
+                    node,
+                    parentLinkerContext,
+                    fileIdentifierContext));
             return CheckerAdapterResult.FAILURE;
+          } else {
+            return CheckerAdapterResult.SUCCESS;
           }
         })
         .reduce(CheckerAdapterResult.SUCCESS,
@@ -94,7 +106,7 @@ public class TestSorts {
   /// Using the extreactors of this class, test that all variable accesses are valid, the variable is defined.
   private CheckerAdapterResult testVariableAccess() {
     return accSortIdentifierExtractor
-        .allEntries()
+        .getNodesAccessingSortIdentifier()
         .stream()
         .map(this::checkAstNodeVariableAccess)
         .reduce(CheckerAdapterResult.SUCCESS,
@@ -110,12 +122,17 @@ public class TestSorts {
     return accessedIdentifiers
         .stream()
         .map((i) -> {
-          if (availableIdentifiers.contains(i)) {
+          if (availableSortIdentifierContext.availableSortIdentifier(node).identifier().contains(i)) {
             return CheckerAdapterResult.SUCCESS;
           } else {
-
-            //TODO: Better log message
-            messageContext.logError(String.format("Identifier '%s' not available at node: ", i, node));
+            messageContext.logReporotable(
+                new IdentifierError(
+                    IdentifierError.IdentifierErrorKind.UNDEFINED,
+                    i,
+                    new SortIdentifier(),
+                    node,
+                    parentLinkerContext,
+                    fileIdentifierContext));
             return CheckerAdapterResult.FAILURE;
           }
         })

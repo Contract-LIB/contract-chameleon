@@ -2,6 +2,19 @@ package org.contract_lib.adapters;
 
 import org.contract_lib.contract_chameleon.Adapter;
 import org.contract_lib.contract_chameleon.adapters.CheckerAdapter;
+import org.contract_lib.lang.contract_lib.context_provider.AppliedAstExtensionsContextProvider;
+import org.contract_lib.lang.contract_lib.context_provider.ContractLibAstContextProvider;
+import org.contract_lib.lang.contract_lib.context_provider.FileIdentifierContextProvider;
+import org.contract_lib.lang.contract_lib.context_provider.ast_extensions.AccessSortIdentifierContextProvider;
+import org.contract_lib.lang.contract_lib.context_provider.ast_extensions.DefinedSortIdentifierContextProvider;
+import org.contract_lib.lang.contract_lib.context_provider.ast_extensions.CommandOrderContextProvider;
+import org.contract_lib.lang.contract_lib.context_provider.ast_extensions.FilePositionLinkerContextProvider;
+import org.contract_lib.lang.contract_lib.contexts.AppliedAstExtensionsContext;
+import org.contract_lib.lang.contract_lib.contexts.CurrentFileIdentifierContext;
+import org.contract_lib.lang.contract_lib.contexts.ast_extensions.AccessSortIdentifierContext;
+import org.contract_lib.lang.contract_lib.contexts.ast_extensions.DefinedSortIdentifierContext;
+import org.contract_lib.lang.contract_lib.contexts.ast_extensions.FilePositionLinkerContext;
+import org.contract_lib.lang.contract_lib.tester.TestSorts;
 
 import com.google.auto.service.AutoService;
 
@@ -15,8 +28,37 @@ public final class ContractLibCheckerAdapter extends CheckerAdapter {
   @Override
   public CheckerAdapterResult performCheck() {
 
-    this.getMessageContext().logError("No checks performed!");
+    // TODO: Remove unchecked unwrap
+    AppliedAstExtensionsContext appliedExtensions = getContext(new AppliedAstExtensionsContextProvider()).get();
 
-    return CheckerAdapterResult.FAILURE;
+    // Adding required extensions
+    appliedExtensions.addAstExtension(new FilePositionLinkerContextProvider());
+    appliedExtensions.addAstExtension(new CommandOrderContextProvider());
+
+    // TODO: Remove unchecked unwrap
+    FilePositionLinkerContext parentLinkerContext = getContext(new FilePositionLinkerContextProvider()).get();
+
+    // TODO: Remove unchecked unwrap
+    CurrentFileIdentifierContext fileIdentifierContext = this
+        .getContext(new FileIdentifierContextProvider())
+        .get();
+    DefinedSortIdentifierContext availableSortIdentifierContext = this
+        .getContext(new DefinedSortIdentifierContextProvider())
+        .get();
+    AccessSortIdentifierContext accessSortIdentifierContext = this
+        .getContext(new AccessSortIdentifierContextProvider())
+        .get();
+
+    // TODO: Remove unchecked unwrap
+    this
+        .getContext(new ContractLibAstContextProvider())
+        .get();
+
+    TestSorts testSorts = new TestSorts(this.getMessageContext());
+    return testSorts.testSorts(
+        fileIdentifierContext,
+        parentLinkerContext,
+        availableSortIdentifierContext,
+        accessSortIdentifierContext);
   }
 }
