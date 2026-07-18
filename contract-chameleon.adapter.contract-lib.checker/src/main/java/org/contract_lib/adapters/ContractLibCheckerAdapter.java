@@ -3,6 +3,7 @@ package org.contract_lib.adapters;
 import org.contract_lib.contract_chameleon.Adapter;
 import org.contract_lib.contract_chameleon.adapters.CheckerAdapter;
 import org.contract_lib.lang.contract_lib.context_provider.AppliedAstExtensionsContextProvider;
+import org.contract_lib.lang.contract_lib.context_provider.AvailableSortIdentifierContextProvider;
 import org.contract_lib.lang.contract_lib.context_provider.ContractLibAstContextProvider;
 import org.contract_lib.lang.contract_lib.context_provider.FileIdentifierContextProvider;
 import org.contract_lib.lang.contract_lib.context_provider.ast_extensions.AccessSortIdentifierContextProvider;
@@ -10,6 +11,7 @@ import org.contract_lib.lang.contract_lib.context_provider.ast_extensions.Define
 import org.contract_lib.lang.contract_lib.context_provider.ast_extensions.CommandOrderContextProvider;
 import org.contract_lib.lang.contract_lib.context_provider.ast_extensions.FilePositionLinkerContextProvider;
 import org.contract_lib.lang.contract_lib.contexts.AppliedAstExtensionsContext;
+import org.contract_lib.lang.contract_lib.contexts.AvailableSortIdentifierContext;
 import org.contract_lib.lang.contract_lib.contexts.CurrentFileIdentifierContext;
 import org.contract_lib.lang.contract_lib.contexts.ast_extensions.AccessSortIdentifierContext;
 import org.contract_lib.lang.contract_lib.contexts.ast_extensions.DefinedSortIdentifierContext;
@@ -42,11 +44,14 @@ public final class ContractLibCheckerAdapter extends CheckerAdapter {
     CurrentFileIdentifierContext fileIdentifierContext = this
         .getContext(new FileIdentifierContextProvider())
         .get();
-    DefinedSortIdentifierContext availableSortIdentifierContext = this
+    DefinedSortIdentifierContext definedSortIdentifierContext = this
         .getContext(new DefinedSortIdentifierContextProvider())
         .get();
     AccessSortIdentifierContext accessSortIdentifierContext = this
         .getContext(new AccessSortIdentifierContextProvider())
+        .get();
+    AvailableSortIdentifierContext availableSortIdentifierContext = this
+        .getContext(new AvailableSortIdentifierContextProvider())
         .get();
 
     // TODO: Remove unchecked unwrap
@@ -58,7 +63,8 @@ public final class ContractLibCheckerAdapter extends CheckerAdapter {
     return testSorts.testSorts(
         fileIdentifierContext,
         parentLinkerContext,
-        availableSortIdentifierContext,
-        accessSortIdentifierContext);
+        definedSortIdentifierContext,
+        accessSortIdentifierContext,
+        availableSortIdentifierContext);
   }
 }

@@ -2,8 +2,11 @@ package org.contract_lib.lang.contract_lib.translator_extensions;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.contract_lib.lang.contract_lib.antlr4parser.ContractLIBParser;
+import org.contract_lib.lang.contract_lib.antlr4parser.ContractLIBParser.Datatype_decContext;
 import org.contract_lib.lang.contract_lib.ast.Abstraction;
 import org.contract_lib.lang.contract_lib.ast.Assert;
 import org.contract_lib.lang.contract_lib.ast.Constant;
@@ -12,6 +15,7 @@ import org.contract_lib.lang.contract_lib.ast.Contract;
 import org.contract_lib.lang.contract_lib.ast.ContractLibAst;
 import org.contract_lib.lang.contract_lib.ast.ContractLibAstElement;
 import org.contract_lib.lang.contract_lib.ast.Datatype;
+import org.contract_lib.lang.contract_lib.ast.DatatypeDec;
 import org.contract_lib.lang.contract_lib.ast.Formal;
 import org.contract_lib.lang.contract_lib.ast.FunctionDec;
 import org.contract_lib.lang.contract_lib.ast.JoinedCommand;
@@ -53,6 +57,18 @@ public final class ParentLinker implements ContractLibAstTranslatorExtension {
 
   private final LabelStore<ContractLibAstElement> store;
 
+  //NOTE: There is in inconcistency regarding the structure of the AST Root.
+  //ATM, all elements create from commands are stored in the root,
+  //but their parent might be a {@code JoinedCommand},
+  //that is not stored directly there.
+  //The parent of that {@code JoinedCommand} node is however the AST root.
+  //This is inconcistent regarding the children
+  //(forall c. c in r.children() => parent(c) == r)
+  //and should be properly redesigned
+  //(maybe with an second interface differentiating between parent, and defining command),
+  //to differentiate between the AST where owning the elements,
+  //and the interactive flow oriented design of the Contract-LIB specification.
+
   public ParentLinker() {
     this.store = new LabelStore<>();
   }
@@ -60,6 +76,16 @@ public final class ParentLinker implements ContractLibAstTranslatorExtension {
   public Optional<ContractLibAstElement> getParent(ContractLibAstElement element) {
     return Optional.ofNullable(
         this.store.getLabel(element));
+  }
+
+  @Override
+  public String toString() {
+    return String.format("Parent Linker [%n%s%n]",
+        store
+            .getEntries()
+            .stream()
+            .map((e) -> String.format("  %s -> %s", e.getKey().toString(), e.getValue()))
+            .collect(Collectors.joining(System.lineSeparator())));
   }
 
   @Override
@@ -95,6 +121,7 @@ public final class ParentLinker implements ContractLibAstTranslatorExtension {
       JoinedCommand<Abstraction> res,
       ContractLIBParser.Cmd_declareAbstractionsContext ctx) {
     addParentList(res, List.of(res::commands));
+    res.commands().forEach(a -> addParent(a, List.of(a::identifier, a::datatypeDec)));
   }
 
   @Override
@@ -110,13 +137,12 @@ public final class ParentLinker implements ContractLibAstTranslatorExtension {
     addParent(res, List.of(res::identifier, res::dtDec));
   }
 
-  // AST Extension
-
   @Override
   public void extensionCmdDeclareDatatypes(
       JoinedCommand<Datatype> res,
       ContractLIBParser.Cmd_declareDatatypesContext ctx) {
     addParentList(res, List.of(res::commands));
+    res.commands().forEach(d -> addParent(d, List.of(d::identifier, d::dtDec)));
   }
 
   // Command Exstensions
@@ -185,17 +211,27 @@ public final class ParentLinker implements ContractLibAstTranslatorExtension {
   // - Define Extensions
 
   @Override
+  public void extensionDatatypeDec(DatatypeDec res, Datatype_decContext ctx) {
+    addParent(
+        res,
+        List.of(),
+        List.of(res::constructors, res::parameters));
+  }
+
+  @Override
   public void extensionConstructor(
       Constructor res,
       ContractLIBParser.Constructor_decContext ctx) {
-    //TODO
+    addParent(
+        res,
+        List.of(res::identifier),
+        List.of(res::selectors));
   }
 
   @Override
   public void extensionSelector(
       SelectorDec res,
       ContractLIBParser.Selector_decContext ctx) {
-    //TODO
   }
 
   @Override
@@ -365,8 +401,9 @@ public final class ParentLinker implements ContractLibAstTranslatorExtension {
 
   private final <E extends ContractLibAstElement> void addParent(
       E parent, ContractLibAstElement field) {
-    //TODO: Check that label does not exist
-    store.putLabel(field, parent);
+    if (!store.getKeys().contains(field)) {
+      store.putLabel(field, parent);
+    }
   }
 
   private final <E extends ContractLibAstElement> void addParent(

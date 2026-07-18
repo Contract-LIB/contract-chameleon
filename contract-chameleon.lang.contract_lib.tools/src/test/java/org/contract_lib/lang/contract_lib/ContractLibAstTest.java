@@ -18,6 +18,7 @@ import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
 import org.contract_lib.contract_chameleon.error.ChameleonReportable;
 import org.contract_lib.lang.contract_lib.ast.ContractLibAst;
 import org.contract_lib.lang.contract_lib.context_provider.AppliedAstExtensionsContextProvider;
+import org.contract_lib.lang.contract_lib.context_provider.AvailableSortIdentifierContextProvider;
 import org.contract_lib.lang.contract_lib.context_provider.ContractLibAstContextProvider;
 import org.contract_lib.lang.contract_lib.context_provider.FileIdentifierContextProvider;
 import org.contract_lib.lang.contract_lib.context_provider.UndefinedCharStreamContextProvider;
@@ -27,6 +28,7 @@ import org.contract_lib.lang.contract_lib.context_provider.ast_extensions.Comman
 import org.contract_lib.lang.contract_lib.context_provider.ast_extensions.FilePositionLinkerContextProvider;
 import org.contract_lib.lang.contract_lib.context_provider.ast_extensions.ParentLinkerContextProvider;
 import org.contract_lib.lang.contract_lib.contexts.AppliedAstExtensionsContext;
+import org.contract_lib.lang.contract_lib.contexts.AvailableSortIdentifierContext;
 import org.contract_lib.lang.contract_lib.contexts.CharStreamContext;
 import org.contract_lib.lang.contract_lib.contexts.ContractLibAstContext;
 import org.contract_lib.lang.contract_lib.contexts.CurrentFileIdentifierContext;
@@ -52,8 +54,9 @@ public class ContractLibAstTest {
   protected FilePositionLinkerContext filePositionExtractor;
   protected ParentLinkerContext parentLinkerContext;
   protected CommandOrderContext commandOrderExtractor;
-  protected DefinedSortIdentifierContext availableSortIdentifierContext;
+  protected DefinedSortIdentifierContext definedSortIdentifierContext;
   protected AccessSortIdentifierContext accessSortIdentifierContext;
+  protected AvailableSortIdentifierContext availableSortIdentifierContext;
 
   @BeforeEach
   protected void setupContext() {
@@ -86,11 +89,14 @@ public class ContractLibAstTest {
         .get();
     commandOrderExtractor = sharedContextManager
         .getContext(new CommandOrderContextProvider()).get();
-    availableSortIdentifierContext = sharedContextManager
+    definedSortIdentifierContext = sharedContextManager
         .getContext(new DefinedSortIdentifierContextProvider())
         .get();
     accessSortIdentifierContext = sharedContextManager
         .getContext(new AccessSortIdentifierContextProvider())
+        .get();
+    availableSortIdentifierContext = sharedContextManager
+        .getContext(new AvailableSortIdentifierContextProvider())
         .get();
 
     appliedAstExtensionsContext.addAstExtensions(List.of(
@@ -103,7 +109,7 @@ public class ContractLibAstTest {
 
   @AfterEach
   protected void printMessages() {
-    messageContext.log();
+    messageContext.getMessageManager().writeStdErr();
   }
 
   public ContractLibAst createAstFromResourcePath(String path) throws IOException {
@@ -118,7 +124,16 @@ public class ContractLibAstTest {
 
       ContractLibAstContext context = sharedContextManager.getContext(new ContractLibAstContextProvider()).get();
 
-      return context.getAst();
+      ContractLibAst ast = context.getAst();
+      System.err.println(ast);
+      System.err.println(definedSortIdentifierContext);
+      System.err.println(accessSortIdentifierContext);
+
+      System.err.println(parentLinkerContext);
+      System.err.println(commandOrderExtractor);
+      System.err.println(availableSortIdentifierContext);
+
+      return ast;
     } catch (IOException exception) {
       throw exception;
     }

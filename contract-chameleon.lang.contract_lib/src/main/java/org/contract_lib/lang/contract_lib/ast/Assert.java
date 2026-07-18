@@ -23,4 +23,5 @@ public record Assert(
       Function<Assert, R> assertion) {
     return assertion.apply(this);
   }
+
 }

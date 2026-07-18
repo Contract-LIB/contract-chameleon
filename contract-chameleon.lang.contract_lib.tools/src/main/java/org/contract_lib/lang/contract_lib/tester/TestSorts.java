@@ -16,6 +16,7 @@ import org.contract_lib.lang.contract_lib.contexts.ast_extensions.FilePositionLi
 import org.contract_lib.lang.contract_lib.error.IdentifierError;
 import org.contract_lib.lang.contract_lib.label.Identifier;
 import org.contract_lib.lang.contract_lib.label.IdentifierMode.Accessed;
+import org.contract_lib.lang.contract_lib.label.IdentifierMode.Available;
 import org.contract_lib.lang.contract_lib.label.IdentifierMode.Defined;
 import org.contract_lib.lang.contract_lib.label.IdentifierScope.Global;
 import org.contract_lib.lang.contract_lib.label.IdentifierScope.Local;
@@ -25,7 +26,7 @@ public class TestSorts {
 
   private final MessageContext messageContext;
 
-  private FilePositionLinkerContext parentLinkerContext;
+  private FilePositionLinkerContext filePosistionLinkerContext;
   private CurrentFileIdentifierContext fileIdentifierContext;
 
   private DefinedSortIdentifierContext definedSortIdentifierContext;
@@ -35,6 +36,8 @@ public class TestSorts {
   //TODO: Add static symbols that can appear as identifer, remove from extractors.
   // private final … theory sorts
 
+  //NOTE: Recurseive Type definitions are not supported yet.
+
   public TestSorts(
       MessageContext messageContext) {
     this.messageContext = messageContext;
@@ -42,18 +45,20 @@ public class TestSorts {
 
   public CheckerAdapterResult testSorts(
       CurrentFileIdentifierContext fileIdentifierContext,
-      FilePositionLinkerContext parentLinkerContext,
-      DefinedSortIdentifierContext availableSortIdentifierContext,
-      AccessSortIdentifierContext accessSortIdentifierContext) {
+      FilePositionLinkerContext filePosistionLinkerContext,
+      DefinedSortIdentifierContext definedSortIdentifierContext,
+      AccessSortIdentifierContext accessSortIdentifierContext,
+      AvailableSortIdentifierContext availableSortIdentifierContext) {
 
-    this.parentLinkerContext = parentLinkerContext;
+    this.filePosistionLinkerContext = filePosistionLinkerContext;
     this.fileIdentifierContext = fileIdentifierContext;
 
     this.accSortIdentifierExtractor = accessSortIdentifierContext;
-    this.definedSortIdentifierContext = availableSortIdentifierContext;
+    this.definedSortIdentifierContext = definedSortIdentifierContext;
+    this.availableSortIdentifierContext = availableSortIdentifierContext;
 
     List<Supplier<CheckerAdapterResult>> variableChecks = List.of(
-        this::testVariableAccess,
+        this::testSortAccess,
         this::testVariableDef);
 
     return variableChecks
@@ -92,7 +97,7 @@ public class TestSorts {
                     i,
                     new SortIdentifier(),
                     node,
-                    parentLinkerContext,
+                    filePosistionLinkerContext,
                     fileIdentifierContext));
             return CheckerAdapterResult.FAILURE;
           } else {
@@ -104,25 +109,27 @@ public class TestSorts {
   }
 
   /// Using the extreactors of this class, test that all variable accesses are valid, the variable is defined.
-  private CheckerAdapterResult testVariableAccess() {
+  private CheckerAdapterResult testSortAccess() {
     return accSortIdentifierExtractor
         .getNodesAccessingSortIdentifier()
         .stream()
-        .map(this::checkAstNodeVariableAccess)
+        .map(this::checkAstNodeSortAccess)
         .reduce(CheckerAdapterResult.SUCCESS,
             CheckerAdapterResult::and);
   }
 
   /// Check an entry if all identifer  are available and logs error if not so.
-  private CheckerAdapterResult checkAstNodeVariableAccess(
+  private CheckerAdapterResult checkAstNodeSortAccess(
       Entry<ContractLibAstElement, Identifier<Accessed, Local, SortIdentifier>> entry) {
     ContractLibAstElement node = entry.getKey();
     Set<String> accessedIdentifiers = entry.getValue().identifier();
+    Identifier<Available, Local, SortIdentifier> availabeIds = availableSortIdentifierContext
+        .availableSortIdentifier(node);
 
     return accessedIdentifiers
         .stream()
         .map((i) -> {
-          if (availableSortIdentifierContext.availableSortIdentifier(node).identifier().contains(i)) {
+          if (availabeIds.identifier().contains(i)) {
             return CheckerAdapterResult.SUCCESS;
           } else {
             messageContext.logReporotable(
@@ -131,7 +138,7 @@ public class TestSorts {
                     i,
                     new SortIdentifier(),
                     node,
-                    parentLinkerContext,
+                    filePosistionLinkerContext,
                     fileIdentifierContext));
             return CheckerAdapterResult.FAILURE;
           }

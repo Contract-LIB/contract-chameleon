@@ -20,4 +20,14 @@ public interface Command extends ContractLibAstElement {
       Function<FunctionDec, R> defFunctionRec,
       Function<JoinedCommand<FunctionDec>, R> defFunctionsRec,
       Function<Assert, R> assertion);
+
+  @Override
+  public default <R> R perform(
+      Function<ContractLibAst, R> ast,
+      Function<Command, R> command,
+      Function<Sort, R> sort,
+      Function<Term, R> term,
+      Function<Inner, R> inner) {
+    return command.apply(this);
+  }
 }

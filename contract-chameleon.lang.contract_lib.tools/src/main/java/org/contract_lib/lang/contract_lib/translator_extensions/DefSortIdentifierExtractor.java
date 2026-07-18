@@ -21,8 +21,6 @@ public final class DefSortIdentifierExtractor extends IdentifierExtractor<Define
   public void extensionCmdDeclareSort(SortDec res, Cmd_declareSortContext ctx) {
     String id = res.name().identifier();
     Identifier<Defined, Global, SortIdentifier> ad = new Identifier<>(Set.of(id));
-
-    System.err.println("CMD S " + id);
     addToStore(res, ad);
   }
 
@@ -30,7 +28,6 @@ public final class DefSortIdentifierExtractor extends IdentifierExtractor<Define
   public void extensionCmdDeclareDatatype(Datatype res, Cmd_declareDatatypeContext ctx) {
     String id = res.identifier().name().identifier();
     Identifier<Defined, Global, SortIdentifier> ad = new Identifier<>(Set.of(id));
-    System.err.println("CMD D " + id);
     addToStore(res, ad);
   }
 
@@ -38,7 +35,6 @@ public final class DefSortIdentifierExtractor extends IdentifierExtractor<Define
   public void extensionCmdDeclareAbstraction(Abstraction res, Cmd_declareAbstractionContext ctx) {
     String id = res.identifier().name().identifier();
     Identifier<Defined, Global, SortIdentifier> ad = new Identifier<>(Set.of(id));
-    System.err.println("CMD A " + id);
     addToStore(res, ad);
   }
 
@@ -46,7 +42,6 @@ public final class DefSortIdentifierExtractor extends IdentifierExtractor<Define
   public final void extensionSortDec(SortDec res, Sort_decContext ctx) {
     String id = res.name().identifier();
     Identifier<Defined, Global, SortIdentifier> ad = new Identifier<>(Set.of(id));
-    System.err.println("SD " + id);
     addToStore(res, ad);
   }
 }

@@ -6,7 +6,7 @@
 
 (declare-datatype DT
     (
-      (Test (a BaseA) (b BaseB))
+      (Test (a UnDef) (b UnDef))
     )
 )
 
@@ -17,17 +17,17 @@
   )
   (
     (
-      (Test (a BaseA) (b BaseB))
+      (Test (a UnDef) (b UnDef))
     )
     (
-      (Test (a BaseA) (b BaseB))
+      (Test (a UnDef) (b UnDef))
     )
   )
 )
 
 (declare-abstraction AS
   (
-    (Test (a BaseA) (b BaseB))
+    (Test (a UnDef) (b UnDef))
   )
 )
 
@@ -38,10 +38,10 @@
   )
   (
     (
-      (Test (a BaseA) (b BaseB))
+      (Test (a UnDef) (b UnDef))
     )
     (
-      (Test (a BaseA) (b BaseB))
+      (Test (a UnDef) (b UnDef))
     )
   )
 )
@@ -49,8 +49,8 @@
 
 (define-contract AS_A.test
   (
-    (this (in BaseA))
-    (b (in BaseB))
+    (this (in UnDef))
+    (b (in UnDef))
   )
   (
     (
@@ -61,8 +61,5 @@
 )
 
 ; TODO: Appearances in terms
-; (forall ((a BaseA) (b BaseB)) true)
-; (exists ((a BaseA) (b BaseB)) true)
-
-; (let (a true) (b true) true)
-; (match v (a true) (b true))
+; (forall ((a UnDef) (b UnDef)) true)
+; (exists ((a UnDef) (b UnDef)) true)

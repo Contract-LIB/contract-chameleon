@@ -8,6 +8,7 @@ import org.contract_lib.lang.contract_lib.ast.Constructor;
 import org.contract_lib.lang.contract_lib.ast.Contract;
 import org.contract_lib.lang.contract_lib.ast.ContractLibAst;
 import org.contract_lib.lang.contract_lib.ast.Datatype;
+import org.contract_lib.lang.contract_lib.ast.DatatypeDec;
 import org.contract_lib.lang.contract_lib.ast.Formal;
 import org.contract_lib.lang.contract_lib.ast.FunctionDec;
 import org.contract_lib.lang.contract_lib.ast.JoinedCommand;
@@ -103,6 +104,10 @@ public interface ContractLibAstTranslatorExtension {
       ContractLIBParser.Cmd_defineContractContext ctx);
 
   // Sort Dec Extensions
+
+  public void extensionDatatypeDec(
+      DatatypeDec res,
+      ContractLIBParser.Datatype_decContext ctx);
 
   public void extensionSortDec(
       SortDec res,

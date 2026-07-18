@@ -1,6 +1,8 @@
 package org.contract_lib.lang.contract_lib.ast;
 
+import org.contract_lib.lang.contract_lib.ast.ContractLibAstElement.Inner;
+
 public record VarBinding(
     Symbol name,
-    Term type) implements ContractLibAstElement {
+    Term type) implements Inner {
 }

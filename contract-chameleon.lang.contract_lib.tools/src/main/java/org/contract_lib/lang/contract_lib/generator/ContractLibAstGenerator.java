@@ -396,6 +396,8 @@ public final class ContractLibAstGenerator {
         par,
         constructors);
 
+    callExtensions(helper, ctx, ContractLibAstTranslatorExtension::extensionDatatypeDec);
+
     return helper;
   }
 

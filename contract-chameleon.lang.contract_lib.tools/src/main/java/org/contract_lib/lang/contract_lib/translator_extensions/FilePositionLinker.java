@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.contract_lib.lang.contract_lib.antlr4parser.ContractLIBParser;
+import org.contract_lib.lang.contract_lib.antlr4parser.ContractLIBParser.Datatype_decContext;
 import org.contract_lib.lang.contract_lib.ast.Abstraction;
 import org.contract_lib.lang.contract_lib.ast.Assert;
 import org.contract_lib.lang.contract_lib.ast.Constant;
@@ -14,6 +15,7 @@ import org.contract_lib.lang.contract_lib.ast.Contract;
 import org.contract_lib.lang.contract_lib.ast.ContractLibAst;
 import org.contract_lib.lang.contract_lib.ast.ContractLibAstElement;
 import org.contract_lib.lang.contract_lib.ast.Datatype;
+import org.contract_lib.lang.contract_lib.ast.DatatypeDec;
 import org.contract_lib.lang.contract_lib.ast.Formal;
 import org.contract_lib.lang.contract_lib.ast.FunctionDec;
 import org.contract_lib.lang.contract_lib.ast.JoinedCommand;
@@ -176,6 +178,12 @@ public final class FilePositionLinker implements ContractLibAstTranslatorExtensi
   }
 
   // Sort Dec Extensions
+
+  @Override
+  public void extensionDatatypeDec(
+      DatatypeDec res,
+      Datatype_decContext ctx) {
+  }
 
   @Override
   public void extensionSortDec(

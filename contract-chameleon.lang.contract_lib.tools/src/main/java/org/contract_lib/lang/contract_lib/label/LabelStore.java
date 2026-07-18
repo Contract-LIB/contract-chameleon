@@ -3,7 +3,7 @@ package org.contract_lib.lang.contract_lib.label;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.IdentityHashMap;
 
 import org.contract_lib.lang.contract_lib.ast.ContractLibAstElement;
@@ -31,10 +31,10 @@ public class LabelStore<T> {
   }
 
   public Set<Entry<ContractLibAstElement, T>> getEntries() {
-    return new HashSet<>(elementToLabelMap.entrySet());
+    return Collections.unmodifiableSet(elementToLabelMap.entrySet());
   }
 
   public Set<ContractLibAstElement> getKeys() {
-    return new HashSet<>(elementToLabelMap.keySet());
+    return Collections.unmodifiableSet(elementToLabelMap.keySet());
   }
 }

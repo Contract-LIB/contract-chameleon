@@ -1,9 +1,16 @@
 package org.contract_lib.lang.contract_lib.translator_extensions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.contract_lib.lang.contract_lib.antlr4parser.ContractLIBParser;
+import org.contract_lib.lang.contract_lib.antlr4parser.ContractLIBParser.Datatype_decContext;
 import org.contract_lib.lang.contract_lib.ast.Abstraction;
 import org.contract_lib.lang.contract_lib.ast.Assert;
 import org.contract_lib.lang.contract_lib.ast.Command;
@@ -12,6 +19,7 @@ import org.contract_lib.lang.contract_lib.ast.Constructor;
 import org.contract_lib.lang.contract_lib.ast.Contract;
 import org.contract_lib.lang.contract_lib.ast.ContractLibAst;
 import org.contract_lib.lang.contract_lib.ast.Datatype;
+import org.contract_lib.lang.contract_lib.ast.DatatypeDec;
 import org.contract_lib.lang.contract_lib.ast.Formal;
 import org.contract_lib.lang.contract_lib.ast.FunctionDec;
 import org.contract_lib.lang.contract_lib.ast.JoinedCommand;
@@ -41,10 +49,57 @@ import org.contract_lib.lang.contract_lib.generator.ContractLibAstTranslatorExte
 /// Creates a list in what order the commands appear in the parse tree.
 public final class CommandOrderExtractor implements ContractLibAstTranslatorExtension {
 
-  private final List<Command> store;
+  private final Map<Command, Integer> index;
+  private final List<Command> commands;
+  private Integer next = 0;
 
   public CommandOrderExtractor() {
-    this.store = new ArrayList<>();
+    this.index = new IdentityHashMap<>();
+    this.commands = new ArrayList<>();
+  }
+
+  public Optional<Command> predecessor(Command command) {
+    return Optional.ofNullable(index.get(command))
+        .map(this::dec)
+        .flatMap(this::testRange)
+        .map(commands::get);
+  }
+
+  public Optional<Command> successor(Command command) {
+    return Optional.ofNullable(index.get(command))
+        .map(this::inc)
+        .flatMap(this::testRange)
+        .map(commands::get);
+  }
+
+  public Stream<Command> getCommands() {
+    return commands.stream();
+  }
+
+  @Override
+  public String toString() {
+    return String.format("Command Order [%n%s%n]",
+        commands
+            .stream()
+            .map((e) -> String.format("  %s", e))
+            .collect(Collectors.joining(System.lineSeparator())));
+  }
+
+  private void add(Command res) {
+    this.index.put(res, next++);
+    this.commands.add(res);
+  }
+
+  private Optional<Integer> testRange(Integer i) {
+    return i >= commands.size() || i < 0 ? Optional.empty() : Optional.of(i);
+  }
+
+  private Integer inc(Integer i) {
+    return i + 1;
+  }
+
+  private Integer dec(Integer i) {
+    return i - 1;
   }
 
   // AST Extension
@@ -57,7 +112,7 @@ public final class CommandOrderExtractor implements ContractLibAstTranslatorExte
 
   @Override
   public void extensionAssert(Assert res, ContractLIBParser.Cmd_assertContext ctx) {
-    store.add(res);
+    this.add(res);
   }
 
   // - Declare Extensions
@@ -66,48 +121,48 @@ public final class CommandOrderExtractor implements ContractLibAstTranslatorExte
   public void extensionCmdDeclareAbstraction(
       Abstraction res,
       ContractLIBParser.Cmd_declareAbstractionContext ctx) {
-    store.add(res);
+    this.add(res);
   }
 
   @Override
   public void extensionCmdDeclareAbstractions(
       JoinedCommand<Abstraction> res,
       ContractLIBParser.Cmd_declareAbstractionsContext ctx) {
-    store.add(res);
+    this.add(res);
   }
 
   @Override
   public void extensionCmdDeclareConstant(
       Constant res,
       ContractLIBParser.Cmd_declareConstContext ctx) {
-    store.add(res);
+    this.add(res);
   }
 
   public void extensionCmdDeclareDatatype(
       Datatype res,
       ContractLIBParser.Cmd_declareDatatypeContext ctx) {
-    store.add(res);
+    this.add(res);
   }
 
   @Override
   public void extensionCmdDeclareDatatypes(
       JoinedCommand<Datatype> res,
       ContractLIBParser.Cmd_declareDatatypesContext ctx) {
-    store.add(res);
+    this.add(res);
   }
 
   @Override
   public void extensionCmdDeclareFun(
       FunctionDec res,
       ContractLIBParser.Cmd_declareFunContext ctx) {
-    store.add(res);
+    this.add(res);
   }
 
   @Override
   public void extensionCmdDeclareSort(
       SortDec res,
       ContractLIBParser.Cmd_declareSortContext ctx) {
-    store.add(res);
+    this.add(res);
   }
 
   // - Define Extensions
@@ -116,38 +171,44 @@ public final class CommandOrderExtractor implements ContractLibAstTranslatorExte
   public void extensionCmdDefineFun(
       FunctionDec res,
       ContractLIBParser.Cmd_defineFunContext ctx) {
-    store.add(res);
+    this.add(res);
   }
 
   @Override
   public void extensionCmdDefineFunRec(
       FunctionDec res,
       ContractLIBParser.Cmd_defineFunRecContext ctx) {
-    store.add(res);
+    this.add(res);
   }
 
   @Override
   public void extensionCmdDefineFunsRec(
       JoinedCommand<FunctionDec> res,
       ContractLIBParser.Cmd_defineFunsRecContext ctx) {
-    store.add(res);
+    this.add(res);
   }
 
   @Override
   public void extensionCmdDefineSort(
       SortDec res,
       ContractLIBParser.Cmd_defineSortContext ctx) {
-    store.add(res);
+    this.add(res);
   }
 
   @Override
   public void extensionCmdDefineContract(
       Contract res,
       ContractLIBParser.Cmd_defineContractContext ctx) {
-    store.add(res);
+    this.add(res);
   }
 
   // Sort Dec Extensions
+
+  @Override
+  public void extensionDatatypeDec(
+      DatatypeDec res,
+      Datatype_decContext ctx) {
+  }
 
   @Override
   public void extensionSortDec(
