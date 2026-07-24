@@ -1,9 +1,8 @@
 package org.contract_lib.lang.contract_lib.error;
 
-import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
 import org.contract_lib.contract_chameleon.error.ChameleonError;
 
-public final class SyntaxError extends ChameleonError {
+public final class SyntaxError implements ChameleonError {
 
   public String file;
   public int line;

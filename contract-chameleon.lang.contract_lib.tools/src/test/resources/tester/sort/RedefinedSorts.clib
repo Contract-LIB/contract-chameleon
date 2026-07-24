@@ -1,0 +1,48 @@
+(declare-sort Dup 0)
+
+(declare-sort Dup 0)
+
+;(declare-sort-parameter P_A)
+;(declare-sort-parameter P_B)
+
+(declare-datatype Dup
+    (
+      (Test)
+    )
+)
+
+(declare-datatypes
+  (
+    (Dup 0)
+    (Dup 0)
+  )
+  (
+    (
+      (Test)
+    )
+    (
+      (Test)
+    )
+  )
+)
+
+(declare-abstraction Dup
+    (
+      (Test)
+    )
+)
+
+(declare-abstractions
+  (
+    (Dup 0)
+    (Dup 0)
+  )
+  (
+    (
+      (Test)
+    )
+    (
+      (Test)
+    )
+  )
+)

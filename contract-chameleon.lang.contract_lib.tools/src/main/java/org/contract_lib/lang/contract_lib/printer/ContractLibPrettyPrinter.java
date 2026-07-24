@@ -6,10 +6,8 @@ import java.io.Writer;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
 import org.contract_lib.lang.contract_lib.ast.Abstraction;
 import org.contract_lib.lang.contract_lib.ast.ArgumentMode;
 import org.contract_lib.lang.contract_lib.ast.Constructor;
@@ -18,6 +16,7 @@ import org.contract_lib.lang.contract_lib.ast.ContractLibAst;
 import org.contract_lib.lang.contract_lib.ast.Formal;
 import org.contract_lib.lang.contract_lib.ast.MatchCase;
 import org.contract_lib.lang.contract_lib.ast.Numeral;
+import org.contract_lib.lang.contract_lib.ast.Parameter;
 import org.contract_lib.lang.contract_lib.ast.Pattern;
 import org.contract_lib.lang.contract_lib.ast.PrePostPair;
 import org.contract_lib.lang.contract_lib.ast.Quantor;
@@ -31,7 +30,7 @@ import org.contract_lib.lang.contract_lib.ast.Pattern.Case;
 import org.contract_lib.lang.contract_lib.ast.Pattern.WithParameters;
 import org.contract_lib.lang.contract_lib.ast.Sort.ParametricType;
 import org.contract_lib.lang.contract_lib.ast.Sort.Type;
-import org.contract_lib.lang.contract_lib.ast.SortDec.Def;
+import org.contract_lib.lang.contract_lib.ast.SortDec;
 import org.contract_lib.lang.contract_lib.ast.Term.Attributes;
 import org.contract_lib.lang.contract_lib.ast.Term.BooleanLiteral;
 import org.contract_lib.lang.contract_lib.ast.Term.LetBinding;
@@ -47,7 +46,6 @@ import org.contract_lib.lang.contract_lib.ast.Term.Identifier.IdentifierValue;
 public final class ContractLibPrettyPrinter {
 
   private Writer writer;
-  private ChameleonMessageManager manager;
   private int indentation;
 
   private static final int DEFAULT_INDENTATION = 4;
@@ -72,10 +70,9 @@ public final class ContractLibPrettyPrinter {
   private static final String PAR = "par";
   private static final String EXCLAMATION = "!";
 
-  public ContractLibPrettyPrinter(Writer writer, ChameleonMessageManager manager) {
+  public ContractLibPrettyPrinter(Writer writer) {
     this.writer = writer;
     this.indentation = 0;
-    this.manager = manager;
   }
 
   public void printContractLibAst(ContractLibAst ast) {
@@ -136,11 +133,17 @@ public final class ContractLibPrettyPrinter {
     return null;
   }
 
-  public void printSortDecDef(Def def) {
+  public void printSortDecDef(SortDec def) {
     printBlockInline(() -> {
       printSymbol(def.name());
       print(SPACE);
       printNumeral(def.rank());
+    });
+  }
+
+  public void printParameter(Parameter def) {
+    printBlockInline(() -> {
+      printSymbol(def.name());
     });
   }
 
