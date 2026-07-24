@@ -1,6 +1,0 @@
-[submodule "libs/verifast"]
-	path = libs/verifast
-	url = git@github.com:verifast/verifast.git
-[submodule "tests.integration/projects/rbtree-verification"]
-	path = tests.integration/projects/rbtree-verification
-	url = https://github.com/KeYProject/rbtree-verification.git

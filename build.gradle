@@ -26,9 +26,6 @@ dependencies {
   // How to add adapters from different repositories to the build
   //runtimeOnly 'org.tool:adapter-extension:1.0.0-SNAPSHOT'
   //runtimeOnly 'org.tool.b:adapter-extension-b:1.0.0-SNAPSHOT'
-  
-  // adapters from this repository
-  runtimeOnly project(":contract-chameleon.adapter.verifast.export")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -78,7 +75,7 @@ task lightShadowJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.Shado
 
   manifest.from tasks.jar.manifest
   dependencies {
-    exclude(project(":contract-chameleon.adapter.verifast.export"))
+    //exclude(project(":contract-chameleon.adapter.verifast.export"))
   }
 }
 
