@@ -1,3 +1,16 @@
+
+(declare-datatypes
+  (
+   (Test 0)
+  )
+  ((
+    (cons_a ) 
+    (cons_b (test_a Test) )
+    (cons_c (test_b Test) (test_c Bool)) 
+    (cons_d (test_d (Seq Int)) (test_e BoundInt) (test_f Test)) 
+  ))
+)
+
 (declare-datatypes
   (
     (AdtTestA 0)

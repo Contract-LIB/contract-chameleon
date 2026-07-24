@@ -1,0 +1,125 @@
+[example_test_core.BooleanWrapper]
+body = "private boolean valueA,valueB,valueC;"
+pred = "= valueA |-> a &*& valueB |-> b &*& valueC |-> c"
+init = """
+
+      this.valueA = true;
+      this.valueB = true;
+      this.valueC = true;
+"""
+init_values = """
+
+      this.valueA = x;
+      this.valueB = y;
+      this.valueC = z;
+"""
+
+get_a = "return this.valueA;"
+check_equals = "return this.valueA == this.valueB;"
+check_distinct = "return this.valueA != this.valueB;"
+check_not = "return !this.valueA;"
+check_implies = "return !this.valueA || this.valueB;"
+check_and = "return this.valueA && this.valueB;"
+check_or = "return this.valueA || this.valueB;"
+check_xor = "return !(this.valueA || this.valueB);"
+check_ite = "return this.valueA ? x : y;"
+file = ""
+
+[example._Client]
+
+file = """
+package example_test_core;
+
+public class _Client {
+
+  public static void main(String[] args) 
+  //@ requires true;
+  //@ ensures true;
+  {
+    BooleanWrapper w = BooleanWrapper.init();
+    BooleanWrapper w2 = BooleanWrapper.init_values(false, false, false);
+    BooleanWrapper w3 = BooleanWrapper.init_values(true, false, false);
+    BooleanWrapper w4 = BooleanWrapper.init_values(false, true, false);
+
+    boolean w_a = w.get_a();
+    //@ assert w_a;
+
+    boolean w2_a = w2.get_a();
+    //@ assert !w2_a;
+
+
+    boolean eq_1 = w.check_equals();
+    //@ assert eq_1;
+    boolean eq_2 = w2.check_equals();
+    //@ assert eq_2;
+    boolean eq_3 = w3.check_equals();
+    //@ assert !eq_3;
+    boolean eq_4 = w4.check_equals();
+    //@ assert !eq_4;
+
+
+    boolean dis_1 = w.check_distinct();
+    //@ assert !dis_1;
+    boolean dis_2 = w2.check_distinct();
+    //@ assert !dis_2;
+    boolean dis_3 = w3.check_distinct();
+    //@ assert dis_3;
+    boolean dis_4 = w4.check_distinct();
+    //@ assert dis_4;
+
+
+    boolean not_1 = w.check_not();
+    //@ assert !not_1;
+    boolean not_2 = w2.check_not();
+    //@ assert not_2;
+
+
+    boolean imp_1 = w.check_implies();
+    //@ assert imp_1;
+    boolean imp_2 = w2.check_implies();
+    //@ assert imp_2;
+    boolean imp_3 = w3.check_implies();
+    //@ assert !imp_3;
+    boolean imp_4 = w4.check_implies();
+    //@ assert imp_4;
+
+    boolean and_1 = w.check_and();
+    //@ assert and_1;
+    boolean and_2 = w2.check_and();
+    //@ assert !and_2;
+    boolean and_3 = w3.check_and();
+    //@ assert !and_3;
+    boolean and_4 = w4.check_and();
+    //@ assert !and_4;
+
+    boolean or_1 = w.check_or();
+    //@ assert or_1;
+    boolean or_2 = w2.check_or();
+    //@ assert !or_2;
+    boolean or_3 = w3.check_or();
+    //@ assert or_3;
+    boolean or_4 = w4.check_or();
+    //@ assert or_4;
+
+
+    boolean xor_1 = w.check_xor();
+    //@ assert !xor_1;
+    boolean xor_2 = w2.check_xor();
+    //@ assert xor_2;
+    boolean xor_3 = w3.check_xor();
+    //@ assert !xor_3;
+    boolean xor_4 = w4.check_xor();
+    //@ assert !xor_4;
+
+
+    boolean ite_1 = w.check_ite(true, false);
+    //@ assert ite_1;
+    boolean ite_1f = w.check_ite(false, true);
+    //@ assert !ite_1f;
+    boolean ite_2 = w2.check_ite(true, false);
+    //@ assert !ite_2;
+    boolean ite_2f = w2.check_ite(false, true);
+    //@ assert ite_2f;
+  }
+}
+"""

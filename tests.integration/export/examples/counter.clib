@@ -20,8 +20,6 @@
 (define-contract example.Counter.value
   (
     (this (in Counter))
-    (testA (in Counter))
-    (testB (inout Counter))
     (result (out Int))
   )
   ((
@@ -58,5 +56,16 @@
   ((
     true
     (= (absVal this) value)
+  ))
+)
+
+
+(define-contract example.Counter.reset
+  (
+    (this (inout Counter))
   )
-))
+  ((
+    true
+    (= (absVal this) 0)
+  ))
+)

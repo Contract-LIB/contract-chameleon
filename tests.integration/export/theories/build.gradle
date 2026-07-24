@@ -1,0 +1,31 @@
+
+// List to store all creatd tasks
+def tests = []
+
+// - Core
+
+def examples_counter = "theories-core"
+def counter_clib = "./export/theories/Core.clib"
+def counter_replace = "./export/theories/verifast_replacement_core.toml"
+
+createVerifastPipeline(
+  examples_counter,
+  verifast_applicant,
+  counter_clib,
+  counter_replace
+).each { t -> tests << t }
+
+createVerifastPipeline(
+  examples_counter,
+  verifast_provider,
+  counter_clib,
+  counter_replace
+).each { t -> tests << t }
+
+// - Full run
+tasks.register('it-theories') {
+    group = "Integration Tests"
+    description = "Run all task of examples integration tests"
+
+    dependsOn tests 
+}

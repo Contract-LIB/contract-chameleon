@@ -45,34 +45,6 @@ tasks.register('check-tools-files') {
   println "===="
 }
 
-tasks.register("help-verifast", Exec) {
-  def verifast = project.findProperty("custom_verifast_exe") ?: contract_chameleon_verifast_exe
-  def verifast_file = new File(rootProject.rootDir, verifast)
-
-  group = "Help"
-  description = "Run the help command of verifast."
-
-  commandLine verifast_file.absolutePath, "--help"
-
-  dependsOn 'check-tools-files'
-}
-
-ext.runVerifast = { String taskName, List<String> argList ->
-
-  tasks.register(taskName, Exec) {
-    def verifast = project.findProperty("custom_verifast_exe") ?: contract_chameleon_verifast_exe
-    def verifast_file = new File(rootProject.rootDir, verifast)
-
-    group = "Integration Tests Verifast"
-    description = "Call the geneated code in verifast."
-
-    executable verifast_file.absolutePath
-    args(argList)
-
-    dependsOn 'check-tools-files'
-  }
-}
-
 tasks.register("help--all") {
   group = "Help"
   description = "Run the help command of all tools."
@@ -142,5 +114,3 @@ ext.replaceWithImpl = {String taskName, String source, String destination, Strin
     }
   }
 }
-
-

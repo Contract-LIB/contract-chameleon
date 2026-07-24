@@ -18,6 +18,8 @@ package example;
     }
 @*/
 
+//@ predicate llist(list<Cell> xs);
+
 public abstract class LinkedCellList {
 
     //@ predicate llist(list<Cell> xs);
@@ -29,11 +31,12 @@ public abstract class LinkedCellList {
         return new LinkedCellListImpl();
     }
 
-    public abstract void add(Cell v);
+    public abstract void add(LinkedCellList v);
         //@ requires this.llist(?l_old) &*& [_]payload(v);
         //@ ensures this.llist(?l) &*& l == addEnd(v, l_old);
 
     public abstract Cell getLast();
         //@ requires this.llist(?l_old) &*& !(l_old == nil);
         //@ ensures this.llist(l_old) &*& result == last(l_old) &*& [_]payload(result);
+
 }

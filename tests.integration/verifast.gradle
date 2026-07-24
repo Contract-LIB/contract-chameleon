@@ -1,0 +1,133 @@
+
+ext.verifast_applicant = "verifast-applicant"
+ext.verifast_provider = "verifast-provider"
+
+//  Call VeriFast help to see if it is running / available
+tasks.register("help-verifast", Exec) {
+  def verifast = project.findProperty("custom_verifast_exe") ?: contract_chameleon_verifast_exe
+  def verifast_file = new File(rootProject.rootDir, verifast)
+
+  group = "Help"
+  description = "Run the help command of verifast."
+
+  commandLine verifast_file.absolutePath, "--help"
+
+  dependsOn 'check-tools-files'
+}
+
+//  Execute VeriFast
+ext.runVerifast = { String taskName, List<String> argList ->
+
+  tasks.register(taskName, Exec) {
+    def verifast = project.findProperty("custom_verifast_exe") ?: contract_chameleon_verifast_exe
+    def verifast_file = new File(rootProject.rootDir, verifast)
+
+    group = "Integration Tests Verifast"
+    description = "Call the geneated code in verifast."
+
+    executable verifast_file.absolutePath
+    args(argList)
+
+    dependsOn 'check-tools-files'
+  }
+}
+
+// Create Client for VeriFast
+ext.createVerifastClient = { String taskName, String destination, String clientPackage, String clientName -> 
+  tasks.register(taskName) {
+
+      def clientFile = layout.buildDirectory
+        .dir(destination)
+        .map { it.dir(clientPackage.replace('.', '/')) }
+        .map { it.file("${clientName}.java") }
+        .get().asFile
+
+
+      def sourcesFile = layout.buildDirectory
+        .dir(destination)
+        .map { it.file("sources.jarsrc") }
+        .get().asFile
+
+      doLast {
+          clientFile.parentFile.mkdirs()
+          clientFile.text = "// TODO: Implement '${clientPackage}.${clientName}.file'."
+          sourcesFile << "${clientPackage.replace('.','/')}/${clientName}.java"
+      }
+  }
+}
+
+// - Runtime arguments for contract-chameleon
+def mode = "OVERWRITE" // To force override in CC 
+def log = "INFO" // To set log level in CC
+
+//TODO: Create examples that do not require this
+def disable_overflow_check = true
+
+// - Create a complete verifast pipeline 
+//   - contract-chameleon
+//   - client generation
+//   - replacement
+//   - verifast verification
+//
+// The tasks are uniquely named by test name and contract-chameleon adapter.
+ext.createVerifastPipeline = {
+  String testName,
+  String contract_chameleon_adapter,
+  String contract_lib_file,
+  String replacement_file
+   -> 
+
+  // The tasks
+  def contract_chameleon_task = "${testName}-${contract_chameleon_adapter}-contract-chameleon"
+  def client_task = "${testName}-${contract_chameleon_adapter}-client"
+  def replace_task = "${testName}-${contract_chameleon_adapter}-replace"
+  def verifast_task = "${testName}-${contract_chameleon_adapter}-verify"
+
+  // The build locations
+  def buildDir = layout.buildDirectory
+  def contract_chameleon_destination = buildDir.dir("results/${testName}/${contract_chameleon_adapter}").get().asFile
+  def replaced_destination = buildDir.dir("replaced/${testName}/${contract_chameleon_adapter}").get().asFile
+
+  // creation of tasks 
+  runIntegrationTest(contract_chameleon_task,
+    ["${contract_chameleon_adapter}",
+     "${contract_lib_file}",
+     "-o", "${contract_chameleon_destination}",
+     "-m", "${mode}",
+     "-l", "${log}"])
+
+  createVerifastClient(client_task,
+    "${contract_chameleon_destination}",
+    "example",
+    "_Client")
+
+  replaceWithImpl(replace_task,
+    "${contract_chameleon_destination}",
+    "${replaced_destination}",
+    "${replacement_file}")
+
+  def args = ["-c",
+     "-allow_dead_code",
+     "-shared"]
+
+  if (disable_overflow_check) {
+    args << "-disable_overflow_check"
+  }
+
+  args << "${replaced_destination}/sources.jarsrc"
+
+  runVerifast(verifast_task,args)
+
+  // dependencies of tasks
+  tasks.named(client_task).configure {
+    dependsOn(contract_chameleon_task)
+  }
+  tasks.named(replace_task).configure {
+    dependsOn(client_task)
+  }
+  tasks.named(verifast_task).configure {
+    dependsOn(replace_task)
+  }
+  
+  ["${client_task}","${replace_task}","${verifast_task}"]
+}

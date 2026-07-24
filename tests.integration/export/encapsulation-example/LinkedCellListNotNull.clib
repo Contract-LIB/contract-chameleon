@@ -39,10 +39,11 @@
      (= (absVal this) (seq.++ (old (absVal this)) (seq.unit v))))))
 
 (define-contract example.LinkedCellList.getLast
-    ((this (in LinkedCellList))
+    ((this (inout LinkedCellList))
      (result (out (Ref Cell))))
-    ((
-     (not (= (absVal this) seq.empty))
-     (= result (seq.nth (absVal this) (- (seq.len (absVal this)) 1)))
-    ))
-)
+    (((not (= (absVal this) seq.empty))
+     (and (= result (seq.nth (absVal this) (- (seq.len (absVal this)) 1)))
+     (and
+      (= (old (absVal this)) (absVal this))
+      (distinct result null))
+     ))))

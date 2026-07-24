@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import org.contract_lib.contract_chameleon.contexts.MessageContext;
 import org.contract_lib.contract_chameleon.contexts.ResultDirectoryContext.TranslationResult;
 import org.contract_lib.contract_chameleon.error.ChameleonMessageManager;
-import org.contract_lib.contract_chameleon.error.ChameleonWarning;
 import org.contract_lib.lang.contract_lib.ast.ContractLibAst;
 import org.contract_lib.lang.contract_lib.ast.Abstraction;
 import org.contract_lib.lang.contract_lib.ast.Argument;
@@ -96,8 +95,8 @@ public class SimpleVerifastTranslator {
   private final List<TermTranslation> termTranslations;
   private final List<QuantorTranslation> quantorTranslations;
 
-  public SimpleVerifastTranslator(Path path, ChameleonMessageManager messageManager, MessageContext messageContext) {
-    this.messageManager = messageManager;
+  public SimpleVerifastTranslator(Path path, MessageContext messageContext) {
+    this.messageManager = messageContext.getMessageManager();
     this.messageContext = messageContext;
     this.results = new ArrayList<>();
 
@@ -120,7 +119,7 @@ public class SimpleVerifastTranslator {
     this.typeTranslator = new TypeTranslator(loadedTypes.stream().map(Provider::get).toList());
 
     this.predicateTranslator = new PredicateTranslator(
-        this.messageManager,
+        this.messageContext,
         this.typeTranslator);
 
     this.quantorTranslations = List.of(
@@ -199,6 +198,9 @@ public class SimpleVerifastTranslator {
     String directoryName = nameExtractor.getDirectoryName();
     String identifier = nameExtractor.getClassIdentifier();
 
+    System.err.println("Abstraction for: " + identifier);
+    addAbstractionType(name);
+
     List<VeriFastPredicate> predicates = predicateTranslator.translatePredicateDef(
         name,
         abstraction.datatypeDec().constructors().get(0), Optional.empty());
@@ -224,10 +226,8 @@ public class SimpleVerifastTranslator {
         name,
         spec);
 
-    System.err.println(directoryName);
-
-    System.err.println("Abstraction for: " + identifier);
     addAbstractionType(name);
+
     javaFiles.add(directoryName + "/" + name + ".java");
     results.add(file);
     getAbstractJavaClassMethods.put(identifier, methods);
@@ -339,7 +339,8 @@ public class SimpleVerifastTranslator {
 
     String contractIdentifier = contract.identifier().identifier();
 
-    System.err.println("-> Translate Contract: " + contractIdentifier);
+    messageContext.logInfo(String.format(
+        "-> Translate Contract: %s", contractIdentifier));
 
     JavaMethodSignaturExtractor extractor = new JavaMethodSignaturExtractor(contract, messageManager);
 
@@ -371,7 +372,7 @@ public class SimpleVerifastTranslator {
         this.typeTranslator,
         this.predicateTranslator,
         this.helperTranslator,
-        this.messageManager);
+        this.messageContext);
 
     requiresPredicates.addAll(predicateTranslator.createPredicates(inArguments, termTranslator, true, false));
     requiresPredicates.addAll(predicateTranslator.createPredicates(inoutArguments, termTranslator, true, true));
@@ -384,6 +385,9 @@ public class SimpleVerifastTranslator {
         .map((p) -> new Argument(p, RESULT_NAME))
         .flatMap(p -> predicateTranslator.createPredicate(p, termTranslator, true, false))
         .ifPresent(ensuresPredicates::add);
+
+    termTranslator.infoLogAvailableTranslations();
+    predicateTranslator.infoLogAvailableTranslations();
 
     TermTranslator.VeriFastPrePostExpression expressions = termTranslator.translateContractPairs(
         requiresPredicates,

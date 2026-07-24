@@ -1,0 +1,51 @@
+
+// List to store all creatd tasks
+def tests = []
+
+// - Counter example
+
+def examples_counter = "examples-counter"
+def counter_clib = "./export/examples/Counter.clib"
+def counter_replace = "./export/examples/verifast_replacement_counter.toml"
+
+createVerifastPipeline(
+  examples_counter,
+  verifast_applicant,
+  counter_clib,
+  counter_replace
+).each { t -> tests << t }
+
+createVerifastPipeline(
+  examples_counter,
+  verifast_provider,
+  counter_clib,
+  counter_replace
+).each { t -> tests << t }
+
+// - Stack example
+
+def examples_stack = "examples-stack"
+def stack_clib = "./export/examples/Stack.clib"
+def stack_replace = "./export/examples/verifast_replacement_stack.toml"
+
+createVerifastPipeline(
+  examples_stack,
+  verifast_applicant,
+  stack_clib,
+  stack_replace 
+).each { t -> tests << t }
+
+createVerifastPipeline(
+  examples_stack,
+  verifast_provider,
+  stack_clib,
+  stack_replace 
+).each { t -> tests << t }
+
+// Full run
+tasks.register('it-examples') {
+    group = "Integration Tests"
+    description = "Run all task of examples integration tests"
+
+    dependsOn tests 
+}

@@ -1,0 +1,170 @@
+
+[example.LinkedCellList]
+pred = "= head |-> ?h &*& (h == null ? absVal == nil : h.nellist(absVal))"
+
+body = "private NonEmptyLinkedCellList head;"
+
+init = "head = null;"
+
+add = """
+
+      if (head == null) {
+        head = new NonEmptyLinkedCellList(v);
+      } else {
+        head.add(v);
+      }"""
+
+getLast = """
+
+      Cell result;
+      if (head == null) {
+        result = null;
+      } else { 
+        result = head.getLast(); 
+      } 
+      return result;"""
+
+file = """
+final class NonEmptyLinkedCellList {
+  /*@ predicate nellist(list<Cell> ll) = next |-> ?n
+     &*& value |-> ?v
+     &*& (n == null ? ll == cons(v, nil)
+     : (n.nellist(?r) &*& ll == cons(v, r)));               
+    @*/
+    
+  private Cell value;
+  private NonEmptyLinkedCellList next;
+
+  public NonEmptyLinkedCellList(Cell v)
+    //@ requires true;
+    //@ ensures nellist(cons(v,nil));
+  {
+    value =v;
+    next = null;
+  }
+
+  public void add(Cell v)
+    //@ requires nellist(?l_old) ;
+    //@ ensures nellist(?l) &*& l == (append(l_old, cons(v, nil)));
+  {
+    if (next == null) {
+      NonEmptyLinkedCellList n = new NonEmptyLinkedCellList(v);
+      next = n;
+    } else {
+      next.add(v);
+    }
+  }
+
+  public Cell getLast()
+    //@ requires nellist(?l);
+    //@ ensures nellist(l) &*& result == (nth((length(l)) - (1), l));
+  {
+    Cell result;
+    if (next == null) {
+      result = value;
+    } else {
+      //@ open next.nellist(?x);
+      result = next.getLast();
+    }
+    return result;
+  }
+}
+"""
+
+[example.Cell]
+body = "private int x;"
+pred = "= x |-> absVal"
+init = "this.x = 0;"
+value = "return this.x;"
+set = "this.x = v;"
+file = ""
+
+[example._Client]
+
+file = """
+package example;
+
+public class _Client {
+
+  public static void main(String[] args) 
+  //@ requires true;
+  //@ ensures true;
+  {
+    testCell();
+    testLinkedCellList();
+  }
+
+  public static void testCell() 
+  //@ requires true;
+  //@ ensures true;
+  {
+    Cell c1 = Cell.init();
+    Cell c2 = Cell.init();
+
+    int r1 = c1.value();
+    int r2 = c2.value();
+    //@ assert r1 == 0;
+    //@ assert r2 == 0;
+
+    c1.set(1);
+    r1 = c1.value();
+    r2 = c2.value();
+    //@ assert r1 == 1;
+    //@ assert r2 == 0;
+  }
+
+  public static void testLinkedCellList() 
+  //@ requires true;
+  //@ ensures true;
+  {
+    Cell c1 = Cell.init();
+    Cell c2 = Cell.init();
+    LinkedCellList l = LinkedCellList.init();
+
+    int r1 = c1.value();
+    int r2 = c2.value();
+    //@ assert r1 == 0;
+    c2.set(1);
+    r2 = c2.value();
+    //@ assert r2 == 1;
+
+    l.add(c1);
+    Cell c3 = l.getLast();
+    //@ assert c3 == c1;
+    int r3 = c3.value();
+    //@ assert r3 == 0;
+
+    l.add(c2);
+    Cell c4 = l.getLast();
+    //@ assert c4 == c2;
+    int r4 = c4.value();
+    //@ assert r4 == 1;
+
+    // It is allowed to add references mutliple times to the data structure.
+    // But only when we pass opaque references.
+    l.add(c1);
+    Cell c5 = l.getLast();
+    //@ assert c5 == c1;
+    int r5 = c5.value();
+    //@ assert r5 == 0;
+
+    // If we now change `c5` we automatically change `c1` and `c3` as they point all to the same memory. 
+    // This however requires from the data structure (LinkedCellList) that we always have to know, 
+    // which reference is stored at which location to keep track.
+    c5.set(5);
+    r5 = c5.value();
+    //@ assert r5 == 5;
+    r1 = c1.value();
+    //@ assert r1 == 5;
+    r2 = c2.value();
+    //@ assert r2 == 1;
+    r3 = c3.value();
+    //@ assert r3 == 5;
+
+    // Yes, we can add null to the list, as this is a valid reference.
+    l.add(null);
+    Cell c6 = l.getLast();
+    //@ assert c6 == null;
+  }
+}
+"""

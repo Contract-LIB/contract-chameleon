@@ -76,6 +76,17 @@ public final record BooleanTermTranslation() implements TermTranslationProvider 
             CLIB_BOOLEAN,
             VERIFAST_BOOLEAN,
             CLIB_BOOLEAN,
+            VERIFAST_BOOLEAN),
+
+        //NOTE: This is ignoring any type definitions at the moment
+        //TODO: must be generic
+        new FixpointOperatorTranslation(
+            new Term.Identifier.IdentifierValue(new Symbol("ite")),
+            "ite",
+            List.of(CLIB_BOOLEAN, CLIB_BOOLEAN, CLIB_BOOLEAN),
+            List.of(VERIFAST_BOOLEAN, VERIFAST_BOOLEAN, VERIFAST_BOOLEAN),
+            CLIB_BOOLEAN,
             VERIFAST_BOOLEAN));
+
   }
 }
