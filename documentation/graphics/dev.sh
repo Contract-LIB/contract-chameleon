@@ -1,5 +1,7 @@
 #!/bin/bash
 
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+
 # = Development skript to build the typst documents.
 # Ensure you have tpyst installed.
 # Note: the log might be a little bugged, in that case just copy the command itself.

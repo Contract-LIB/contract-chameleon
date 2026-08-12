@@ -1,0 +1,97 @@
+; - TodoList
+
+(declare-abstractions (
+  (example.TodoList 0)
+)(
+  (TodoList
+    (openTasks (Seq String))
+    (closedTasks (Seq String))
+)))
+
+(define-contract example.TodoList.init (
+  (result (out TodoList))
+) ((
+    true
+    (and
+      (= (openTasks this) seq.empty)
+      (= (closedTasks this) seq.empty)
+    )
+)))
+
+(define-contract example.TodoList.addTask (
+  (this (inout TodoList))
+  (task (in String))
+) ((
+    true
+    (and
+      (=
+        (openTasks this)
+        (seq.++
+          (old (openTasks this))
+          (seq.unit taks)))
+      (=
+        (closedTasks this)
+        (old (closedTasks this)))
+    )
+)))
+
+(define-contract example.TodoList.nextTask (
+  (this (in TodoList))
+) ((
+    (distinct (openTasks this) seq.empty)
+    (= result (nth (openTasks this) 0))
+)))
+
+(define-contract example.TodoList.finishNextTask (
+  (this (inout TodoList))
+) ((
+    (distinct (openTasks this) seqEmpty)
+    (and
+      (=
+        (openTasks this)
+        (seq.extract
+          1
+          (seq.len (old (openTasks this)))
+          (old (openTasks this))))
+      (=
+        (closedTasks this)
+        (++
+          (old (closedTasks this))
+          (seq.unit (nth (old (openTasks this) 0)))))
+    )
+)))
+
+(define-contract example.TodoList.allMarkedDone (
+  (this (in TodoList))
+  (result (out Bool))
+) ((
+    true
+    (=
+      result
+      (= (openTasks this) seq.empty))
+)))
+
+; - Whiteboard
+
+(declare-abstractions (
+  (example.Whiteboard 0)
+)(
+  (TodoList
+    (tasks (Set String))
+)))
+
+
+(define-contract example.Whiteboard.init (
+  (result (out Whiteboard))
+) ((
+    true
+      (= (tasks this) setEmpty)
+)))
+
+(define-contract example.Whiteboard.isClear (
+  (this (in Whiteboard))
+  (result (out Bool))
+) ((
+    true
+    (= result (= (openTasks this) emptySet))
+)))
