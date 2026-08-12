@@ -49,6 +49,17 @@ It also gives an overview over existing adapters at the moment.
 
 ![Diagram of Adapters in contract-chameleon](./documentation/graphics/adapters.svg)
 
+## Available Adapters
+
+- [`KeY` adapters](https://github.com/Contract-LIB/contract-chameleon-key):
+  - `key-provider`
+  - `key-applicant`
+  - `key-universe` (work in progress)
+  - `key-import`
+- [`VeriFast` adapters](https://github.com/Contract-LIB/contract-chameleon-verifast):
+  - `verifast-provider`
+  - `verifast-applicant`
+
 ## Running the tool
 
 The tool with all default adapters can be run with:
@@ -78,13 +89,12 @@ java -jar contract-chameleon-exe.jar key-provider --help
 Place the `JAR` of the additional adapter next to the `contract-chameleon-exe.jar`:
 
 ```sh
-java -cp '*' org.contract_lib.ContractChameleon help <adapter-name>
+java -cp '*' org.contract_lib.ContractChameleon <adapter-name> --help
 ```
 
 The additional `JAR` must have a file with the name `org.contract_lib.contract_chameleon.Adapter`
 in `src/main/ressources/META-INF/services`
 containing the full class name (including package) of the additional adapter.
-Compare the following [example](./contract-chameleon.adapter.key.import/).
 
 ## Developing the tool
 
@@ -105,19 +115,6 @@ with its dependencies by following the following steps:
     git clone git@github.com:Contract-LIB/contract-chameleon.git contract-chameleon
     ```
 
-1. Install required git submodules
-
-    ```sh
-    cd contract-chameleon
-    # to fetch and initialize the submodules the first time
-    git submodule update --init --recursive 
-    ```
-
-    ```sh
-    # to pull changes from submodules
-    git pull --rebase --recurse-submodules
-    ```
-
 1. Build `contract-chameleon` with `gradle`
 
     ```sh
@@ -131,43 +128,7 @@ with its dependencies by following the following steps:
     gradle run --args="<adapter-name> <file_path>"
     ```
 
-1. Run integration tests
-
-    ```sh
-    gradle run-integration-tests
-    ```
-
 ### Accessing the JavaDoc
 
 For each module the `JavaDoc` can be found in
 `<module>/build/docs/javadoc/org/contract_lib/contract_chameleon/package-summary.html`.
-
-### JavaDoc of Dependencies
-
-#### jmlparser
-
-```sh
-# build Javadoc
-./mvnw javadoc:javadoc
-```
-
-The `JavaDoc` can be found in for the different packages: `<jmlparser-module>/javaparser-core/target/reports/apidocs/index.html`
-
-## Run integration tests with tools
-
-### KeY
-
-Requires `KeY: ci-tool`, `KeY`
-
-```sh
-# check if proofs can be found in key (see folder `tests.integration`)
-gradle key_ci-check-all --continue
-```
-
-(under construction)
-
-### VeriFast
-
-Requires `verifast`
-
-(under construction)
