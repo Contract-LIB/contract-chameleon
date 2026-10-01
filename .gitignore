@@ -24,4 +24,9 @@ build
 **/.DS_Store
 
 # Ignore Tools folder
-tools/
+tools/verifast
+tools/ci-tool.jar
+tools/ci-statistics.jar
+tools/key-2.12.3-exe.jar
+
+tests.integration/export/encapsulation-example/Ω_solution/encapsulation-artifact-fm-2026

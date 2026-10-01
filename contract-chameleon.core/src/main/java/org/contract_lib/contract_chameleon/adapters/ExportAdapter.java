@@ -28,17 +28,16 @@ public abstract class ExportAdapter extends TranslationAdapter {
     this.result = resultContext.get();
 
     if (sourcesContext.get().getPaths().size() == 1) {
-      this.performForPath(sourcesContext.get().getPaths().getFirst(), this.result.getResultDirectory());
+      this.performForPath(this.result.getResultDirectory());
     } else {
-      sourcesContext.get().getPaths().forEach(this::performAddingSubdir);
+      getMessageContext().logError("Only on Contract-LIB file is supported at a time.");
     }
   }
 
   final void performAddingSubdir(Path p) {
     String filename = p.getFileName().toString();
     Dir finalDir = result.getResultDirectory().addSubDirectories(filename);
-    //NOTE: As there might be multiple Contract-LIB files that have the same name, this will just override I think.
-    performForPath(p, finalDir);
+    performForPath(finalDir);
   }
 
   /** Given a path to a single ContractLIB file, creates a translation in the result directory.
@@ -46,6 +45,6 @@ public abstract class ExportAdapter extends TranslationAdapter {
    * @param p the path to the ContractLIB file.
    * @param finalDir the directory where the results should be written.
    */
-  public abstract void performForPath(Path p, Dir finalDir);
+  public abstract void performForPath(Dir finalDir);
 
 }

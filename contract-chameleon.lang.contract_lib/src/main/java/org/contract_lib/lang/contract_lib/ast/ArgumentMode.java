@@ -1,6 +1,8 @@
 package org.contract_lib.lang.contract_lib.ast;
 
-public enum ArgumentMode {
+import org.contract_lib.lang.contract_lib.ast.ContractLibAstElement.Inner;
+
+public enum ArgumentMode implements Inner {
   IN,
   OUT,
   INOUT;

@@ -1,7 +1,9 @@
 
 package org.contract_lib.lang.contract_lib.ast;
 
-public enum Quantor {
+import org.contract_lib.lang.contract_lib.ast.ContractLibAstElement.Inner;
+
+public enum Quantor implements Inner {
   ALL,
   EXISTS;
 }

@@ -1,0 +1,65 @@
+(declare-sort BaseA 0)
+(declare-sort BaseB 0)
+
+; TODO: Add to test
+;(define-sort S_A 0)
+
+(declare-datatype DT
+    (
+      (Test (a UnDef) (b UnDef))
+    )
+)
+
+(declare-datatypes
+  (
+    (DT_A 0)
+    (DT_B 0)
+  )
+  (
+    (
+      (Test (a UnDef) (b UnDef))
+    )
+    (
+      (Test (a UnDef) (b UnDef))
+    )
+  )
+)
+
+(declare-abstraction AS
+  (
+    (Test (a UnDef) (b UnDef))
+  )
+)
+
+(declare-abstractions
+  (
+    (AS_A 0)
+    (AS_B 0)
+  )
+  (
+    (
+      (Test (a UnDef) (b UnDef))
+    )
+    (
+      (Test (a UnDef) (b UnDef))
+    )
+  )
+)
+
+
+(define-contract AS_A.test
+  (
+    (this (in UnDef))
+    (b (in UnDef))
+  )
+  (
+    (
+      true
+      true
+    )
+  )
+)
+
+; TODO: Appearances in terms
+; (forall ((a UnDef) (b UnDef)) true)
+; (exists ((a UnDef) (b UnDef)) true)

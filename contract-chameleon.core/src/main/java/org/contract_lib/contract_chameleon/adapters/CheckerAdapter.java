@@ -46,5 +46,12 @@ public abstract class CheckerAdapter extends Adapter {
   public enum CheckerAdapterResult {
     SUCCESS,
     FAILURE;
+
+    public static CheckerAdapterResult and(CheckerAdapterResult a, CheckerAdapterResult b) {
+      return switch (a) {
+        case SUCCESS -> b == SUCCESS ? SUCCESS : FAILURE;
+        case FAILURE -> FAILURE;
+      };
+    }
   }
 }
