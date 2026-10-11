@@ -144,6 +144,10 @@ public final class MessageContext implements
     });
   }
 
+  public void logReporotable(ChameleonFileReportable reportable) {
+    this.manager.reportGroup(reportable);
+  }
+
   public void logException(Exception exception) {
     this.manager.report(new ChameleonException(exception));
   }
@@ -176,7 +180,7 @@ public final class MessageContext implements
   }
 
   public void logFile(MessageType type, String locationIdentifier, int line, int pos, String message) {
-    this.manager.report(new ChameleonFileReportable() {
+    this.manager.reportGroup(new ChameleonFileReportable() {
       @Override
       public String messageType() {
         return type.toString();
@@ -247,6 +251,7 @@ public final class MessageContext implements
     return switch (type) {
       case "INFO" -> MessageType.INFO;
       case "ERROR" -> MessageType.ERROR;
+      case "WARNING" -> MessageType.WARNING;
       default -> MessageType.ERROR;
     };
   }
