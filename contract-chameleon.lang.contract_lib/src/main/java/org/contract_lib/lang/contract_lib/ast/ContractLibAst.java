@@ -8,7 +8,7 @@ public record ContractLibAst(
   List<SortDec.Def> sorts,
   List<SortDec.Parameter> sortParameter,
   
-  List<FunctionDec> functions,
+  List<Function> functions,
   List<Constant> constants,
 
   List<Contract> contracts,
