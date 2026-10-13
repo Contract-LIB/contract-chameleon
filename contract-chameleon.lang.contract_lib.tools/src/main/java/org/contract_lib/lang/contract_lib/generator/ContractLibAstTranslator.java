@@ -20,7 +20,7 @@ import org.contract_lib.lang.contract_lib.ast.Constructor;
 import org.contract_lib.lang.contract_lib.ast.Datatype;
 import org.contract_lib.lang.contract_lib.ast.DatatypeDec;
 import org.contract_lib.lang.contract_lib.ast.SortDec;
-import org.contract_lib.lang.contract_lib.ast.FunctionDec;
+import org.contract_lib.lang.contract_lib.ast.Function;
 import org.contract_lib.lang.contract_lib.ast.Constant;
 import org.contract_lib.lang.contract_lib.ast.Contract;
 
@@ -54,13 +54,13 @@ class ContractLibAstTranslator {
     this(new ArrayList());
   }
 
-	ContractLibAst translateStart(ContractLIBParser.Start_Context ctx) {
+  ContractLibAst translateStart(ContractLIBParser.Start_Context ctx) {
     List<Assert> asserts = new ArrayList();
     List<Abstraction> abstractions = new ArrayList();
     List<Datatype> datatypes = new ArrayList();
     List<SortDec.Def> sorts = new ArrayList();
     List<SortDec.Parameter> sortParameterss = new ArrayList();
-    List<FunctionDec> functions = new ArrayList();
+    List<Function> functions = new ArrayList();
     List<Constant> constants = new ArrayList();
     List<Contract> contracts = new ArrayList();
 
@@ -72,28 +72,26 @@ class ContractLibAstTranslator {
       testAndAppend(constants, command.cmd_declareConst(), this::translateConstant);
       testAndAppend(datatypes, command.cmd_declareDatatype(), this::translateDeclareDatatype);
       testAndAppendStream(datatypes, command.cmd_declareDatatypes(), this::translateDeclareDatatypes);
-      testAndAppend(functions, command.cmd_declareFun(), this::translateDeclareFun);
+      testAndAppend(functions, command.cmd_declareFun(), this::translateCommandDeclareFun);
       testAndAppend(sorts, command.cmd_declareSort(), this::translateDeclareSort);
       // Define Commands
       testAndAppend(contracts, command.cmd_defineContract(), this::translateDefineContract);
-      //TODO: To implement
-      //testAndAppend(functions, command.cmd_defineFun(), this::translateDefineFun);
-      //testAndAppend(functions, command.cmd_defineFunRec(), this::translateDefineFunRec);
-      //testAndAppend(functions, command.cmd_defineFunsRec(), this::translateDefineFunsRec);
-      //testAndAppend(sorts, command.cmd_defineSort(), this::translateDefineSort);
+      testAndAppend(functions, command.cmd_defineFun(), this::translateDefineFun);
+      testAndAppend(functions, command.cmd_defineFunRec(), this::translateDefineFunRec);
+      testAndAppendStream(functions, command.cmd_defineFunsRec(), this::translateDefineFunsRec);
+      // testAndAppend(sorts, command.cmd_defineSort(), this::translateDefineSort);
     }
 
-    //TODO: To implement
+    // TODO: To implement
     ContractLibAst ast = new ContractLibAst(
-      datatypes,
-      abstractions,
-      sorts,
-      sortParameterss,
-      functions,
-      constants,
-      contracts,
-      asserts
-    );
+        datatypes,
+        abstractions,
+        sorts,
+        sortParameterss,
+        functions,
+        constants,
+        contracts,
+        asserts);
 
     callExtensions(ast, ctx, AstTranslatorExtension::extendsionContractLibAst);
 
@@ -102,7 +100,7 @@ class ContractLibAstTranslator {
 
   // - MARK: Command Translations
 
-	Assert translateAssert(ContractLIBParser.Cmd_assertContext ctx) {
+  Assert translateAssert(ContractLIBParser.Cmd_assertContext ctx) {
     Term term = translateTerm(ctx.term());
     Assert assertV = new Assert(term);
     return assertV;
@@ -111,51 +109,51 @@ class ContractLibAstTranslator {
   Abstraction translateDeclareAbstraction(ContractLIBParser.Cmd_declareAbstractionContext ctx) {
     Symbol symbol = translateSymbol(ctx.symbol());
     SortDec.Def sort = new SortDec.Def(symbol, DEFAULT_RANK_DATATYPE_DECLARATION);
-    
-    //TODO: Problem in how the datatypes of the abstraction are named? 
+
+    // TODO: Problem in how the datatypes of the abstraction are named?
     SortDec.Def missingName = new SortDec.Def(new Symbol("missing_type_symbol"), DEFAULT_RANK_DATATYPE_DECLARATION);
 
     DatatypeDec datatypeDec = this.translateDatatypeDec(ctx.datatype_dec());
 
     Abstraction abstraction = new Abstraction(
-      sort,
-      datatypeDec
-    );
+        sort,
+        datatypeDec);
 
-    //TODO: call extensions 
+    // TODO: call extensions
 
     return abstraction;
   }
+
   Stream<Abstraction> translateDeclareAbstractions(ContractLIBParser.Cmd_declareAbstractionsContext ctx) {
-    
+
     List<SortDec.Def> sortDec = ctx.sort_dec().stream()
-      .map(this::translateSortDec)
-      .collect(Collectors.toList());
+        .map(this::translateSortDec)
+        .collect(Collectors.toList());
 
     List<DatatypeDec> helpers = ctx.datatype_dec().stream()
-      .map(this::translateDatatypeDec)
-      .collect(Collectors.toList());
+        .map(this::translateDatatypeDec)
+        .collect(Collectors.toList());
 
     if (sortDec.size() != helpers.size()) {
-      //TODO: Handle error
+      // TODO: Handle error
     }
 
     Stream<Abstraction> abstractions = IntStream.range(0, sortDec.size())
-      .mapToObj(i -> new Abstraction(
-        sortDec.get(i),
-        helpers.get(i)
-      ));
-    //TODO: call extensions 
-    
+        .mapToObj(i -> new Abstraction(
+            sortDec.get(i),
+            helpers.get(i)));
+    // TODO: call extensions
+
     return abstractions;
   }
+
   Constant translateConstant(ContractLIBParser.Cmd_declareConstContext ctx) {
     Symbol symbol = translateSymbol(ctx.symbol());
     Sort sort = translateSort(ctx.sort());
-    
-    Constant constant = new Constant(symbol,sort);
 
-    //TODO: call extensions 
+    Constant constant = new Constant(symbol, sort);
+
+    // TODO: call extensions
 
     return constant;
   }
@@ -167,171 +165,246 @@ class ContractLibAstTranslator {
     DatatypeDec dtDec = translateDatatypeDec(ctx.datatype_dec());
 
     Datatype datatype = new Datatype(
-      sort,
-      dtDec
-    );
-    //TODO: call extensions 
-    
+        sort,
+        dtDec);
+    // TODO: call extensions
+
     return datatype;
   }
 
   Stream<Datatype> translateDeclareDatatypes(ContractLIBParser.Cmd_declareDatatypesContext ctx) {
 
-    //TODO: Think about how to handle the extension properly
+    // TODO: Think about how to handle the extension properly
 
     List<SortDec.Def> sortDec = ctx.sort_dec().stream()
-      .map(this::translateSortDec)
-      .collect(Collectors.toList());
+        .map(this::translateSortDec)
+        .collect(Collectors.toList());
 
     List<DatatypeDec> helpers = ctx.datatype_dec().stream()
-      .map(this::translateDatatypeDec)
-      .collect(Collectors.toList());
-    
+        .map(this::translateDatatypeDec)
+        .collect(Collectors.toList());
+
     if (sortDec.size() != helpers.size()) {
-      //TODO: Handle error
+      // TODO: Handle error
     }
 
     Stream<Datatype> datatypes = IntStream.range(0, sortDec.size())
-      .mapToObj(i -> new Datatype(
-        sortDec.get(i),
-        helpers.get(i)
-    ));
+        .mapToObj(i -> new Datatype(
+            sortDec.get(i),
+            helpers.get(i)));
 
-    //TODO: call extensions 
-    
+    // TODO: call extensions
+
     return datatypes;
   }
 
-  FunctionDec translateDeclareFun(ContractLIBParser.Cmd_declareFunContext ctx) {
+  Function.FunctionDec translateCommandDeclareFun(ContractLIBParser.Cmd_declareFunContext ctx) {
     Symbol symbol = translateSymbol(ctx.symbol());
 
     List<Sort> sorts = ctx.sort().stream()
-      .map(this::translateSort)
-      .collect(Collectors.toList());
+        .map(this::translateSort)
+        .collect(Collectors.toList());
 
     Sort result = sorts.removeLast();
     List<Sort> arguments = sorts;
 
-    FunctionDec function = new FunctionDec(
-      symbol,
-      new ArrayList(),
-      arguments,
-      result
-    );
-    //TODO: call extensions 
-    return null;
+    Function.FunctionDec dec = new Function.FunctionDec(
+        symbol,
+        arguments,
+        result);
+
+    // TODO: call extensions
+
+    return dec;
   }
 
   SortDec.Def translateDeclareSort(ContractLIBParser.Cmd_declareSortContext ctx) {
     Symbol symbol = translateSymbol(ctx.symbol());
     Numeral numeral = translateNumeral(ctx.numeral());
-   
-    //TODO: Do better error handling than null-checks, rework interface to Option??
-    //if (symbol == null | numeral == null) {
+
+    // TODO: Do better error handling than null-checks, rework interface to Option??
+    // if (symbol == null | numeral == null) {
     if (numeral == null) {
       return null;
     }
+
     SortDec.Def sort = new SortDec.Def(symbol, numeral);
 
-    //TODO: call extensions 
-    
+    // TODO: call extensions
+
     return sort;
   }
 
-  FunctionDec translateDefineFun(ContractLIBParser.Cmd_defineFunContext ctx) {
-    //TODO: Implement / other type!!
-    return null;
+  Function.FunctionDef translateDefineFun(ContractLIBParser.Cmd_defineFunContext ctx) {
+    Symbol symbol = translateSymbol(ctx.function_def().symbol());
+
+    List<SortedVar> arguments = ctx.function_def().sorted_var().stream()
+        .map(this::translateSortedVar)
+        .collect(Collectors.toList());
+
+    Sort result = this.translateSort(ctx.function_def().sort());
+
+    Term term = translateTerm(ctx.function_def().term());
+
+    Function.FunctionDef def = new Function.FunctionDef(
+        symbol,
+        arguments,
+        result,
+        term);
+
+    // TODO: call extensions
+
+    return def;
   }
-  FunctionDec translateDefineFunRec(ContractLIBParser.Cmd_defineFunRecContext ctx) {
-    //TODO: Implement / other type!!
-    //TODO: Implement
-    return null;
+
+  Function.FunctionDef translateDefineFunRec(ContractLIBParser.Cmd_defineFunRecContext ctx) {
+    Symbol symbol = translateSymbol(ctx.function_def().symbol());
+
+    List<SortedVar> arguments = ctx.function_def().sorted_var().stream()
+        .map(this::translateSortedVar)
+        .collect(Collectors.toList());
+
+    Sort result = this.translateSort(ctx.function_def().sort());
+
+    Term term = translateTerm(ctx.function_def().term());
+
+    Function.FunctionDef def = new Function.FunctionDef(
+        symbol,
+        arguments,
+        result,
+        term);
+
+    // TODO: call extensions
+
+    return def;
   }
-  FunctionDec translateDefineFunsRec(ContractLIBParser.Cmd_defineFunsRecContext ctx) {
-    //TODO: Implement / other type!!
-    //TODO: Implement
-    return null;
+
+  private record FunctionDefHelper(
+      Symbol symbol,
+      List<SortedVar> arguments,
+      Sort result) {
   }
+
+  FunctionDefHelper translateDeclareFun(ContractLIBParser.Function_decContext ctx) {
+    Symbol symbol = translateSymbol(ctx.symbol());
+
+    List<SortedVar> arguments = ctx.sorted_var().stream()
+        .map(this::translateSortedVar)
+        .collect(Collectors.toList());
+
+    Sort result = this.translateSort(ctx.sort());
+
+    FunctionDefHelper def = new FunctionDefHelper(
+        symbol,
+        arguments,
+        result);
+
+    // TODO: call extensions
+
+    return def;
+  }
+
+  Stream<Function.FunctionDef> translateDefineFunsRec(ContractLIBParser.Cmd_defineFunsRecContext ctx) {
+
+    List<FunctionDefHelper> decs = ctx.function_dec().stream()
+        .map(this::translateDeclareFun)
+        .collect(Collectors.toList());
+
+    List<Term> terms = ctx.term().stream()
+        .map(this::translateTerm)
+        .collect(Collectors.toList());
+
+    if (decs.size() != terms.size()) {
+      // TODO: Handle error
+    }
+
+    Stream<Function.FunctionDef> defs = IntStream.range(0, decs.size())
+        .mapToObj(i -> new Function.FunctionDef(
+            decs.get(i).symbol(),
+            decs.get(i).arguments(),
+            decs.get(i).result(),
+            terms.get(i)));
+
+    // TODO: call extensions
+
+    return defs;
+  }
+
   SortDec translateDefineSort(ContractLIBParser.Cmd_defineSortContext ctx) {
-    //TODO: Implement / other type necessary??
+    // TODO: Implement / other type necessary??
     return null;
   }
 
   Formal translateFormal(ContractLIBParser.FormalContext ctx) {
-    ArgumentMode argumentMode = translateArgumentMode(ctx.argument_mode());//TODO: Implement
+    ArgumentMode argumentMode = translateArgumentMode(ctx.argument_mode());// TODO: Implement
     Sort sort = translateSort(ctx.sort());
     Symbol symbol = translateSymbol(ctx.symbol());
 
     Formal formal = new Formal(
-      symbol,
-      argumentMode,
-      sort
-    );
-    
-    //TODO: Implement
+        symbol,
+        argumentMode,
+        sort);
+
+    // TODO: Implement
     return formal;
   }
-  
+
   PrePostPair translatePrePostPair(ContractLIBParser.ContractContext ctx) {
     Term pre = translateTerm(ctx.term().get(0));
     Term post = translateTerm(ctx.term().get(1));
     PrePostPair prePost = new PrePostPair(
-      pre,
-      post
-    );
-    //TODO: Implement
+        pre,
+        post);
+    // TODO: Implement
     return prePost;
   }
 
   Contract translateDefineContract(ContractLIBParser.Cmd_defineContractContext ctx) {
     Symbol symbol = translateSymbol(ctx.symbol());
     List<Formal> formals = ctx.formal().stream()
-      .map(this::translateFormal)
-      .collect(Collectors.toList());
+        .map(this::translateFormal)
+        .collect(Collectors.toList());
 
     List<PrePostPair> pairs = ctx.contract().stream()
-      .map(this::translatePrePostPair)
-      .collect(Collectors.toList());
-    
-    Contract contract = new Contract(
-      symbol,
-      formals,
-      pairs
-    );
+        .map(this::translatePrePostPair)
+        .collect(Collectors.toList());
 
-    //TODO: Implement
+    Contract contract = new Contract(
+        symbol,
+        formals,
+        pairs);
+
+    // TODO: Implement
     return contract;
   }
 
   // - MARK: Translations
-  
+
   SortDec.Def translateSortDec(ContractLIBParser.Sort_decContext ctx) {
 
     Symbol symbol = translateSymbol(ctx.symbol());
     Numeral numeral = translateNumeral(ctx.numeral());
-  
-    SortDec.Def sortDec = new SortDec.Def(
-      symbol,
-      numeral
-    );
 
-    //TODO: call extensions? 
+    SortDec.Def sortDec = new SortDec.Def(
+        symbol,
+        numeral);
+
+    // TODO: call extensions?
 
     return sortDec;
   }
 
   SelectorDec translateSelectorDec(ContractLIBParser.Selector_decContext ctx) {
-    
+
     Symbol symbol = translateSymbol(ctx.symbol());
-    
+
     Sort def = translateSort(ctx.sort());
 
-    //TODO: call extensions? 
+    // TODO: call extensions?
 
     SelectorDec selector = new SelectorDec(
-      symbol,
-      def
-    );
+        symbol,
+        def);
 
     return selector;
   }
@@ -339,27 +412,26 @@ class ContractLibAstTranslator {
   Constructor translateConstructor(ContractLIBParser.Constructor_decContext ctx) {
     Symbol symbol = translateSymbol(ctx.symbol());
     List<SelectorDec> selectors = ctx.selector_dec().stream()
-      .map(this::translateSelectorDec)
-      .collect(Collectors.toList());
+        .map(this::translateSelectorDec)
+        .collect(Collectors.toList());
 
     Constructor constructor = new Constructor(
-      symbol,
-      selectors
-    );
+        symbol,
+        selectors);
 
-    //TODO: call extensions?
+    // TODO: call extensions?
 
     return constructor;
   }
-  
+
   DatatypeDec translateDatatypeDec(ContractLIBParser.Datatype_decContext ctx) {
     List<SortDec.Parameter> par = new ArrayList<>();
 
     if (ctx.GRW_Par() != null) {
       ctx.symbol().stream()
-        .map(this::translateSymbol)
-        .map(SortDec.Parameter::new)
-        .collect(Collectors.toList());
+          .map(this::translateSymbol)
+          .map(SortDec.Parameter::new)
+          .collect(Collectors.toList());
     }
 
     List<Constructor> constructors = ctx.constructor_dec().stream()
@@ -367,16 +439,15 @@ class ContractLibAstTranslator {
         .collect(Collectors.toList());
 
     DatatypeDec helper = new DatatypeDec(
-      par,
-      constructors
-    );
+        par,
+        constructors);
 
     return helper;
   }
-  
+
   Term translateTerm(ContractLIBParser.TermContext ctx) {
     Term term = null;
-    
+
     if (ctx.spec_constant() != null) {
       term = translateSpecConstant(ctx.spec_constant());
     } else if (ctx.qual_identifer() != null) {
@@ -385,52 +456,51 @@ class ContractLibAstTranslator {
 
       if (ctx.term().size() > 0) {
         List<Term> parameters = ctx.term().stream()
-          .map(this::translateTerm)
-          .collect(Collectors.toList());
+            .map(this::translateTerm)
+            .collect(Collectors.toList());
         term = new Term.MethodApplication(
-          identifier,
-          parameters
-        );
+            identifier,
+            parameters);
       } else {
         term = checkForBoolean(identifier);
       }
 
     } else if (ctx.GRW_Let() != null) {
       List<VarBinding> vars = ctx.var_binding().stream()
-        .map(this::translateVarBinding)
-        .collect(Collectors.toList());
+          .map(this::translateVarBinding)
+          .collect(Collectors.toList());
       Term body = translateTerm(ctx.term(0));
       term = new Term.LetBinding(vars, body);
-      
+
     } else if (ctx.GRW_Forall() != null) {
       List<SortedVar> vars = ctx.sorted_var().stream()
-        .map(this::translateSortedVar)
-        .collect(Collectors.toList());
+          .map(this::translateSortedVar)
+          .collect(Collectors.toList());
       Term body = translateTerm(ctx.term(0));
       term = new Term.QuantorBinding(Quantor.ALL, vars, body);
-      
+
     } else if (ctx.GRW_Exists() != null) {
       List<SortedVar> vars = ctx.sorted_var().stream()
-        .map(this::translateSortedVar)
-        .collect(Collectors.toList());
+          .map(this::translateSortedVar)
+          .collect(Collectors.toList());
       Term body = translateTerm(ctx.term(0));
       term = new Term.QuantorBinding(Quantor.EXISTS, vars, body);
-      
+
     } else if (ctx.GRW_Match() != null) {
       List<MatchCase> matchCases = ctx.match_case().stream()
-        .map(this::translateMatchCase)
-        .collect(Collectors.toList());
+          .map(this::translateMatchCase)
+          .collect(Collectors.toList());
       Term body = translateTerm(ctx.term(0));
       term = new Term.MatchBinding(body, matchCases);
 
     } else if (ctx.GRW_Exclamation() != null) {
       Term body = translateTerm(ctx.term(0));
       List<String> attributes = ctx.attribute()
-        .stream()
-        .map(this::translateAttribute)
-        .collect(Collectors.toList());
+          .stream()
+          .map(this::translateAttribute)
+          .collect(Collectors.toList());
       term = new Term.Attributes(body, attributes);
-      
+
     } else if (ctx.GRW_Old() != null) {
       Term body = translateTerm(ctx.term(0));
 
@@ -439,7 +509,7 @@ class ContractLibAstTranslator {
 
     callExtensions(term, ctx, AstTranslatorExtension::extendsionTerm);
     return term;
-    //TODO: Allow parameters
+    // TODO: Allow parameters
   }
 
   Term checkForBoolean(Term.Identifier id) {
@@ -451,18 +521,17 @@ class ContractLibAstTranslator {
     return id;
   }
 
-
   MatchCase translateMatchCase(ContractLIBParser.Match_caseContext ctx) {
     Pattern pattern = translatePattern(ctx.pattern());
     Term body = translateTerm(ctx.term());
-    //TODO: call extensions
+    // TODO: call extensions
     return new MatchCase(pattern, body);
   }
 
   Pattern translatePattern(ContractLIBParser.PatternContext ctx) {
     List<Symbol> symbols = ctx.symbol().stream()
-      .map(this::translateSymbol)
-      .collect(Collectors.toList());
+        .map(this::translateSymbol)
+        .collect(Collectors.toList());
 
     Symbol symbol = symbols.get(0);
 
@@ -475,7 +544,7 @@ class ContractLibAstTranslator {
       pattern = new Pattern.WithParameters(symbol, symbols);
     }
 
-    //TODO: call extensions
+    // TODO: call extensions
 
     return pattern;
   }
@@ -485,10 +554,9 @@ class ContractLibAstTranslator {
     Term term = translateTerm(ctx.term());
 
     VarBinding binding = new VarBinding(
-      symbol,
-      term 
-    );
-    //TODO: call extensions
+        symbol,
+        term);
+    // TODO: call extensions
 
     return binding;
   }
@@ -498,35 +566,31 @@ class ContractLibAstTranslator {
     Sort sort = translateSort(ctx.sort());
 
     SortedVar sortedVar = new SortedVar(
-      symbol,
-      sort
-    );
-    //TODO: call extensions
-    
+        symbol,
+        sort);
+    // TODO: call extensions
+
     return sortedVar;
   }
 
   Term translateSpecConstant(ContractLIBParser.Spec_constantContext ctx) {
 
-    if (
-      ctx.numeral() != null | 
-      ctx.decimal() != null |
-      ctx.hexadecimal() != null |
-      ctx.binary() != null
-    ) {
+    if (ctx.numeral() != null |
+        ctx.decimal() != null |
+        ctx.hexadecimal() != null |
+        ctx.binary() != null) {
       return new Term.NumberLiteral(ctx.getText());
     }
-    //TODO: call extensions
+    // TODO: call extensions
     return new Term.SpecConstant(ctx.getText());
   }
-
 
   Term.Identifier.IdentifierValue translateIdentifier(ContractLIBParser.IdentifierContext ctx) {
     Symbol s = translateSymbol(ctx.symbol());
     if (ctx.LPAR() != null) {
-      
+
     }
-    //TODO: Implement
+    // TODO: Implement
     return new Term.Identifier.IdentifierValue(s);
   }
 
@@ -534,25 +598,24 @@ class ContractLibAstTranslator {
     Term.Identifier.IdentifierValue v = translateIdentifier(ctx.identifier());
     if (ctx.LPAR() != null && ctx.GRW_As() != null) {
       Sort s = translateSort(ctx.sort());
-      //TODO: Call extensions
+      // TODO: Call extensions
       return new Term.Identifier.IdentifierAs(v, s);
     }
-    //TODO: Call extensions
+    // TODO: Call extensions
     return v;
   }
 
   Sort translateSort(ContractLIBParser.SortContext ctx) {
-    //TODO: do proper parsing
+    // TODO: do proper parsing
     String name = ctx.identifier().getText();
     if (ctx.LPAR() != null) {
       List<Sort> parameters = ctx.sort()
-        .stream()
-        .map(this::translateSort)
-        .collect(Collectors.toList());
+          .stream()
+          .map(this::translateSort)
+          .collect(Collectors.toList());
       return new Sort.ParametricType(
-        name,
-        parameters
-      );
+          name,
+          parameters);
     }
 
     return new Sort.Type(name);
@@ -565,7 +628,7 @@ class ContractLibAstTranslator {
     }
     return new Symbol(value);
   }
-  
+
   Numeral translateNumeral(ContractLIBParser.NumeralContext ctx) {
     String value = ctx.getText();
     if (value.isEmpty()) {
@@ -591,7 +654,7 @@ class ContractLibAstTranslator {
     } else if (value.equals("inout")) {
       return ArgumentMode.INOUT;
     } else {
-      //TODO: handle error
+      // TODO: handle error
       return null;
     }
   }
@@ -599,20 +662,18 @@ class ContractLibAstTranslator {
   // - MARK: Helper Methods
 
   private <C, T> void testAndAppendStream(
-    List<T> store, 
-    C field,
-    java.util.function.Function<C, Stream<T>> handler
-  ) {
+      List<T> store,
+      C field,
+      java.util.function.Function<C, Stream<? extends T>> handler) {
     if (field != null) {
       handler.apply(field).filter(Objects::nonNull).forEach(store::add);
     }
   }
 
   private <C, T> void testAndAppend(
-    List<T> store, 
-    C field,
-    java.util.function.Function<C, T> handler
-  ) {
+      List<T> store,
+      C field,
+      java.util.function.Function<C, T> handler) {
     if (field != null) {
       T res = handler.apply(field);
       if (res != null) {
@@ -622,10 +683,9 @@ class ContractLibAstTranslator {
   }
 
   private <R, C> void callExtensions(
-    R result,
-    C context,
-    ExtensionHelper<R, C> handler
-  ) {
+      R result,
+      C context,
+      ExtensionHelper<R, C> handler) {
     for (AstTranslatorExtension e : this.extensions) {
       handler.accept(e, result, context);
     }
